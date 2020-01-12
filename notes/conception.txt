@@ -1,0 +1,43 @@
+[REDACTED] architecture:
+- 16 bit adress
+- 32 bit data (OP, I1(A), I2(B), O)
+- pin: 16MEM, 32DATA, 1PWR, 1GND, 1RST, 1CLK
+- design:
+                  D
+B  -------------->E>--------------------------+
+				  M----+					  |
+				  ^    |				 +----------+--------------+-----------------------+------------------------+
+				  |D   |			     v    |     v              |                       |                        |
+A  --------------->E>--|--------------->MUL   +--->MUL             |                       |                        |
+				  |M---+				 v		    v			   ^                       ^                        ^
+				  |^   |			  \¯¯¯¯\     /¯¯¯¯/       |¯¯¯¯¯¯¯¯¯|             |¯¯¯¯¯¯¯¯¯|             |¯¯¯¯¯¯¯¯¯¯|
+               |¯¯¯¯¯¯||               \    \___/    /        | GENERAL |             | SPECIAL |             |  MEMORY  |
+OP ----------->|  CU  |---------------->\    ALU    /---------|   REG   |----FLAG-----|   REG   |             |          |
+               |______|------------------\_________/----------|_________|----PC--+--->|_________|-----ADR---->|__________|
+				   v   |				      v                    ^             |         ^                        ^
+O  -------------+--D---|-------------------->DEM                   |             |         |                        |
+				+->E>--+----------------------v--------------------|-------------+         |                        |
+				   M						  +--------------------+-----------------------+------------------------+
+
+
+
+
+
+[REDACTED] OS functionnality:
+- compiler for [REDACTED]
+- memory management
+- file systeme
+  - understand assembler and [REDACTED] language
+  - execute file
+  - edit file
+- console
+
+
+[REDACTED] language functionnality:
+- variables
+- function
+- (load file)
+- operator
+- comparator
+- iteration
+- (array)
