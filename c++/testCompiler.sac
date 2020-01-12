@@ -1,0 +1,28 @@
+#comment with a MOV inside to check if comment are interpret
+
+
+LABEL:
+MOV $A aa
+MOV $B $A
+MOV $F %0
+JMP 00 STOP
+NOP
+NOP
+NOP
+
+STOP:
+OFF
+
+
+#after that point, I ahve written only error to test the compiler
+
+:LABEL
+
+THING
+
+MOV SS vv
+MOV SS $vv
+MOV SS %vv
+
+test#comment
+
