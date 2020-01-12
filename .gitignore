@@ -30,3 +30,7 @@
 *.exe
 *.out
 *.app
+
+# C++ folders
+c++/.vscode
+c++/bin
