@@ -1,36 +1,35 @@
-#include "AssemblerTranslate.hpp"
+#include "AssemblerCompiler.hpp"
 
-AssemblerTranslate::AssemblerTranslate()
+AssemblerCompiler::AssemblerCompiler()
 {
 }
 
-AssemblerTranslate::AssemblerTranslate(const char *configFile)
-{
-    
-}
-
-AssemblerTranslate::~AssemblerTranslate()
+AssemblerCompiler::AssemblerCompiler(const char *configFile)
 {
 }
 
-void AssemblerTranslate::loadAssembler(const char* file)
+AssemblerCompiler::~AssemblerCompiler()
+{
+}
+
+void AssemblerCompiler::loadAssembler(const char* file)
 {
     //open file
-    if(/* can't open */)
+    if(false/* can't open */)
     {
         //error: can't open file
     }
 
     //label reading
-    while (/* line */)
+    while (false/* line */)
     {
         bool find = false;
 
-        while (/* word and not find */)
+        while (false/* word and not find */)
         {
-            if(/* label symbol find a the end of the word */)
+            if(false/* label symbol find a the end of the word */)
             {
-                if(/* special char like reg or dec find */)
+                if(false/* special char like reg or dec find */)
                 {
                     //error: label name incorrect
                 }
@@ -41,7 +40,7 @@ void AssemblerTranslate::loadAssembler(const char* file)
     }
     
     //instruction and comment reading
-    while (/* line */)
+    while (false/* line */)
     {
         int8_t cmd_arg = 0;
         int8_t cmd_argLabel = 0;
@@ -49,13 +48,13 @@ void AssemblerTranslate::loadAssembler(const char* file)
         bool label = false;
         int8_t cmd_index = 0;
 
-        while (/* word */)
+        while (false/* word */)
         {
             if(comment)
             {
                 // add comment
             }
-            else if(/* comment symbol find */)
+            else if(false/* comment symbol find */)
             {
                 comment = true;
                 // add comment if there is something just after the symbol
@@ -64,7 +63,7 @@ void AssemblerTranslate::loadAssembler(const char* file)
             {
                 // error: something wrong after label
             }
-            else if (/* label symobl find */)
+            else if (false/* label symobl find */)
             {
                 label = true;
                 // ignore
@@ -74,9 +73,9 @@ void AssemblerTranslate::loadAssembler(const char* file)
                 if(cmd_argLabel<op_label[cmd_index] && op_label_pos[cmd_index][cmd_argLabel]==cmd_arg)
                 {
                     bool find = false;
-                    while (/* check label */)
+                    while (false/* check label */)
                     {
-                        if(/* label exist */)
+                        if(false/* label exist */)
                         {
                             //replace label
                             find = true;
@@ -93,9 +92,9 @@ void AssemblerTranslate::loadAssembler(const char* file)
                 }
                 else
                 {
-                    if (/* register char find */)
+                    if (false/* register char find */)
                     {
-                        if(/* convert error */)
+                        if(false/* convert error */)
                         {
                             //error: not a valid register name
                         }
@@ -104,9 +103,9 @@ void AssemblerTranslate::loadAssembler(const char* file)
                             //add reg to instruction
                         }
                     }
-                    else if (/* decimal char find */)
+                    else if (false/* decimal char find */)
                     {
-                        if(/* convert error */)
+                        if(false/* convert error */)
                         {
                             //error: not a valid decimal number
                         }
@@ -116,7 +115,7 @@ void AssemblerTranslate::loadAssembler(const char* file)
                         }
                     }else
                     {
-                        if(/* convert error */)
+                        if(false/* convert error */)
                         {
                             //error: not a valid hexadecimal number
                         }
@@ -127,12 +126,12 @@ void AssemblerTranslate::loadAssembler(const char* file)
                     }
                 }
             }
-            else if (/* command find */)
+            else if (false/* command find */)
             {
                 int i=0;
-                while (/* command name not find */)
+                while (false/* command name not find */)
                 {
-                    if(/* cmd name find */)
+                    if(false/* cmd name find */)
                     {
                         // add command
                         cmd_index = i;
@@ -148,7 +147,7 @@ void AssemblerTranslate::loadAssembler(const char* file)
         }
         if(!comment && !label)
         {
-            for (int i = op_arg[cmd_index]; i < op_size; i++)
+            for (int i = op_arg[cmd_index]; i < *op_size; i++)
             {
                 //add 00 to instruction
             }
@@ -158,14 +157,14 @@ void AssemblerTranslate::loadAssembler(const char* file)
     //close file
 }
 
-void AssemblerTranslate::loadBinary(const char *file)
+void AssemblerCompiler::loadBinary(const char *file)
 {
 }
 
-void AssemblerTranslate::saveAssembler(const char *file)
+void AssemblerCompiler::saveAssembler(const char *file)
 {
 }
 
-void AssemblerTranslate::saveBinary(const char *file)
+void AssemblerCompiler::saveBinary(const char *file)
 {
 }

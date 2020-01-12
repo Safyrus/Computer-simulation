@@ -2,6 +2,6 @@
 
 int main()
 {
-    std::cout << "Hello Easy C++ project!" << std::endl;
+    std::cout << "Nothing here for now, just press enter and leave" << std::endl;
     std::cin.ignore();
 }

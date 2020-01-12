@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 
-class AssemblerTranslate
+class AssemblerCompiler
 {
 private:
     int8_t *instructions;
@@ -25,9 +25,9 @@ private:
     char labelReplaceChar;
 
 public:
-    AssemblerTranslate();
-    AssemblerTranslate(const char *configFile);
-    ~AssemblerTranslate();
+    AssemblerCompiler();
+    AssemblerCompiler(const char *configFile);
+    ~AssemblerCompiler();
 
     void loadAssembler(const char *file);
     void loadBinary(const char *file);
