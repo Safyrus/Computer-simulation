@@ -1,4 +1,7 @@
 #include "AssemblerCompiler.hpp"
+#include <iostream>
+#include <fstream>
+#include <string>
 
 AssemblerCompiler::AssemblerCompiler()
 {
@@ -12,12 +15,22 @@ AssemblerCompiler::~AssemblerCompiler()
 {
 }
 
-void AssemblerCompiler::loadAssembler(const char* file)
+void AssemblerCompiler::loadAssembler(const char* f)
 {
     //open file
-    if(false/* can't open */)
+    std::string line;
+    std::ifstream file (f);
+
+    if (!file.is_open())
     {
-        //error: can't open file
+        std::cout << "Error: Unable to open file\n";
+        return;
+    }
+    
+    std::cout << "file open\n";
+    while (getline (file,line))
+    {
+        std::cout << line << '\n';
     }
 
     //label reading
@@ -155,16 +168,18 @@ void AssemblerCompiler::loadAssembler(const char* file)
     }
 
     //close file
+    file.close();
+    std::cout << "file close\n";
 }
 
-void AssemblerCompiler::loadBinary(const char *file)
+void AssemblerCompiler::loadBinary(const char *f)
 {
 }
 
-void AssemblerCompiler::saveAssembler(const char *file)
+void AssemblerCompiler::saveAssembler(const char *f)
 {
 }
 
-void AssemblerCompiler::saveBinary(const char *file)
+void AssemblerCompiler::saveBinary(const char *f)
 {
 }

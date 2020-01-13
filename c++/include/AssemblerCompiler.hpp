@@ -29,10 +29,10 @@ public:
     AssemblerCompiler(const char *configFile);
     ~AssemblerCompiler();
 
-    void loadAssembler(const char *file);
-    void loadBinary(const char *file);
-    void saveAssembler(const char *file);
-    void saveBinary(const char *file);
+    void loadAssembler(const char *f);
+    void loadBinary(const char *f);
+    void saveAssembler(const char *f);
+    void saveBinary(const char *f);
 
     int8_t *getMemory();
 };
