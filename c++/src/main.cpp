@@ -1,7 +1,14 @@
 #include <iostream>
+#include "AssemblerCompiler.hpp"
 
-int main()
-{
-    std::cout << "Nothing here for now, just press enter and leave" << std::endl;
+int main() {
+    std::cout << "Test for assemblerCompiler" << std::endl;
+    std::cin.ignore();
+
+    AssemblerCompiler *compiler = new AssemblerCompiler();
+    compiler->loadAssembler("testCompiler.sac");
+    delete compiler;
+
+    std::cout << "Done" << std::endl;
     std::cin.ignore();
 }
