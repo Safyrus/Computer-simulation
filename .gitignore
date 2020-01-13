@@ -32,5 +32,5 @@
 *.app
 
 # C++ folders
-/.vscode
-c++/bin
+*.vscode/
+*bin/
