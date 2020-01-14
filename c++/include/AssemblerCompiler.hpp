@@ -18,11 +18,11 @@ private:
     std::string *reg_name;
     int8_t *reg_code;
 
-    char commentChar;
-    char regChar;
-    char decimalChar;
-    char labelChar;
-    char labelReplaceChar;
+    char char_comment;
+    char char_reg;
+    char char_decimal;
+    char char_label;
+    char char_labelReplace;
 
 public:
     AssemblerCompiler();

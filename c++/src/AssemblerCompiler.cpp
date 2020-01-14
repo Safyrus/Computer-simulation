@@ -2,9 +2,16 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <string.h>
+#include <vector>
 
 AssemblerCompiler::AssemblerCompiler()
 {
+    char_comment = '#';
+    char_label = ':';
+    char_labelReplace = '£';
+    char_reg = '$';
+    char_decimal = '§';
 }
 
 AssemblerCompiler::AssemblerCompiler(const char *configFile)
@@ -18,7 +25,7 @@ AssemblerCompiler::~AssemblerCompiler()
 void AssemblerCompiler::loadAssembler(const char* f)
 {
     //open file
-    std::string line;
+    //std::string line;
     std::ifstream file (f);
 
     if (!file.is_open())
@@ -26,30 +33,56 @@ void AssemblerCompiler::loadAssembler(const char* f)
         std::cout << "Error: Unable to open file\n";
         return;
     }
-    
     std::cout << "file open\n";
-    while (getline (file,line))
-    {
-        std::cout << line << '\n';
-    }
 
-    //label reading
-    while (false/* line */)
+    //-----label reading-----
+    // for each line
+    std::string line="";
+    while (getline(file,line))
     {
         bool find = false;
+        std::string word;
 
-        while (false/* word and not find */)
+        //for each word
+        while (line != "" && !find)
         {
-            if(false/* label symbol find a the end of the word */)
+            word = line.substr(0, line.find(" "));
+            if(word==line)
             {
-                if(false/* special char like reg or dec find */)
+                line = "";
+            }
+            std::cout << word << " ";
+            line = line.substr(line.find(" ")+1);
+
+            if(word.back()== char_label)//label symbol find a the end of the word
+            {
+                /*std::cout << "**LABEL DETECTED**";
+                if(word.find(char_comment)==0 || word.find(char_reg)==0 || word.find(char_decimal)==0 || word.find(char_labelReplace)==0)//special char like reg or dec find
                 {
-                    //error: label name incorrect
-                }
-                find = true;
+                    std::cout << "**ERROR: LABEL NAME INCORRECT**";
+                }*/
+                //find = true;
                 //add label
             }
         }
+        std::cout << '\n';
+        
+
+        // for each word
+        //while (word != NULL && !find)
+        //{
+            //if(false/* label symbol find a the end of the word */)
+            //{
+                //if(false/* special char like reg or dec find */)
+                //{
+                    //error: label name incorrect
+                //}
+                //find = true;
+                //add label
+            //}
+            //std::cout << word << " ";
+            //word = strtok(NULL, " ");
+        //}
     }
     
     //instruction and comment reading
