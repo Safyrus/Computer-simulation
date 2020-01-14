@@ -1,12 +1,13 @@
 #pragma once
 #include <string>
+#include <vector>
 
 class AssemblerCompiler
 {
 private:
-    int8_t *instructions;
-    std::string *labels;
-    std::string *comments;
+    std::vector<int8_t> instructions;
+    std::vector<std::string> labels;
+    std::vector<std::string> comments;
 
     std::string *op_name;
     int8_t *op_code;

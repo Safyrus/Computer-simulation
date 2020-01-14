@@ -2,7 +2,6 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <string.h>
 #include <vector>
 
 AssemblerCompiler::AssemblerCompiler()
@@ -12,6 +11,7 @@ AssemblerCompiler::AssemblerCompiler()
     char_labelReplace = '£';
     char_reg = '$';
     char_decimal = '§';
+
 }
 
 AssemblerCompiler::AssemblerCompiler(const char *configFile)
@@ -37,32 +37,40 @@ void AssemblerCompiler::loadAssembler(const char* f)
 
     //-----label reading-----
     // for each line
-    std::string line="";
+    std::string line = "";
     while (getline(file,line))
     {
-        bool find = false;
         std::string word;
 
         //for each word
-        while (line != "" && !find)
+        while (line != "")
         {
+            //check if end of line
             word = line.substr(0, line.find(" "));
             if(word==line)
             {
                 line = "";
+            }else
+            {
+                line = line.substr(line.find(" ")+1);
             }
             std::cout << word << " ";
-            line = line.substr(line.find(" ")+1);
 
-            if(word.back()== char_label)//label symbol find a the end of the word
+
+            //label symbol find a the end of the word
+            if(word.back()== char_label)
             {
-                /*std::cout << "**LABEL DETECTED**";
-                if(word.find(char_comment)==0 || word.find(char_reg)==0 || word.find(char_decimal)==0 || word.find(char_labelReplace)==0)//special char like reg or dec find
+                std::cout << "**LABEL DETECTED**";
+
+                //special char like reg or dec find
+                if(word.find(char_comment)!=std::string::npos || word.find(char_reg)!=std::string::npos || word.find(char_decimal)!=std::string::npos || word.find(char_labelReplace)!=std::string::npos)
                 {
                     std::cout << "**ERROR: LABEL NAME INCORRECT**";
-                }*/
-                //find = true;
+                }
+                
                 //add label
+                labels.push_back(word.substr(0, word.length()-1));
+                std::cout << labels.back();
             }
         }
         std::cout << '\n';
