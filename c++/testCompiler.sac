@@ -1,4 +1,4 @@
-#comment with a MOV inside to check if comment are interpret
+#comment with a MOV and some symbols ( $A LABEL: ) inside to check if comment are interpret
 
 
 LABEL:
@@ -10,12 +10,17 @@ NOP
 NOP
 NOP
 
-STOP:
+#comment with # another comment and
+# a comment with a space
+SOM: # a label
+
+STOP: #with a comment
 OFF
 
 
-#after that point, I ahve written only error to test the compiler
+#after that point, I have written only error to test the compiler
 
+NAME: Something
 :LABEL
 #AB$L:
 LAB$L:
@@ -30,4 +35,6 @@ MOV SS $vv
 MOV SS %vv
 
 test#comment
+testcomment#
+#testcomment#
 
