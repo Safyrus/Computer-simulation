@@ -5,19 +5,22 @@
 class AssemblerCompiler
 {
 private:
-    std::vector<int8_t> instructions;
+    std::vector<std::string> instructions;
     std::vector<std::string> labels;
     std::vector<std::string> comments;
+    std::vector<int> instructions_pos;
+    std::vector<int> labels_pos;
+    std::vector<int> comments_pos;
 
-    std::string *op_name;
-    int8_t *op_code;
-    int8_t *op_arg;
-    int8_t *op_label;
-    int8_t **op_label_pos;
-    int8_t *op_size;
+    std::vector<std::string> op_name;
+    std::vector<int8_t> op_code;
+    std::vector<int8_t> op_arg;
+    std::vector<int8_t> op_label;
+    std::vector<std::vector<int8_t>> op_label_pos;
+    int8_t op_size;
 
-    std::string *reg_name;
-    int8_t *reg_code;
+    std::vector<std::string> reg_name;
+    std::vector<int8_t> reg_code;
 
     char char_comment;
     char char_reg;

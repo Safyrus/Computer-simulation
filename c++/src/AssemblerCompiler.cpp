@@ -12,6 +12,11 @@ AssemblerCompiler::AssemblerCompiler()
     char_reg = '$';
     char_decimal = '§';
 
+    op_name.push_back("NOP");
+    op_code.push_back(0);
+    op_arg.push_back(0);
+    op_label.push_back(0);
+    op_size = 4;
 }
 
 AssemblerCompiler::AssemblerCompiler(const char *configFile)
@@ -25,19 +30,22 @@ AssemblerCompiler::~AssemblerCompiler()
 void AssemblerCompiler::loadAssembler(const char* f)
 {
     //open file
-    //std::string line;
     std::ifstream file (f);
 
     if (!file.is_open())
     {
         std::cout << "Error: Unable to open file\n";
         return;
+    }else
+    {
+        std::cout << "file open \n";
     }
-    std::cout << "file open\n";
+
+    std::string line = "";
+    int lineCount = 0;
 
     //-----label reading-----
     // for each line
-    std::string line = "";
     while (getline(file,line))
     {
         std::string word;
@@ -58,60 +66,110 @@ void AssemblerCompiler::loadAssembler(const char* f)
 
 
             //label symbol find a the end of the word
-            if(word.back()== char_label)
+            if(word.back()== char_label && word.front()!=char_comment)
             {
                 std::cout << "**LABEL DETECTED**";
-
+                word = word.substr(0, word.length()-1);
+                
                 //special char like reg or dec find
-                if(word.find(char_comment)!=std::string::npos || word.find(char_reg)!=std::string::npos || word.find(char_decimal)!=std::string::npos || word.find(char_labelReplace)!=std::string::npos)
+                if(word.find(char_comment)!=std::string::npos || word.find(char_reg)!=std::string::npos || word.find(char_decimal)!=std::string::npos || word.find(char_labelReplace)!=std::string::npos ||  word.find(char_label)!=std::string::npos)
                 {
                     std::cout << "**ERROR: LABEL NAME INCORRECT**";
+                }else
+                {
+                    //add label
+                        std::cout << "**ADD LABEL**";
+                    labels.push_back(word);
+                    labels_pos.push_back(lineCount);
+                    std::cout << labels.back();
                 }
-                
-                //add label
-                labels.push_back(word.substr(0, word.length()-1));
-                std::cout << labels.back();
             }
         }
         std::cout << '\n';
-        
-
-        // for each word
-        //while (word != NULL && !find)
-        //{
-            //if(false/* label symbol find a the end of the word */)
-            //{
-                //if(false/* special char like reg or dec find */)
-                //{
-                    //error: label name incorrect
-                //}
-                //find = true;
-                //add label
-            //}
-            //std::cout << word << " ";
-            //word = strtok(NULL, " ");
-        //}
+        lineCount++;
     }
     
-    //instruction and comment reading
-    while (false/* line */)
+    //close file
+    file.close();
+    std::cout << "file close\n";
+
+    std::cout << "#------------------------------#\n";
+    for (int i = 0; i < labels.size(); i++)
     {
+        std::cout << labels.at(i) << ": " << labels_pos.at(i) <<'\n';
+    }
+    std::cout << "#------------------------------#\n";
+    
+
+    //open file
+    file.open(f);
+    if (!file.is_open())
+    {
+        std::cout << "Error: Unable to open file\n";
+        return;
+    }else
+    {
+        std::cout << "file open 2\n";
+    }
+    
+    lineCount = 0;
+
+    //instruction and comment reading
+    // for each line
+    while (getline(file,line))
+    {
+        std::string word;
+
+
         int8_t cmd_arg = 0;
         int8_t cmd_argLabel = 0;
         bool comment = false;
         bool label = false;
         int8_t cmd_index = 0;
 
-        while (false/* word */)
+        //for each word
+        while (line != "")
         {
-            if(comment)
+            //check if end of line
+            word = line.substr(0, line.find(" "));
+            if(word==line)
+            {
+                line = "";
+            }else
+            {
+                line = line.substr(line.find(" ")+1);
+            }
+            std::cout << word << " ";
+
+            /*if(comment)
             {
                 // add comment
-            }
-            else if(false/* comment symbol find */)
+                comments.push_back(word);
+                comments_pos.push_back(lineCount);
+            }*/
+
+            //comment symbol find
+            if(word.find(char_comment)!=std::string::npos)
             {
-                comment = true;
-                // add comment if there is something just after the symbol
+                std::cout << "**COMMENT DETECTED**";
+                int char_com_pos = word.find(char_comment);
+                std::string strBefor = word.substr(0, (char_com_pos<0)?0:char_com_pos);
+                std::string strAfter = word.substr(word.find(char_comment)+1);
+                if(strBefor != "")
+                {
+                    std::cout << "**SOMETHING BEFOR COMMENT**\n";
+                    line = strBefor + ' ' + char_comment + strAfter + " " + line;
+                }else
+                {
+                    //comment = true;
+                    if(strAfter != "")
+                    {
+                        std::cout << "**ADD COMMENT**" << strAfter + line;
+                        comments.push_back(strAfter + line);
+                        comments_pos.push_back(lineCount);
+                        line = "";
+                    }
+                }
             }
             else if (label)
             {
@@ -196,12 +254,14 @@ void AssemblerCompiler::loadAssembler(const char* f)
             }
             else
             {
-                //error: something is wrong
+                //error: something is wrong, maybe a space or something
             }            
         }
+        std::cout << '\n';
+
         if(!comment && !label)
         {
-            for (int i = op_arg[cmd_index]; i < *op_size; i++)
+            for (int i = op_arg[cmd_index]; i < op_size; i++)
             {
                 //add 00 to instruction
             }
@@ -210,7 +270,7 @@ void AssemblerCompiler::loadAssembler(const char* f)
 
     //close file
     file.close();
-    std::cout << "file close\n";
+    std::cout << "file close 2\n";
 }
 
 void AssemblerCompiler::loadBinary(const char *f)
