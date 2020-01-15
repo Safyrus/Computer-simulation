@@ -15,9 +15,9 @@ private:
     std::vector<std::string> op_name;
     std::vector<int8_t> op_code;
     std::vector<int8_t> op_arg;
-    std::vector<int8_t> op_label;
-    std::vector<std::vector<int8_t>> op_label_pos;
-    int8_t op_size;
+    std::vector<std::vector<int8_t>> op_arg_type;
+    //std::vector<std::vector<int8_t>> op_label_pos;
+    int8_t op_arg_size;
 
     std::vector<std::string> reg_name;
     std::vector<int8_t> reg_code;
@@ -27,6 +27,9 @@ private:
     char char_decimal;
     char char_label;
     char char_labelReplace;
+    const int8_t LABEL = 2;
+    const int8_t REG = 1;
+    const int8_t VAL = 0;
 
 public:
     AssemblerCompiler();

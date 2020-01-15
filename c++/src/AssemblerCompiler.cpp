@@ -12,11 +12,47 @@ AssemblerCompiler::AssemblerCompiler()
     char_reg = '$';
     char_decimal = '§';
 
-    op_name.push_back("NOP");
-    op_code.push_back(0);
-    op_arg.push_back(0);
-    op_label.push_back(0);
-    op_size = 4;
+    op_name = {
+        "NOP","RST","OFF","MOV","MOV","CMP","CMP","CMP","CMP",
+        "ADD","ADC","SUB","SBB","MUL","DIV","MOD","AND","OR" ,"XOR",
+        "ADD","ADC","SUB","SBB","MUL","DIV","MOD","AND","OR" ,"XOR",
+        "ADD","ADC","SUB","SBB","MUL","DIV","MOD","AND","OR" ,"XOR",
+        "ADD","ADC","SUB","SBB","MUL","DIV","MOD","AND","OR" ,"XOR",
+        "JMP","JMP","JMP","JMP","JMP"
+        "GET","GET","GET","GET","GET",
+        "SET","SET","SET","SET","SET","SET","SET","SET","SET","SET"
+    };
+    op_code = {
+        0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,
+        0x10,0x11,0x12,0x13,0x14,0x15,0x16,0x17,0x18,0x19,
+        0x20,0x21,0x22,0x23,0x24,0x25,0x26,0x27,0x28,0x29,
+        0x30,0x31,0x32,0x33,0x34,0x35,0x36,0x37,0x38,0x39,
+        0x40,0x41,0x42,0x43,0x44,0x45,0x46,0x47,0x48,0x49,
+        0x50,0x51,0x52,0x53,0x53,
+        0x54,0x55,0x56,0x57,0x57,
+        0x58,0x59,0x5a,0x5b,0x5c,0x5d,0x5e,0x5f,0x5b,0x5f
+    };
+    op_arg = {
+        0, 0, 0, 2, 2, 2, 2, 2, 2,
+        3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+        3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+        3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+        3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+        3, 3, 3, 3, 2,
+        3, 3, 3, 3, 2,
+        3, 3, 3, 3, 3, 3, 3, 3, 2, 2
+    };
+    op_arg_type = {
+        {},{},{},{REG, REG},{REG, VAL},{REG, REG},{VAL, REG},{REG,VAL},{VAL,VAL},
+        {REG,REG,REG},{REG,REG,REG},{REG,REG,REG},{REG,REG,REG},{REG,REG,REG},{REG,REG,REG},{REG,REG,REG},{REG,REG,REG},{REG,REG,REG},{REG,REG,REG},
+        {REG,VAL,REG},{REG,VAL,REG},{REG,VAL,REG},{REG,VAL,REG},{REG,VAL,REG},{REG,VAL,REG},{REG,VAL,REG},{REG,VAL,REG},{REG,VAL,REG},{REG,VAL,REG},
+        {REG,REG,VAL},{REG,REG,VAL},{REG,REG,VAL},{REG,REG,VAL},{REG,REG,VAL},{REG,REG,VAL},{REG,REG,VAL},{REG,REG,VAL},{REG,REG,VAL},{REG,REG,VAL},
+        {REG,VAL,VAL},{REG,VAL,VAL},{REG,VAL,VAL},{REG,VAL,VAL},{REG,VAL,VAL},{REG,VAL,VAL},{REG,VAL,VAL},{REG,VAL,VAL},{REG,VAL,VAL},{REG,VAL,VAL},
+        {REG,REG,REG},{REG,VAL,REG},{REG,REG,VAL},{REG,VAL,VAL},{REG,LABEL},
+        {REG,REG,REG},{REG,VAL,REG},{REG,REG,VAL},{REG,VAL,VAL},{REG,LABEL},
+        {REG,REG,REG},{REG,VAL,REG},{REG,REG,VAL},{REG,VAL,VAL},{VAL,REG,REG},{VAL,VAL,REG},{VAL,REG,VAL},{VAL,VAL,VAL},{REG,LABEL},{VAL,LABEL}
+    };
+    op_arg_size = 3;
 }
 
 AssemblerCompiler::AssemblerCompiler(const char *configFile)
@@ -199,7 +235,7 @@ void AssemblerCompiler::loadAssembler(const char *f)
             //check if any arg remaind
             else if (cmd_arg < op_arg[cmd_index])
             {
-                if (cmd_argLabel < op_label[cmd_index] && op_label_pos[cmd_index][cmd_argLabel] == cmd_arg)
+                if (false/*cmd_argLabel < op_label[cmd_index] && op_label_pos[cmd_index][cmd_argLabel] == cmd_arg*/)
                 {
                     bool find = false;
                     while (false /* check label */)
@@ -277,7 +313,7 @@ void AssemblerCompiler::loadAssembler(const char *f)
 
         if (!comment && !label)
         {
-            for (int i = op_arg[cmd_index]; i < op_size; i++)
+            for (int i = op_arg[cmd_index]; i < op_arg_size; i++)
             {
                 //add 00 to instruction
             }
