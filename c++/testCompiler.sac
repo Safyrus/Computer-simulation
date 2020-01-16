@@ -5,7 +5,7 @@ LABEL:
 MOV $A aa
 MOV $B $A
 MOV $F %0
-JMP 00 STOP
+JMP $F STOP
 NOP
 NOP
 NOP
@@ -24,15 +24,16 @@ NAME: Something
 :LABEL
 #AB$L:
 LAB$L:
-L£BEL:
-LA§EL:
+L*BEL:
+LA%EL:
 :ABEL:
 
 THING
 
 MOV SS vv
-MOV SS $vv
-MOV SS %vv
+MOV SS vv nn
+MOV SS $vv nn
+MOV SS %vv nn
 
 test#comment
 testcomment#

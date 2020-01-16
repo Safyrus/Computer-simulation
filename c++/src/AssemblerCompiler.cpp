@@ -3,35 +3,42 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <sstream>
+
+bool isHex(const std::string &s)
+{
+    char *p;
+    strtol(s.c_str(), &p, 16);
+
+    return (*p == 0);
+}
 
 AssemblerCompiler::AssemblerCompiler()
 {
     char_comment = '#';
     char_label = ':';
-    char_labelReplace = '£';
+    char_labelReplace = '*';
     char_reg = '$';
-    char_decimal = '§';
+    char_decimal = '%';
 
     op_name = {
-        "NOP","RST","OFF","MOV","MOV","CMP","CMP","CMP","CMP",
-        "ADD","ADC","SUB","SBB","MUL","DIV","MOD","AND","OR" ,"XOR",
-        "ADD","ADC","SUB","SBB","MUL","DIV","MOD","AND","OR" ,"XOR",
-        "ADD","ADC","SUB","SBB","MUL","DIV","MOD","AND","OR" ,"XOR",
-        "ADD","ADC","SUB","SBB","MUL","DIV","MOD","AND","OR" ,"XOR",
-        "JMP","JMP","JMP","JMP","JMP"
-        "GET","GET","GET","GET","GET",
-        "SET","SET","SET","SET","SET","SET","SET","SET","SET","SET"
-    };
+        "NOP", "RST", "OFF", "MOV", "MOV", "CMP", "CMP", "CMP", "CMP",
+        "ADD", "ADC", "SUB", "SBB", "MUL", "DIV", "MOD", "AND", "OR", "XOR",
+        "ADD", "ADC", "SUB", "SBB", "MUL", "DIV", "MOD", "AND", "OR", "XOR",
+        "ADD", "ADC", "SUB", "SBB", "MUL", "DIV", "MOD", "AND", "OR", "XOR",
+        "ADD", "ADC", "SUB", "SBB", "MUL", "DIV", "MOD", "AND", "OR", "XOR",
+        "JMP", "JMP", "JMP", "JMP", "JMP",
+        "GET", "GET", "GET", "GET", "GET",
+        "SET", "SET", "SET", "SET", "SET", "SET", "SET", "SET", "SET", "SET"};
     op_code = {
-        0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,
-        0x10,0x11,0x12,0x13,0x14,0x15,0x16,0x17,0x18,0x19,
-        0x20,0x21,0x22,0x23,0x24,0x25,0x26,0x27,0x28,0x29,
-        0x30,0x31,0x32,0x33,0x34,0x35,0x36,0x37,0x38,0x39,
-        0x40,0x41,0x42,0x43,0x44,0x45,0x46,0x47,0x48,0x49,
-        0x50,0x51,0x52,0x53,0x53,
-        0x54,0x55,0x56,0x57,0x57,
-        0x58,0x59,0x5a,0x5b,0x5c,0x5d,0x5e,0x5f,0x5b,0x5f
-    };
+        0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+        0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19,
+        0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29,
+        0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39,
+        0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49,
+        0x50, 0x51, 0x52, 0x53, 0x53,
+        0x54, 0x55, 0x56, 0x57, 0x57,
+        0x58, 0x59, 0x5a, 0x5b, 0x5c, 0x5d, 0x5e, 0x5f, 0x5b, 0x5f};
     op_arg = {
         0, 0, 0, 2, 2, 2, 2, 2, 2,
         3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
@@ -40,18 +47,9 @@ AssemblerCompiler::AssemblerCompiler()
         3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
         3, 3, 3, 3, 2,
         3, 3, 3, 3, 2,
-        3, 3, 3, 3, 3, 3, 3, 3, 2, 2
-    };
+        3, 3, 3, 3, 3, 3, 3, 3, 2, 2};
     op_arg_type = {
-        {},{},{},{REG, REG},{REG, VAL},{REG, REG},{VAL, REG},{REG,VAL},{VAL,VAL},
-        {REG,REG,REG},{REG,REG,REG},{REG,REG,REG},{REG,REG,REG},{REG,REG,REG},{REG,REG,REG},{REG,REG,REG},{REG,REG,REG},{REG,REG,REG},{REG,REG,REG},
-        {REG,VAL,REG},{REG,VAL,REG},{REG,VAL,REG},{REG,VAL,REG},{REG,VAL,REG},{REG,VAL,REG},{REG,VAL,REG},{REG,VAL,REG},{REG,VAL,REG},{REG,VAL,REG},
-        {REG,REG,VAL},{REG,REG,VAL},{REG,REG,VAL},{REG,REG,VAL},{REG,REG,VAL},{REG,REG,VAL},{REG,REG,VAL},{REG,REG,VAL},{REG,REG,VAL},{REG,REG,VAL},
-        {REG,VAL,VAL},{REG,VAL,VAL},{REG,VAL,VAL},{REG,VAL,VAL},{REG,VAL,VAL},{REG,VAL,VAL},{REG,VAL,VAL},{REG,VAL,VAL},{REG,VAL,VAL},{REG,VAL,VAL},
-        {REG,REG,REG},{REG,VAL,REG},{REG,REG,VAL},{REG,VAL,VAL},{REG,LABEL},
-        {REG,REG,REG},{REG,VAL,REG},{REG,REG,VAL},{REG,VAL,VAL},{REG,LABEL},
-        {REG,REG,REG},{REG,VAL,REG},{REG,REG,VAL},{REG,VAL,VAL},{VAL,REG,REG},{VAL,VAL,REG},{VAL,REG,VAL},{VAL,VAL,VAL},{REG,LABEL},{VAL,LABEL}
-    };
+        {}, {}, {}, {REG, REG}, {REG, VAL}, {REG, REG}, {VAL, REG}, {REG, VAL}, {VAL, VAL}, {REG, REG, REG}, {REG, REG, REG}, {REG, REG, REG}, {REG, REG, REG}, {REG, REG, REG}, {REG, REG, REG}, {REG, REG, REG}, {REG, REG, REG}, {REG, REG, REG}, {REG, REG, REG}, {REG, VAL, REG}, {REG, VAL, REG}, {REG, VAL, REG}, {REG, VAL, REG}, {REG, VAL, REG}, {REG, VAL, REG}, {REG, VAL, REG}, {REG, VAL, REG}, {REG, VAL, REG}, {REG, VAL, REG}, {REG, REG, VAL}, {REG, REG, VAL}, {REG, REG, VAL}, {REG, REG, VAL}, {REG, REG, VAL}, {REG, REG, VAL}, {REG, REG, VAL}, {REG, REG, VAL}, {REG, REG, VAL}, {REG, REG, VAL}, {REG, VAL, VAL}, {REG, VAL, VAL}, {REG, VAL, VAL}, {REG, VAL, VAL}, {REG, VAL, VAL}, {REG, VAL, VAL}, {REG, VAL, VAL}, {REG, VAL, VAL}, {REG, VAL, VAL}, {REG, VAL, VAL}, {REG, REG, REG}, {REG, VAL, REG}, {REG, REG, VAL}, {REG, VAL, VAL}, {REG, LABEL}, {REG, REG, REG}, {REG, VAL, REG}, {REG, REG, VAL}, {REG, VAL, VAL}, {REG, LABEL}, {REG, REG, REG}, {REG, VAL, REG}, {REG, REG, VAL}, {REG, VAL, VAL}, {VAL, REG, REG}, {VAL, VAL, REG}, {VAL, REG, VAL}, {VAL, VAL, VAL}, {REG, LABEL}, {VAL, LABEL}};
     op_arg_size = 3;
 }
 
@@ -64,6 +62,54 @@ AssemblerCompiler::~AssemblerCompiler()
 }
 
 void AssemblerCompiler::loadAssembler(const char *f)
+{
+
+    loadAssembler_read1(f);
+
+    //print result
+    std::cout << "#------------------------------#\n|Labels:\n";
+    for (int i = 0; i < labels.size(); i++)
+    {
+        std::cout << labels_pos.at(i) << ": " << labels.at(i) << '\n';
+    }
+    std::cout << "#------------------------------#\n";
+
+    std::cin.ignore();
+
+    loadAssembler_read2(f);
+
+    //print result
+    std::cout << "#------------------------------#\n|Labels:\n";
+    for (int i = 0; i < labels.size(); i++)
+    {
+        std::cout << labels_pos.at(i) << ": " << labels.at(i) << '\n';
+    }
+    std::cout << "|Instructions:\n";
+    for (int i = 0; i < instructions.size(); i++)
+    {
+        std::cout << instructions_pos.at(i) << ": " << instructions.at(i) << '\n';
+    }
+    std::cout << "|Comments:\n";
+    for (int i = 0; i < comments.size(); i++)
+    {
+        std::cout << comments_pos.at(i) << ": " << comments.at(i) << '\n';
+    }
+    std::cout << "#------------------------------#\n";
+}
+
+void AssemblerCompiler::loadBinary(const char *f)
+{
+}
+
+void AssemblerCompiler::saveAssembler(const char *f)
+{
+}
+
+void AssemblerCompiler::saveBinary(const char *f)
+{
+}
+
+void AssemblerCompiler::loadAssembler_read1(const char *f)
 {
     //open file
     std::ifstream file(f);
@@ -109,7 +155,7 @@ void AssemblerCompiler::loadAssembler(const char *f)
                 comment = true;
             }
 
-            if(label && !comment)
+            if (label && !comment)
             {
                 std::cout << "**ERROR: SOMETHING AFTER LABEL**" << line;
                 line = "";
@@ -144,19 +190,13 @@ void AssemblerCompiler::loadAssembler(const char *f)
     //close file
     file.close();
     std::cout << "file close\n";
+}
 
-    //print result
-    std::cout << "#------------------------------#\n|Labels:\n";
-    for (int i = 0; i < labels.size(); i++)
-    {
-        std::cout << labels_pos.at(i) << ": " << labels.at(i) << '\n';
-    }
-    std::cout << "#------------------------------#\n";
-
-    std::cin.ignore();
-
+void AssemblerCompiler::loadAssembler_read2(const char *f)
+{
     //open file
-    file.open(f);
+    std::ifstream file(f);
+
     if (!file.is_open())
     {
         std::cout << "Error: Unable to open file\n";
@@ -167,7 +207,8 @@ void AssemblerCompiler::loadAssembler(const char *f)
         std::cout << "file open 2\n";
     }
 
-    lineCount = 0;
+    std::string line = "";
+    int lineCount = 0;
 
     //instruction and comment reading
     // for each line
@@ -175,21 +216,21 @@ void AssemblerCompiler::loadAssembler(const char *f)
     {
         std::string word;
 
-        int8_t cmd_arg = 0;
-        int8_t cmd_argLabel = 0;
+        int cmd_arg = 0;
+        std::string cmd = "";
         bool comment = false;
-        int8_t cmd_index = 0;
         bool label = false;
+        std::vector<int> cmd_find;
+
         //set label to true if this line contain label
         for (int i = 0; i < labels_pos.size(); i++)
         {
-            if(labels_pos[i]==lineCount)
+            if (labels_pos[i] == lineCount)
             {
                 label = true;
                 break;
             }
         }
-        
 
         //for each word
         while (line != "")
@@ -231,121 +272,149 @@ void AssemblerCompiler::loadAssembler(const char *f)
             else if (label)
             {
                 std::cout << "**LABEL FIND**";
+                label = false;
             }
             //check if any arg remaind
-            else if (cmd_arg < op_arg[cmd_index])
+            else if (!cmd_find.empty())
             {
-                if (false/*cmd_argLabel < op_label[cmd_index] && op_label_pos[cmd_index][cmd_argLabel] == cmd_arg*/)
+                std::cout << "**ARGUMENT FOUND**";
+
+                //check what type of argument is possible
+                bool reg = false;
+                bool val = false;
+                bool lab = false;
+                int argSize = 0;
+                for (int i = 0; i < cmd_find.size(); i++)
                 {
-                    bool find = false;
-                    while (false /* check label */)
+                    if (op_arg_type[cmd_find[i]][cmd_arg] == REG)
                     {
-                        if (false /* label exist */)
-                        {
-                            //replace label
-                            find = true;
-                            break;
-                        }
+                        reg = true;
                     }
-                    if (!find)
+                    else if (op_arg_type[cmd_find[i]][cmd_arg] == LABEL)
                     {
-                        //error: label does not exist
+                        lab = true;
                     }
-                    //add label
-                    cmd_argLabel++;
-                    cmd_arg++;
+                    else if (op_arg_type[cmd_find[i]][cmd_arg] == VAL)
+                    {
+                        val = true;
+                    }
+                    if (argSize < op_arg[cmd_find[i]])
+                    {
+                        argSize = op_arg[cmd_find[i]];
+                    }
+                }
+                if (argSize <= cmd_arg)
+                {
+                    std::cout << "**ERROR: TOO MANY ARG**";
                 }
                 else
                 {
-                    if (false /* register char find */)
+                    int change = -1;
+                    if (word.front() == char_reg && reg)
                     {
-                        if (false /* convert error */)
-                        {
-                            //error: not a valid register name
-                        }
-                        else
-                        {
-                            //add reg to instruction
-                        }
+                        std::cout << "**TYPE REG**";
+                        cmd += word + ' ';
+                        change = REG;
+                        cmd_arg++;
                     }
-                    else if (false /* decimal char find */)
+                    else if ((word.front() == char_decimal || isHex(word)) && val)
                     {
-                        if (false /* convert error */)
-                        {
-                            //error: not a valid decimal number
-                        }
-                        else
-                        {
-                            //add dec to instruction
-                        }
+                        std::cout << "**TYPE VAL**";
+                        cmd += word + ' ';
+                        change = VAL;
+                        cmd_arg++;
                     }
                     else
                     {
-                        if (false /* convert error */)
+                        bool findLabel = false;
+                        for (int i = 0; i < labels.size(); i++)
                         {
-                            //error: not a valid hexadecimal number
+                            if (labels.at(i) == word)
+                            {
+                                findLabel = true;
+                                break;
+                            }
+                        }
+                        if (findLabel)
+                        {
+                            std::cout << "**TYPE LABEL**";
+                            cmd += word + ' ';
+                            change = LABEL;
+                            cmd_arg++;
                         }
                         else
                         {
-                            //add hex to instruction
+                            std::cout << "**ERROR: ARG TYPE INCORRECT**";
                         }
+                    }
+
+                    //change possible command
+                    if (change > -1)
+                    {
+                        std::cout << "**CHANGE**";
+                        std::vector<int> tmp;
+                        for (int i = 0; i < cmd_find.size(); i++)
+                        {
+                            if (op_arg_type[cmd_find[i]][cmd_arg-1] == change)
+                            {
+                                tmp.push_back(cmd_find.at(i));
+                            }
+                        }
+                        cmd_find = tmp;
+                    }
+
+                    std::cout << "*[" << cmd_find.size() << "][" << cmd_arg << "][" << (int)(op_arg[cmd_find[0]]) << "]*";
+                    if (cmd_find.size() == 1 && cmd_arg == op_arg[cmd_find[0]])
+                    {
+                        std::cout << "**ADD CMD**";
+                        instructions.push_back(cmd);
+                        instructions_pos.push_back(lineCount);
                     }
                 }
             }
             //command find (maybe)
             else
             {
+                std::cout << "**CHECK COMMAND NAME**";
                 int i = 0;
-                while (false /* command name not find */)
+                bool addCmd = false;
+                // while command name not find
+                while (i < op_name.size())
                 {
-                    if (false /* cmd name find */)
+                    //cmd name find
+                    if (op_name[i] == word)
                     {
+                        cmd_find.push_back(i);
                         // add command
-                        cmd_index = i;
-                        break;
+                        if (!addCmd)
+                        {
+                            cmd += word + ' ';
+                            addCmd = true;
+                        }
+                    }
+                    i++;
+                }
+                if (cmd_find.empty())
+                {
+                    std::cout << "**ERROR: NOT A COMMAND NAME**";
+                }
+                else
+                {
+                    std::cout << "**COMMAND NAME FOUND[" << cmd_find.size() << "]**";
+                    if(cmd_find.size()==1 && op_arg[cmd_find.at(0)]==0)
+                    {
+                        std::cout << "**ADD CMD**";
+                        instructions.push_back(cmd);
+                        instructions_pos.push_back(lineCount);
                     }
                 }
-                //error: not a command name
             }
         }
         std::cout << '\n';
         lineCount++;
-
-        if (!comment && !label)
-        {
-            for (int i = op_arg[cmd_index]; i < op_arg_size; i++)
-            {
-                //add 00 to instruction
-            }
-        }
     }
 
     //close file
     file.close();
     std::cout << "file close 2\n";
-
-    //print result
-    std::cout << "#------------------------------#\n|Labels:\n";
-    for (int i = 0; i < labels.size(); i++)
-    {
-        std::cout << labels_pos.at(i) << ": " << labels.at(i) << '\n';
-    }
-    std::cout << "|Comments:\n";
-    for (int i = 0; i < comments.size(); i++)
-    {
-        std::cout << comments_pos.at(i) << ": " << comments.at(i) << '\n';
-    }
-    std::cout << "#------------------------------#\n";
-}
-
-void AssemblerCompiler::loadBinary(const char *f)
-{
-}
-
-void AssemblerCompiler::saveAssembler(const char *f)
-{
-}
-
-void AssemblerCompiler::saveBinary(const char *f)
-{
 }

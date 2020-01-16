@@ -31,6 +31,9 @@ private:
     const int8_t REG = 1;
     const int8_t VAL = 0;
 
+    void loadAssembler_read1(const char *f);
+    void loadAssembler_read2(const char *f);
+
 public:
     AssemblerCompiler();
     AssemblerCompiler(const char *configFile);
