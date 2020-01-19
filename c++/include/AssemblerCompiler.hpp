@@ -10,13 +10,13 @@ private:
     std::vector<std::string> comments;
     std::vector<int> instructions_pos;
     std::vector<int> labels_pos;
+    std::vector<int> labels_val;
     std::vector<int> comments_pos;
 
     std::vector<std::string> op_name;
     std::vector<int8_t> op_code;
     std::vector<int8_t> op_arg;
     std::vector<std::vector<int8_t>> op_arg_type;
-    //std::vector<std::vector<int8_t>> op_label_pos;
     int8_t op_arg_size;
 
     std::vector<std::string> reg_name;

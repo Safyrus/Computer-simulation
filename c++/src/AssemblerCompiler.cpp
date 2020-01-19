@@ -1,5 +1,6 @@
 #include "AssemblerCompiler.hpp"
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <string>
 #include <vector>
@@ -51,6 +52,13 @@ AssemblerCompiler::AssemblerCompiler()
     op_arg_type = {
         {}, {}, {}, {REG, REG}, {REG, VAL}, {REG, REG}, {VAL, REG}, {REG, VAL}, {VAL, VAL}, {REG, REG, REG}, {REG, REG, REG}, {REG, REG, REG}, {REG, REG, REG}, {REG, REG, REG}, {REG, REG, REG}, {REG, REG, REG}, {REG, REG, REG}, {REG, REG, REG}, {REG, REG, REG}, {REG, VAL, REG}, {REG, VAL, REG}, {REG, VAL, REG}, {REG, VAL, REG}, {REG, VAL, REG}, {REG, VAL, REG}, {REG, VAL, REG}, {REG, VAL, REG}, {REG, VAL, REG}, {REG, VAL, REG}, {REG, REG, VAL}, {REG, REG, VAL}, {REG, REG, VAL}, {REG, REG, VAL}, {REG, REG, VAL}, {REG, REG, VAL}, {REG, REG, VAL}, {REG, REG, VAL}, {REG, REG, VAL}, {REG, REG, VAL}, {REG, VAL, VAL}, {REG, VAL, VAL}, {REG, VAL, VAL}, {REG, VAL, VAL}, {REG, VAL, VAL}, {REG, VAL, VAL}, {REG, VAL, VAL}, {REG, VAL, VAL}, {REG, VAL, VAL}, {REG, VAL, VAL}, {REG, REG, REG}, {REG, VAL, REG}, {REG, REG, VAL}, {REG, VAL, VAL}, {REG, LABEL}, {REG, REG, REG}, {REG, VAL, REG}, {REG, REG, VAL}, {REG, VAL, VAL}, {REG, LABEL}, {REG, REG, REG}, {REG, VAL, REG}, {REG, REG, VAL}, {REG, VAL, VAL}, {VAL, REG, REG}, {VAL, VAL, REG}, {VAL, REG, VAL}, {VAL, VAL, VAL}, {REG, LABEL}, {VAL, LABEL}};
     op_arg_size = 3;
+
+    reg_name = {
+        "A", "B", "C", "D", "E", "F"
+    };
+    reg_code = {
+        0, 1, 2, 3, 4, 5
+    };
 }
 
 AssemblerCompiler::AssemblerCompiler(const char *configFile)
@@ -82,7 +90,7 @@ void AssemblerCompiler::loadAssembler(const char *f)
     std::cout << "#------------------------------#\n|Labels:\n";
     for (int i = 0; i < labels.size(); i++)
     {
-        std::cout << labels_pos.at(i) << ": " << labels.at(i) << '\n';
+        std::cout << labels_pos.at(i) << ": " << labels.at(i) << ", " << labels_val.at(i) << '\n';
     }
     std::cout << "|Instructions:\n";
     for (int i = 0; i < instructions.size(); i++)
@@ -107,6 +115,105 @@ void AssemblerCompiler::saveAssembler(const char *f)
 
 void AssemblerCompiler::saveBinary(const char *f)
 {
+    //create file
+    std::ofstream file(f);
+    file << std::hex << std::setfill('0') << std::setw(2);
+    std::cout << "CREATE FILE";
+    //std::cin.ignore();
+
+    //for each instruction
+    for (int i = 0; i < instructions.size(); i++)
+    {
+        if(i%4==0 && i!=0)
+        {
+            file << '\n';
+        }
+
+        std::string word;
+        std::string instructionsBuffer = instructions[i] + ' ';
+
+        std::cout << "INSTRUCTION LINE: " << instructionsBuffer << '\n';
+        //std::cin.ignore();
+
+        word = instructionsBuffer.substr(0, instructionsBuffer.find(' '));
+        instructionsBuffer = instructionsBuffer.substr(instructionsBuffer.find(' ') + 1);
+
+        std::cout << "INSTRUCTION BUFFER: " << instructionsBuffer << '\n';
+        std::cout << "WORD: " << word << '\n';
+        //std::cin.ignore();
+
+        int code = strtol(word.c_str(), NULL, 10);
+
+        std::cout << "CODE: " << code << '\n';
+        //std::cin.ignore();
+
+        file << std::hex << std::setfill('0') << std::setw(2) << code << ' ';
+
+        std::cout << "ADD INSTRUCTION TO FILE" << '\n';
+        //std::cin.ignore();
+
+        word = instructionsBuffer.substr(0, instructionsBuffer.find(' '));
+        instructionsBuffer = instructionsBuffer.substr(instructionsBuffer.find(' ') + 1);
+        int arg_size = 0;
+        while (word != "" || arg_size < op_arg_size)
+        {
+            
+            bool label = false;
+            int label_index = 0;
+            for (int j = 0; j < labels.size(); j++)
+            {
+                if(labels[j] == word)
+                {
+                    label = true;
+                    label_index = j;
+                    break;
+                }
+            }
+            if(label)
+            {
+                std::cout << "LABEL ";
+                file << std::hex << std::setfill('0') << std::setw(2) << (labels_val[label_index]>>8)%0xff << ' ' << labels_val[label_index]%0xff;
+                arg_size++;
+            }else if (word.front()==char_reg)
+            {
+                std::cout << "REG ";
+                for (int j = 0; j < reg_name.size(); j++)
+                {
+                    if(reg_name[j]==word.substr(1))
+                    {
+                        file << std::hex << std::setfill('0') << std::setw(2) << std::to_string(reg_code[j]);
+                        break;
+                    }
+                }
+                
+            }else if (word.front()==char_decimal)
+            {
+                std::cout << "DEC ";
+                file << std::hex << std::setfill('0') << std::setw(2) << word.substr(1);
+            }else if(word != "")
+            {
+                std::cout << "HEX ";
+                file << std::hex << std::setfill('0') << std::setw(2) << word;
+            }else
+            {
+                std::cout << "NOTHING ";
+                file << std::hex << std::setfill('0') << std::setw(2) << "00";
+            }
+            
+            std::cout << "WORD: " << word << "[" << arg_size << "]" << '\n';
+            //std::cin.ignore();
+
+            file << ' ';
+            word = instructionsBuffer.substr(0, instructionsBuffer.find(' '));
+            instructionsBuffer = instructionsBuffer.substr(instructionsBuffer.find(' ') + 1);
+            arg_size++;
+        }
+        file << ' ';
+        //std::cin.ignore();
+    }
+
+    //save file
+    file.close();
 }
 
 void AssemblerCompiler::loadAssembler_read1(const char *f)
@@ -178,6 +285,7 @@ void AssemblerCompiler::loadAssembler_read1(const char *f)
                     std::cout << "**ADD LABEL**";
                     labels.push_back(word);
                     labels_pos.push_back(lineCount);
+                    labels_val.push_back(0);
                     std::cout << labels.back();
                     label = true;
                 }
@@ -209,6 +317,7 @@ void AssemblerCompiler::loadAssembler_read2(const char *f)
 
     std::string line = "";
     int lineCount = 0;
+    int instructionCounter = 0;
 
     //instruction and comment reading
     // for each line
@@ -228,6 +337,7 @@ void AssemblerCompiler::loadAssembler_read2(const char *f)
             if (labels_pos[i] == lineCount)
             {
                 label = true;
+                labels_val[i] = instructionCounter * (op_arg_size+1);
                 break;
             }
         }
@@ -355,7 +465,7 @@ void AssemblerCompiler::loadAssembler_read2(const char *f)
                         std::vector<int> tmp;
                         for (int i = 0; i < cmd_find.size(); i++)
                         {
-                            if (op_arg_type[cmd_find[i]][cmd_arg-1] == change)
+                            if (op_arg_type[cmd_find[i]][cmd_arg - 1] == change)
                             {
                                 tmp.push_back(cmd_find.at(i));
                             }
@@ -367,6 +477,7 @@ void AssemblerCompiler::loadAssembler_read2(const char *f)
                     if (cmd_find.size() == 1 && cmd_arg == op_arg[cmd_find[0]])
                     {
                         std::cout << "**ADD CMD**";
+                        cmd = std::to_string(op_code[cmd_find[0]]) + cmd.substr(cmd.find(' '));
                         instructions.push_back(cmd);
                         instructions_pos.push_back(lineCount);
                     }
@@ -401,10 +512,11 @@ void AssemblerCompiler::loadAssembler_read2(const char *f)
                 else
                 {
                     std::cout << "**COMMAND NAME FOUND[" << cmd_find.size() << "]**";
-                    if(cmd_find.size()==1 && op_arg[cmd_find.at(0)]==0)
+                    instructionCounter++;
+                    if (cmd_find.size() == 1 && op_arg[cmd_find.at(0)] == 0)
                     {
                         std::cout << "**ADD CMD**";
-                        instructions.push_back(cmd);
+                        instructions.push_back(std::to_string(op_code[cmd_find[0]]));
                         instructions_pos.push_back(lineCount);
                     }
                 }
