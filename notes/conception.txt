@@ -1,4 +1,4 @@
-[REDACTED] architecture:
+S257-01 architecture:
 - 16 bit adress
 - 32 bit data (OP, I1(A), I2(B), O)
 - pin: 16MEM, 32DATA, 1PWR, 1GND, 1RST, 1CLK
@@ -31,6 +31,7 @@ O  -------------+--D---|-------------------->DEM                   |            
   - execute file
   - edit file
 - console
+
 
 
 [REDACTED] language functionnality:
