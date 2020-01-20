@@ -4,6 +4,7 @@
 LABEL:
 MOV $A aa
 MOV $B $A
+CMP $A $B
 MOV $F %0
 JMP $F STOP
 NOP
