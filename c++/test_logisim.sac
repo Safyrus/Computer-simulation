@@ -1,0 +1,159 @@
+# this program test if all instructions work correctly
+# the only one that need to work befor is:
+# - MOV REG VAL
+# - CMP REG VAL
+# - JMP VAL ADR
+# those who cannot be tested are: OFF and RST
+
+## TODO: REPLACE JMP VAL LABEL WITH JMP REG LABEL
+
+MOV $D 04
+# test MOV REG REG
+MOV $A AA
+MOV $B BB
+MOV $A $B
+CMP $A BB
+JMP $D MOV_1_YES
+JMP $F MOV_1_NOP
+
+MOV_1_NOP:
+MOV $E 03
+JMP $F MOV_1_NOP
+
+MOV_1_YES:
+##############################
+# test ADD REG REG REG
+MOV $A 11
+MOV $B 22
+ADD $C $A $B
+CMP $C 33
+JMP $D ADD_1_YES
+JMP $F ADD_1_NOP
+
+ADD_1_NOP:
+MOV $E 10
+JMP $F ADD_1_NOP
+
+ADD_1_YES:
+# test ADC REG REG REG
+MOV $A 11
+MOV $B 22
+ADC $C $A $B
+CMP $C 34
+JMP $D ADC_1_YES
+JMP $F ADC_1_NOP
+
+ADC_1_NOP:
+MOV $E 11
+JMP $F ADC_1_NOP
+
+ADC_1_YES:
+# test SUB REG REG REG
+MOV $A 11
+MOV $B 22
+SUB $C $B $A
+CMP $C 11
+JMP $D SUB_1_YES
+JMP $F SUB_1_NOP
+
+SUB_1_NOP:
+MOV $E 12
+JMP $F SUB_1_NOP
+
+SUB_1_YES:
+# test SBB REG REG REG
+MOV $A 11
+MOV $B 22
+SBB $C $B $A
+CMP $C 10
+JMP $D SBB_1_YES
+JMP $F SBB_1_NOP
+
+SBB_1_NOP:
+MOV $E 13
+JMP $F SBB_1_NOP
+
+SBB_1_YES:
+# test MUL REG REG REG
+MOV $A 04
+MOV $B 22
+MUL $C $B $A
+CMP $C 88
+JMP $D MUL_1_YES
+JMP $F MUL_1_NOP
+
+MUL_1_NOP:
+MOV $E 14
+JMP $F MUL_1_NOP
+
+MUL_1_YES:
+# test DIV REG REG REG
+MOV $A 11
+MOV $B 22
+DIV $C $B $A
+CMP $C 02
+JMP $D DIV_1_YES
+JMP $F DIV_1_NOP
+
+DIV_1_NOP:
+MOV $E 15
+JMP $F DIV_1_NOP
+
+DIV_1_YES:
+# test MOD REG REG REG
+MOV $A 11
+MOV $B 24
+MOD $C $B $A
+CMP $C 02
+JMP $D MOD_1_YES
+JMP $F MOD_1_NOP
+
+MOD_1_NOP:
+MOV $E 16
+JMP $F MOD_1_NOP
+
+MOD_1_YES:
+# test AND REG REG REG
+MOV $A 11
+MOV $B 23
+AND $C $B $A
+CMP $C 01
+JMP $D AND_1_YES
+JMP $F AND_1_NOP
+
+AND_1_NOP:
+MOV $E 17
+JMP $F AND_1_NOP
+
+AND_1_YES:
+# test OR REG REG REG
+MOV $A 12
+MOV $B 20
+OR  $C $B $A
+CMP $C 32
+JMP $D OR_1_YES
+JMP $F OR_1_NOP
+
+OR_1_NOP:
+MOV $E 18
+JMP $F OR_1_NOP
+
+OR_1_YES:
+# test XOR REG REG REG
+MOV $A 11
+MOV $B 23
+XOR $C $B $A
+CMP $C 32
+JMP $D XOR_1_YES
+JMP $F XOR_1_NOP
+
+XOR_1_NOP:
+MOV $E 19
+JMP $F XOR_1_NOP
+
+XOR_1_YES:
+
+
+
+########################
+OFF
