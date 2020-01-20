@@ -49,7 +49,7 @@ AssemblerCompiler::AssemblerCompiler()
         3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
         3, 3, 3, 3, 2, 3, 3, 3, 3, 2,
         3, 3, 3, 3, 2,
-        3, 3, 3, 3, 3, 3, 3, 3, 2, 2};
+        3, 3, 3, 3, 2, 3, 3, 3, 3, 2};
     op_arg_type = {
         {}, {}, {}, {REG, REG}, {REG, VAL}, {EMPTY, REG, REG}, {EMPTY, VAL, REG}, {EMPTY, REG, VAL}, {EMPTY, VAL, VAL},
         {REG, REG, REG}, {REG, REG, REG}, {REG, REG, REG}, {REG, REG, REG}, {REG, REG, REG}, {REG, REG, REG}, {REG, REG, REG}, {REG, REG, REG}, {REG, REG, REG}, {REG, REG, REG},
@@ -58,7 +58,7 @@ AssemblerCompiler::AssemblerCompiler()
         {REG, VAL, VAL}, {REG, VAL, VAL}, {REG, VAL, VAL}, {REG, VAL, VAL}, {REG, VAL, VAL}, {REG, VAL, VAL}, {REG, VAL, VAL}, {REG, VAL, VAL}, {REG, VAL, VAL}, {REG, VAL, VAL},
         {REG, REG, REG}, {REG, VAL, REG}, {REG, REG, VAL}, {REG, VAL, VAL}, {REG, LABEL}, {VAL, REG, REG}, {VAL, VAL, REG}, {VAL, REG, VAL}, {VAL, VAL, VAL}, {VAL, LABEL},
         {REG, REG, REG}, {REG, VAL, REG}, {REG, REG, VAL}, {REG, VAL, VAL}, {REG, LABEL},
-        {REG, REG, REG}, {REG, VAL, REG}, {REG, REG, VAL}, {REG, VAL, VAL}, {VAL, REG, REG}, {VAL, VAL, REG}, {VAL, REG, VAL}, {VAL, VAL, VAL}, {REG, LABEL}, {VAL, LABEL}};
+        {REG, REG, REG}, {REG, VAL, REG}, {REG, REG, VAL}, {REG, VAL, VAL}, {REG, LABEL}, {VAL, REG, REG}, {VAL, VAL, REG}, {VAL, REG, VAL}, {VAL, VAL, VAL}, {VAL, LABEL}};
     op_arg_size = 3;
 
     reg_name = {
