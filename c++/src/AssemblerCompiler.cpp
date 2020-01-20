@@ -21,6 +21,7 @@ AssemblerCompiler::AssemblerCompiler()
     char_labelReplace = '*';
     char_reg = '$';
     char_decimal = '%';
+    char_emptyArg = '!';
 
     op_name = {
         "NOP", "RST", "OFF", "MOV", "MOV", "CMP", "CMP", "CMP", "CMP",
@@ -28,7 +29,7 @@ AssemblerCompiler::AssemblerCompiler()
         "ADD", "ADC", "SUB", "SBB", "MUL", "DIV", "MOD", "AND", "OR", "XOR",
         "ADD", "ADC", "SUB", "SBB", "MUL", "DIV", "MOD", "AND", "OR", "XOR",
         "ADD", "ADC", "SUB", "SBB", "MUL", "DIV", "MOD", "AND", "OR", "XOR",
-        "JMP", "JMP", "JMP", "JMP", "JMP",
+        "JMP", "JMP", "JMP", "JMP", "JMP", "JMP", "JMP", "JMP", "JMP", "JMP",
         "GET", "GET", "GET", "GET", "GET",
         "SET", "SET", "SET", "SET", "SET", "SET", "SET", "SET", "SET", "SET"};
     op_code = {
@@ -37,27 +38,34 @@ AssemblerCompiler::AssemblerCompiler()
         0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29,
         0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39,
         0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49,
-        0x50, 0x51, 0x52, 0x53, 0x53,
-        0x54, 0x55, 0x56, 0x57, 0x57,
-        0x58, 0x59, 0x5a, 0x5b, 0x5c, 0x5d, 0x5e, 0x5f, 0x5b, 0x5f};
+        0x50, 0x51, 0x52, 0x53, 0x53, 0x54, 0x55, 0x56, 0x57, 0x57,
+        0x60, 0x61, 0x62, 0x63, 0x63,
+        0x64, 0x65, 0x66, 0x67, 0x67, 0x68, 0x69, 0x6a, 0x6b, 0x6b};
     op_arg = {
-        0, 0, 0, 2, 2, 2, 2, 2, 2,
+        0, 0, 0, 2, 2, 3, 3, 3, 3,
         3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
         3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
         3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
         3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-        3, 3, 3, 3, 2,
+        3, 3, 3, 3, 2, 3, 3, 3, 3, 2,
         3, 3, 3, 3, 2,
         3, 3, 3, 3, 3, 3, 3, 3, 2, 2};
     op_arg_type = {
-        {}, {}, {}, {REG, REG}, {REG, VAL}, {REG, REG}, {VAL, REG}, {REG, VAL}, {VAL, VAL}, {REG, REG, REG}, {REG, REG, REG}, {REG, REG, REG}, {REG, REG, REG}, {REG, REG, REG}, {REG, REG, REG}, {REG, REG, REG}, {REG, REG, REG}, {REG, REG, REG}, {REG, REG, REG}, {REG, VAL, REG}, {REG, VAL, REG}, {REG, VAL, REG}, {REG, VAL, REG}, {REG, VAL, REG}, {REG, VAL, REG}, {REG, VAL, REG}, {REG, VAL, REG}, {REG, VAL, REG}, {REG, VAL, REG}, {REG, REG, VAL}, {REG, REG, VAL}, {REG, REG, VAL}, {REG, REG, VAL}, {REG, REG, VAL}, {REG, REG, VAL}, {REG, REG, VAL}, {REG, REG, VAL}, {REG, REG, VAL}, {REG, REG, VAL}, {REG, VAL, VAL}, {REG, VAL, VAL}, {REG, VAL, VAL}, {REG, VAL, VAL}, {REG, VAL, VAL}, {REG, VAL, VAL}, {REG, VAL, VAL}, {REG, VAL, VAL}, {REG, VAL, VAL}, {REG, VAL, VAL}, {REG, REG, REG}, {REG, VAL, REG}, {REG, REG, VAL}, {REG, VAL, VAL}, {REG, LABEL}, {REG, REG, REG}, {REG, VAL, REG}, {REG, REG, VAL}, {REG, VAL, VAL}, {REG, LABEL}, {REG, REG, REG}, {REG, VAL, REG}, {REG, REG, VAL}, {REG, VAL, VAL}, {VAL, REG, REG}, {VAL, VAL, REG}, {VAL, REG, VAL}, {VAL, VAL, VAL}, {REG, LABEL}, {VAL, LABEL}};
+        {}, {}, {}, {REG, REG}, {REG, VAL}, {EMPTY, REG, REG}, {EMPTY, VAL, REG}, {EMPTY, REG, VAL}, {EMPTY, VAL, VAL},
+        {REG, REG, REG}, {REG, REG, REG}, {REG, REG, REG}, {REG, REG, REG}, {REG, REG, REG}, {REG, REG, REG}, {REG, REG, REG}, {REG, REG, REG}, {REG, REG, REG}, {REG, REG, REG},
+        {REG, VAL, REG}, {REG, VAL, REG}, {REG, VAL, REG}, {REG, VAL, REG}, {REG, VAL, REG}, {REG, VAL, REG}, {REG, VAL, REG}, {REG, VAL, REG}, {REG, VAL, REG}, {REG, VAL, REG},
+        {REG, REG, VAL}, {REG, REG, VAL}, {REG, REG, VAL}, {REG, REG, VAL}, {REG, REG, VAL}, {REG, REG, VAL}, {REG, REG, VAL}, {REG, REG, VAL}, {REG, REG, VAL}, {REG, REG, VAL},
+        {REG, VAL, VAL}, {REG, VAL, VAL}, {REG, VAL, VAL}, {REG, VAL, VAL}, {REG, VAL, VAL}, {REG, VAL, VAL}, {REG, VAL, VAL}, {REG, VAL, VAL}, {REG, VAL, VAL}, {REG, VAL, VAL},
+        {REG, REG, REG}, {REG, VAL, REG}, {REG, REG, VAL}, {REG, VAL, VAL}, {REG, LABEL}, {VAL, REG, REG}, {VAL, VAL, REG}, {VAL, REG, VAL}, {VAL, VAL, VAL}, {VAL, LABEL},
+        {REG, REG, REG}, {REG, VAL, REG}, {REG, REG, VAL}, {REG, VAL, VAL}, {REG, LABEL},
+        {REG, REG, REG}, {REG, VAL, REG}, {REG, REG, VAL}, {REG, VAL, VAL}, {VAL, REG, REG}, {VAL, VAL, REG}, {VAL, REG, VAL}, {VAL, VAL, VAL}, {REG, LABEL}, {VAL, LABEL}};
     op_arg_size = 3;
 
     reg_name = {
-        "A", "B", "C", "D", "E", "F"
+        "X", "A", "B", "C", "D", "E", "F", "R", "G", "H", "I", "J"
     };
     reg_code = {
-        0, 1, 2, 3, 4, 5
+        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
     };
 }
 
@@ -172,7 +180,11 @@ void AssemblerCompiler::saveBinary(const char *f)
             if(label)
             {
                 std::cout << "LABEL ";
-                file << std::hex << std::setfill('0') << std::setw(2) << (labels_val[label_index]>>8)%0xff << ' ' << labels_val[label_index]%0xff;
+                int hex = labels_val[label_index];
+                int hex1 = (hex>>8)&0xff;
+                int hex2 = hex&0xff;
+                file << std::hex << std::setfill('0') << std::setw(2) << hex1 << ' ';
+                file << std::hex << std::setfill('0') << std::setw(2) << hex2;
                 arg_size++;
             }else if (word.front()==char_reg)
             {
@@ -189,8 +201,8 @@ void AssemblerCompiler::saveBinary(const char *f)
             }else if (word.front()==char_decimal)
             {
                 std::cout << "DEC ";
-                file << std::hex << std::setfill('0') << std::setw(2) << word.substr(1);
-            }else if(word != "")
+                file << std::hex << std::setfill('0') << std::setw(2) << strtol(word.substr(1).c_str(), NULL, 10);
+            }else if(word != "" && word.front()!=char_emptyArg)
             {
                 std::cout << "HEX ";
                 file << std::hex << std::setfill('0') << std::setw(2) << word;
@@ -387,30 +399,46 @@ void AssemblerCompiler::loadAssembler_read2(const char *f)
             //check if any arg remaind
             else if (!cmd_find.empty())
             {
-                std::cout << "**ARGUMENT FOUND**";
+                std::cout << "**ARGUMENT FOUND**";                
 
                 //check what type of argument is possible
                 bool reg = false;
                 bool val = false;
                 bool lab = false;
+                bool emp = true;
                 int argSize = 0;
-                for (int i = 0; i < cmd_find.size(); i++)
+                while(emp)
                 {
-                    if (op_arg_type[cmd_find[i]][cmd_arg] == REG)
+                    emp = false;
+                    for (int i = 0; i < cmd_find.size(); i++)
                     {
-                        reg = true;
+                        if (op_arg_type[cmd_find[i]][cmd_arg] == REG)
+                        {
+                            reg = true;
+                        }
+                        else if (op_arg_type[cmd_find[i]][cmd_arg] == LABEL)
+                        {
+                            lab = true;
+                        }
+                        else if (op_arg_type[cmd_find[i]][cmd_arg] == VAL)
+                        {
+                            val = true;
+                        }
+                        else if (op_arg_type[cmd_find[i]][cmd_arg] == EMPTY)
+                        {
+                            emp = true;
+                        }
+                        if (argSize < op_arg[cmd_find[i]])
+                        {
+                            argSize = op_arg[cmd_find[i]];
+                        }
                     }
-                    else if (op_arg_type[cmd_find[i]][cmd_arg] == LABEL)
+                    if(emp)
                     {
-                        lab = true;
-                    }
-                    else if (op_arg_type[cmd_find[i]][cmd_arg] == VAL)
-                    {
-                        val = true;
-                    }
-                    if (argSize < op_arg[cmd_find[i]])
-                    {
-                        argSize = op_arg[cmd_find[i]];
+                        std::cout << "**EMPTY ARG**";
+                        cmd_arg++;
+                        cmd = cmd + char_emptyArg;
+                        cmd = cmd + ' ';
                     }
                 }
                 if (argSize <= cmd_arg)

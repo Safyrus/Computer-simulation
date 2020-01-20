@@ -27,9 +27,11 @@ private:
     char char_decimal;
     char char_label;
     char char_labelReplace;
-    const int8_t LABEL = 2;
+    char char_emptyArg;
+    const int8_t EMPTY = 0;
     const int8_t REG = 1;
-    const int8_t VAL = 0;
+    const int8_t VAL = 2;
+    const int8_t LABEL = 3;
 
     void loadAssembler_read1(const char *f);
     void loadAssembler_read2(const char *f);
