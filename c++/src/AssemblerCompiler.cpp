@@ -84,7 +84,7 @@ void AssemblerCompiler::loadAssembler(const char *f)
 
     //print result
     std::cout << "#------------------------------#\n|Labels:\n";
-    for (int i = 0; i < labels.size(); i++)
+    for (unsigned int i = 0; i < labels.size(); i++)
     {
         std::cout << labels_pos.at(i) << ": " << labels.at(i) << '\n';
     }
@@ -96,17 +96,17 @@ void AssemblerCompiler::loadAssembler(const char *f)
 
     //print result
     std::cout << "#------------------------------#\n|Labels:\n";
-    for (int i = 0; i < labels.size(); i++)
+    for (unsigned int i = 0; i < labels.size(); i++)
     {
         std::cout << labels_pos.at(i) << ": " << labels.at(i) << ", " << labels_val.at(i) << '\n';
     }
     std::cout << "|Instructions:\n";
-    for (int i = 0; i < instructions.size(); i++)
+    for (unsigned int i = 0; i < instructions.size(); i++)
     {
         std::cout << instructions_pos.at(i) << ": " << instructions.at(i) << '\n';
     }
     std::cout << "|Comments:\n";
-    for (int i = 0; i < comments.size(); i++)
+    for (unsigned int i = 0; i < comments.size(); i++)
     {
         std::cout << comments_pos.at(i) << ": " << comments.at(i) << '\n';
     }
@@ -130,7 +130,7 @@ void AssemblerCompiler::saveBinary(const char *f)
     //std::cin.ignore();
 
     //for each instruction
-    for (int i = 0; i < instructions.size(); i++)
+    for (unsigned int i = 0; i < instructions.size(); i++)
     {
         if(i%4==0 && i!=0)
         {
@@ -168,7 +168,7 @@ void AssemblerCompiler::saveBinary(const char *f)
             
             bool label = false;
             int label_index = 0;
-            for (int j = 0; j < labels.size(); j++)
+            for (unsigned int j = 0; j < labels.size(); j++)
             {
                 if(labels[j] == word)
                 {
@@ -189,7 +189,7 @@ void AssemblerCompiler::saveBinary(const char *f)
             }else if (word.front()==char_reg)
             {
                 std::cout << "REG ";
-                for (int j = 0; j < reg_name.size(); j++)
+                for (unsigned int j = 0; j < reg_name.size(); j++)
                 {
                     if(reg_name[j]==word.substr(1))
                     {
@@ -344,7 +344,7 @@ void AssemblerCompiler::loadAssembler_read2(const char *f)
         std::vector<int> cmd_find;
 
         //set label to true if this line contain label
-        for (int i = 0; i < labels_pos.size(); i++)
+        for (unsigned int i = 0; i < labels_pos.size(); i++)
         {
             if (labels_pos[i] == lineCount)
             {
@@ -410,7 +410,7 @@ void AssemblerCompiler::loadAssembler_read2(const char *f)
                 while(emp)
                 {
                     emp = false;
-                    for (int i = 0; i < cmd_find.size(); i++)
+                    for (unsigned int i = 0; i < cmd_find.size(); i++)
                     {
                         if (op_arg_type[cmd_find[i]][cmd_arg] == REG)
                         {
@@ -465,7 +465,7 @@ void AssemblerCompiler::loadAssembler_read2(const char *f)
                     else
                     {
                         bool findLabel = false;
-                        for (int i = 0; i < labels.size(); i++)
+                        for (unsigned int i = 0; i < labels.size(); i++)
                         {
                             if (labels.at(i) == word)
                             {
@@ -491,7 +491,7 @@ void AssemblerCompiler::loadAssembler_read2(const char *f)
                     {
                         std::cout << "**CHANGE**";
                         std::vector<int> tmp;
-                        for (int i = 0; i < cmd_find.size(); i++)
+                        for (unsigned int i = 0; i < cmd_find.size(); i++)
                         {
                             if (op_arg_type[cmd_find[i]][cmd_arg - 1] == change)
                             {
@@ -515,7 +515,7 @@ void AssemblerCompiler::loadAssembler_read2(const char *f)
             else
             {
                 std::cout << "**CHECK COMMAND NAME**";
-                int i = 0;
+                unsigned int i = 0;
                 bool addCmd = false;
                 // while command name not find
                 while (i < op_name.size())
