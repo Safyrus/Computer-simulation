@@ -720,4 +720,12 @@ void CPU::stp()
         {
         }
     }
+    reg[0] = 0;
+    reg[7] = rand()&0xff;
+    std::cout << "[CPU] : reg";
+    for (int i = 0; i < REGMAX; i++)
+    {
+        std::cout << reg[i] << "  ";
+    }
+    std::cout << std::endl;
 }

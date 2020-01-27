@@ -62,10 +62,10 @@ AssemblerCompiler::AssemblerCompiler()
     op_arg_size = 3;
 
     reg_name = {
-        "X", "A", "B", "C", "D", "E", "F", "R", "G", "H", "I", "J"
+        "X", "A", "B", "C", "D", "E", "F", "R"
     };
     reg_code = {
-        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
+        0, 1, 2, 3, 4, 5, 6, 7
     };
 }
 
