@@ -8,10 +8,10 @@ private:
     bool clk;
     bool pwr;
     bool load;
-    
+
     static const int REGMAX = 8;
-    static const int FLAG=5;
-    static const int RAN=6;
+    static const int FLAG = 6;
+    static const int RAN = 7;
 
     int adr;
     int adrBack;

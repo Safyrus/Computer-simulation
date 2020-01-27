@@ -4,14 +4,15 @@
 #include <thread>
 #include "AssemblerCompiler.hpp"
 #include "CPU.hpp"
+#include "DISK.hpp"
 
 int main()
 {
     std::string file = "";
     int choice = 0;
-    CPU *cpu;
     AssemblerCompiler *compiler;
-    int adr = 0;
+    CPU *cpu;
+    DISK *disk;
 
     std::cout << "--- What do you want to test ? ---\n0 - Assembler\n1 - CPU" << std::endl;
     std::cin >> choice;
@@ -35,51 +36,30 @@ int main()
         delete compiler;
         break;
     case 1:
+        std::cout << std::hex;
         cpu = new CPU();
-        int disk[0x20];
-        for (int i = 0; i < 0x20; i++)
+        disk = new DISK(0x10000);
+        std::cout << disk->getLen() << '\n';
+        bool load = disk->load("test");
+        if (!load)
         {
-            disk[i] = 0;
+            std::cout << "ERROR: can't load to disk\n";
         }
-        disk[0] = 0x04;
-        disk[1] = 0x00;
-        disk[2] = 0x01;
-        disk[3] = 0x00;
-        disk[4] = 0x04;
-        disk[5] = 0x03;
-        disk[6] = 0x01;
-        disk[7] = 0x00;
-        disk[8] = 0x10;
-        disk[9] = 0x02;
-        disk[10] = 0x01;
-        disk[11] = 0x03;
-        disk[12] = 0x67;
-        disk[13] = 0x02;
-        disk[14] = 0x00;
-        disk[15] = 0x18;
-        std::cout << disk[8] << std::endl;
-        std::cout << disk[adr] << std::endl;
-        std::cout << "array(play role of disk) created" << std::endl;
 
         cpu->setPwr();
         std::cout << "CPU on" << std::endl;
 
         while (cpu->getPwr())
         {
-            if (cpu->getAdr() < 0x20)
+            if (cpu->getAdr() < disk->getLen())
             {
-                adr = cpu->getAdr();
-                std::cout << "adr:" << adr << "  disk1:" << disk[adr] << "  disk2:" << disk[adr + 1] << "  disk3:" << disk[adr + 2] << "  disk4:" << disk[adr + 3] << std::endl;
-                std::cout << ((disk[adr] & 0xff) << 24) << std::endl;
-                std::cout << ((disk[adr + 1] & 0xff) << 16) << std::endl;
-                std::cout << ((disk[adr + 2] & 0xff) << 8) << std::endl;
-                std::cout << ((disk[adr + 3] & 0xff)) << std::endl;
-                int data = ((disk[adr] & 0xff) << 24) + ((disk[adr + 1] & 0xff) << 16) + ((disk[adr + 2] & 0xff) << 8) + (disk[adr + 3] & 0xff);
-                std::cout << "data: " << data << std::endl;
+                disk->setAdr(cpu->getAdr());
+                int data4 = disk->getData4();
+                std::cout << "data: " << data4 << std::endl;
                 if (!cpu->getClk())
                 {
                     std::cout << "Clock off" << std::endl;
-                    cpu->setData(data);
+                    cpu->setData(data4);
                     cpu->setClk();
                     cpu->stp();
                 }
@@ -97,14 +77,14 @@ int main()
                         std::cout << "step 1" << std::endl;
                         if (cpu->getLoad())
                         {
-                            std::cout << "DATA load: " << disk[adr] << std::endl;
-                            cpu->setData(disk[adr]);
+                            std::cout << "DATA load: " << disk->getData() << std::endl;
+                            cpu->setData(disk->getData());
                         }
                         else
                         {
-                            data = cpu->getData();
+                            int data = cpu->getData();
                             std::cout << "DATA save: " << data << std::endl;
-                            disk[adr] = (data & 0xff);
+                            disk->setData((data & 0xff));
                         }
                         cpu->stp();
                         break;
@@ -118,9 +98,15 @@ int main()
                     }
                 }
             }
+            else
+            {
+                cpu->setClk();
+            }
+
             std::cout << "CPU: adr[" << cpu->getAdr() << "]  data[" << cpu->getData() << "] step[" << cpu->getStep() << "]  clk[" << cpu->getClk() << "]  load[" << cpu->getLoad() << "]  pwr[" << cpu->getPwr() << "]" << std::endl;
-            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
         }
+        delete disk;
         delete cpu;
         break;
     }
