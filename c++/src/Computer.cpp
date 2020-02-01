@@ -148,4 +148,5 @@ void Computer::print(int x, int y)
     std::cout << std::setfill('0') << std::setw(2) << ((cpu->getData()>>8)&0xff) << "  ";
     std::cout << std::setfill('0') << std::setw(2) << ((cpu->getData())&0xff);
     std::cout << std::flush;
+    cpu->print(x, y+3);
 }

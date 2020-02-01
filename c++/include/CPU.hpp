@@ -38,4 +38,6 @@ public:
     void stp();
     void setRst();
     void setPwr();
+
+    void print(int x, int y);
 };

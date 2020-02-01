@@ -74,7 +74,7 @@ int main()
         break;
     }
 
-    std::cout << "-=#[ Done ]#=-" << std::endl;
+    std::cout << "\n-=#[ Done ]#=-" << std::endl;
     std::cin.ignore();
     std::cin.ignore();
 
