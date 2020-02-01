@@ -4,6 +4,7 @@
 #include <thread>
 #include "AssemblerCompiler.hpp"
 #include "Computer.hpp"
+#include "DISK.hpp"
 
 int main()
 {
@@ -35,17 +36,28 @@ int main()
         break;
     case 1:
         std::cout << std::hex;
-        com = new Computer("test");
+        com = new Computer();
+        DISK *disk1 = new DISK(0x100);
+        DISK *disk2 = new DISK(0xFF00);
+        disk1->load("test1");
+        disk2->load("test2");
+        com->addDevice(disk1, 0, 0xFF);
+        com->addDevice(disk2, 0x100, 0xFFFF);
         com->setPwr();
         std::cout << "Computer ON" << std::endl;
 
         while (com->getPwr())
         {
             com->cycle();
-            std::this_thread::sleep_for(std::chrono::milliseconds(200));
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
+        std::cout << "Computer OFF" << std::endl;
+        com->removeDevice(disk1);
+        com->removeDevice(disk2);
 
         delete com;
+        delete disk1;
+        delete disk2;
         break;
     }
     std::cout << "-=#[ Done ]#=-" << std::endl;
