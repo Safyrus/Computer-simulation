@@ -6,12 +6,15 @@
 #include "Computer.hpp"
 #include "DISK.hpp"
 #include "global.hpp"
+#include "console.hpp"
 
 bool print_debug;
 
 int main()
 {
     print_debug = false;
+    setupConsole();
+
     std::string file = "";
     int choice = 0;
     AssemblerCompiler *compiler;
@@ -40,6 +43,7 @@ int main()
         break;
     case 1:
         std::cout << std::hex;
+
         com = new Computer();
         DISK *disk1 = new DISK(0x100);
         DISK *disk2 = new DISK(0xFF00);
@@ -47,6 +51,7 @@ int main()
         disk2->load("test2");
         com->addDevice(disk1, 0, 0xFF);
         com->addDevice(disk2, 0x100, 0xFFFF);
+
         com->setPwr();
         if (print_debug)
             std::cout << "Computer ON" << std::endl;
@@ -66,7 +71,10 @@ int main()
         delete disk2;
         break;
     }
+
     std::cout << "-=#[ Done ]#=-" << std::endl;
     std::cin.ignore();
     std::cin.ignore();
+
+    restoreConsole();
 }
