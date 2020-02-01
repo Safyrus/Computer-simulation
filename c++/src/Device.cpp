@@ -1,5 +1,6 @@
 #include <iostream>
 #include "Device.hpp"
+#include "global.hpp"
 
 Device::Device(int l)
 {
@@ -38,12 +39,16 @@ int Device::getData4()
 {
     unsigned int dat = 0;
     dat |= ((((unsigned)data[adr + 0]) & 0xff) << 24);
+    if (print_debug)
     std::cout << dat << " ";
     dat |= ((((unsigned)data[adr + 1]) & 0xff) << 16);
+    if (print_debug)
     std::cout << dat << " ";
     dat |= ((((unsigned)data[adr + 2]) & 0xff) << 8);
+    if (print_debug)
     std::cout << dat << " ";
     dat |= ((((unsigned)data[adr + 3]) & 0xff) << 0);
+    if (print_debug)
     std::cout << dat << " \n";
     return dat;
 }

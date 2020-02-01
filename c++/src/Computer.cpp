@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include "Computer.hpp"
+#include "global.hpp"
 
 Computer::Computer()
 {
@@ -21,52 +22,60 @@ void Computer::cycle()
     int dev = -1;
     for (int i = 0; i < devices.size(); i++)
     {
-        if(cpu->getAdr() >= adrDeviceStart[i] && cpu->getAdr() <= adrDeviceEnd[i])
+        if (cpu->getAdr() >= adrDeviceStart[i] && cpu->getAdr() <= adrDeviceEnd[i])
         {
             dev = i;
             break;
         }
     }
-    
+
     if (dev != -1)
     {
-        devices[dev]->setAdr(cpu->getAdr()-adrDeviceStart[dev]);
+        devices[dev]->setAdr(cpu->getAdr() - adrDeviceStart[dev]);
         int data4 = devices[dev]->getData4();
-        std::cout << "data: " << data4 << std::endl;
+        if (print_debug)
+            std::cout << "data: " << data4 << std::endl;
         if (!cpu->getClk())
         {
-            std::cout << "Clock off" << std::endl;
+            if (print_debug)
+                std::cout << "Clock off" << std::endl;
             cpu->setData(data4);
             cpu->setClk();
             cpu->stp();
         }
         else
         {
-            std::cout << "Clock on" << std::endl;
+            if (print_debug)
+                std::cout << "Clock on" << std::endl;
             switch (cpu->getStep())
             {
             case 0:
-                std::cout << "step 0" << std::endl;
+                if (print_debug)
+                    std::cout << "step 0" << std::endl;
                 cpu->setClk();
                 cpu->stp();
                 break;
             case 1:
-                std::cout << "step 1" << std::endl;
+                if (print_debug)
+                    std::cout << "step 1" << std::endl;
                 if (cpu->getLoad())
                 {
-                    std::cout << "DATA load: " << devices[dev]->getData() << std::endl;
+                    if (print_debug)
+                        std::cout << "DATA load: " << devices[dev]->getData() << std::endl;
                     cpu->setData(devices[dev]->getData());
                 }
                 else
                 {
                     int data = cpu->getData();
-                    std::cout << "DATA save: " << data << std::endl;
+                    if (print_debug)
+                        std::cout << "DATA save: " << data << std::endl;
                     devices[dev]->setData((data & 0xff));
                 }
                 cpu->stp();
                 break;
             case 2:
-                std::cout << "step 2" << std::endl;
+                if (print_debug)
+                    std::cout << "step 2" << std::endl;
                 cpu->setClk();
                 cpu->stp();
                 break;
@@ -80,7 +89,8 @@ void Computer::cycle()
         cpu->setClk();
     }
 
-    std::cout << "CPU: adr[" << cpu->getAdr() << "]  data[" << cpu->getData() << "] step[" << cpu->getStep() << "]  clk[" << cpu->getClk() << "]  load[" << cpu->getLoad() << "]  pwr[" << cpu->getPwr() << "]" << std::endl;
+    if (print_debug)
+        std::cout << "CPU: adr[" << cpu->getAdr() << "]  data[" << cpu->getData() << "] step[" << cpu->getStep() << "]  clk[" << cpu->getClk() << "]  load[" << cpu->getLoad() << "]  pwr[" << cpu->getPwr() << "]" << std::endl;
 }
 
 void Computer::setPwr()
@@ -102,15 +112,15 @@ void Computer::addDevice(Device *d, int adrStart, int adrEnd)
 
 void Computer::removeDevice(Device *d)
 {
-    std::vector<Device*>::iterator itDev;
+    std::vector<Device *>::iterator itDev;
     std::vector<int>::iterator itStart;
     std::vector<int>::iterator itEnd;
     itStart = adrDeviceStart.begin();
     itEnd = adrDeviceEnd.begin();
-    
+
     for (itDev = devices.begin(); itDev != devices.end(); itDev++)
     {
-        if(d==*itDev)
+        if (d == *itDev)
         {
             devices.erase(itDev);
             adrDeviceStart.erase(itStart);

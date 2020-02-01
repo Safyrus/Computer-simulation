@@ -1,7 +1,8 @@
-#include "DISK.hpp"
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include "DISK.hpp"
+#include "global.hpp"
 
 DISK::DISK(int l) : Device(l)
 {
@@ -60,7 +61,8 @@ bool DISK::load(const char *f)
             if (word != "")
             {
                 data[count] = stoi(word, NULL, 16);
-                std::cout << std::setfill('0') << std::setw(2) << (((int)data[count]) & 0xff) << " ";
+                if (print_debug)
+                    std::cout << std::setfill('0') << std::setw(2) << (((int)data[count]) & 0xff) << " ";
                 count++;
                 if (count % 32 == 0)
                 {
@@ -69,7 +71,8 @@ bool DISK::load(const char *f)
             }
         }
     }
-    std::cout << "\n";
+    if (print_debug)
+        std::cout << "\n";
     file.close();
     return true;
 }

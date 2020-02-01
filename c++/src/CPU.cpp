@@ -1,5 +1,6 @@
-#include "CPU.hpp"
 #include <iostream>
+#include "CPU.hpp"
+#include "global.hpp"
 
 CPU::CPU()
 {
@@ -81,7 +82,8 @@ void CPU::setRst()
 void CPU::setPwr()
 {
     this->pwr = !this->pwr;
-    std::cout << "[CPU] : power=" << pwr << std::endl;
+    if (print_debug)
+        std::cout << "[CPU] : power=" << pwr << std::endl;
     setRst();
 }
 
@@ -98,7 +100,8 @@ int CPU::CU()
         arg2 = dataBack >> 8 & 0xff;
         arg3 = dataBack & 0xff;
     }
-    std::cout << "[CU] : cmd=" << cmd << "  arg1=" << arg1 << "  arg2=" << arg2 << "  arg3=" << arg3 << std::endl;
+    if (print_debug)
+        std::cout << "[CU] : cmd=" << cmd << "  arg1=" << arg1 << "  arg2=" << arg2 << "  arg3=" << arg3 << std::endl;
 
     int res = 0;
     switch (cmd)
@@ -713,7 +716,8 @@ void CPU::stp()
     {
         if (clk)
         {
-            std::cout << "[CPU] : cu" << std::endl;
+            if (print_debug)
+                std::cout << "[CPU] : cu" << std::endl;
             CU();
         }
         else
@@ -722,10 +726,13 @@ void CPU::stp()
     }
     reg[0] = 0;
     reg[7] = rand() & 0xff;
-    std::cout << "[CPU] : reg ";
+    if (print_debug)
+        std::cout << "[CPU] : reg ";
     for (int i = 0; i < REGMAX; i++)
     {
-        std::cout << reg[i] << "  ";
+        if (print_debug)
+            std::cout << reg[i] << "  ";
     }
-    std::cout << std::endl;
+    if (print_debug)
+        std::cout << std::endl;
 }

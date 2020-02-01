@@ -1,10 +1,11 @@
-#include "AssemblerCompiler.hpp"
 #include <iostream>
 #include <iomanip>
 #include <fstream>
 #include <string>
 #include <vector>
 #include <sstream>
+#include "AssemblerCompiler.hpp"
+#include "global.hpp"
 
 bool isHex(const std::string &s)
 {
@@ -62,11 +63,9 @@ AssemblerCompiler::AssemblerCompiler()
     op_arg_size = 3;
 
     reg_name = {
-        "X", "A", "B", "C", "D", "E", "F", "R"
-    };
+        "X", "A", "B", "C", "D", "E", "F", "R"};
     reg_code = {
-        0, 1, 2, 3, 4, 5, 6, 7
-    };
+        0, 1, 2, 3, 4, 5, 6, 7};
 }
 
 AssemblerCompiler::AssemblerCompiler(const char *configFile)
@@ -83,34 +82,45 @@ void AssemblerCompiler::loadAssembler(const char *f)
     loadAssembler_read1(f);
 
     //print result
-    std::cout << "#------------------------------#\n|Labels:\n";
+    if (print_debug)
+        std::cout << "#------------------------------#\n|Labels:\n";
     for (unsigned int i = 0; i < labels.size(); i++)
     {
-        std::cout << labels_pos.at(i) << ": " << labels.at(i) << '\n';
+        if (print_debug)
+            std::cout << labels_pos.at(i) << ": " << labels.at(i) << '\n';
     }
-    std::cout << "#------------------------------#\n";
+    if (print_debug)
+        std::cout << "#------------------------------#\n";
 
-    std::cin.ignore();
+    if (print_debug)
+        std::cin.ignore();
 
     loadAssembler_read2(f);
 
     //print result
-    std::cout << "#------------------------------#\n|Labels:\n";
+    if (print_debug)
+        std::cout << "#------------------------------#\n|Labels:\n";
     for (unsigned int i = 0; i < labels.size(); i++)
     {
-        std::cout << labels_pos.at(i) << ": " << labels.at(i) << ", " << labels_val.at(i) << '\n';
+        if (print_debug)
+            std::cout << labels_pos.at(i) << ": " << labels.at(i) << ", " << labels_val.at(i) << '\n';
     }
-    std::cout << "|Instructions:\n";
+    if (print_debug)
+        std::cout << "|Instructions:\n";
     for (unsigned int i = 0; i < instructions.size(); i++)
     {
-        std::cout << instructions_pos.at(i) << ": " << instructions.at(i) << '\n';
+        if (print_debug)
+            std::cout << instructions_pos.at(i) << ": " << instructions.at(i) << '\n';
     }
-    std::cout << "|Comments:\n";
+    if (print_debug)
+        std::cout << "|Comments:\n";
     for (unsigned int i = 0; i < comments.size(); i++)
     {
-        std::cout << comments_pos.at(i) << ": " << comments.at(i) << '\n';
+        if (print_debug)
+            std::cout << comments_pos.at(i) << ": " << comments.at(i) << '\n';
     }
-    std::cout << "#------------------------------#\n";
+    if (print_debug)
+        std::cout << "#------------------------------#\n";
 }
 
 void AssemblerCompiler::loadBinary(const char *f)
@@ -126,13 +136,14 @@ void AssemblerCompiler::saveBinary(const char *f)
     //create file
     std::ofstream file(f);
     file << std::hex << std::setfill('0') << std::setw(2);
-    std::cout << "CREATE FILE";
+    if (print_debug)
+        std::cout << "CREATE FILE";
     //std::cin.ignore();
 
     //for each instruction
     for (unsigned int i = 0; i < instructions.size(); i++)
     {
-        if(i%4==0 && i!=0)
+        if (i % 4 == 0 && i != 0)
         {
             file << '\n';
         }
@@ -140,24 +151,29 @@ void AssemblerCompiler::saveBinary(const char *f)
         std::string word;
         std::string instructionsBuffer = instructions[i] + ' ';
 
-        std::cout << "INSTRUCTION LINE: " << instructionsBuffer << '\n';
+        if (print_debug)
+            std::cout << "INSTRUCTION LINE: " << instructionsBuffer << '\n';
         //std::cin.ignore();
 
         word = instructionsBuffer.substr(0, instructionsBuffer.find(' '));
         instructionsBuffer = instructionsBuffer.substr(instructionsBuffer.find(' ') + 1);
 
-        std::cout << "INSTRUCTION BUFFER: " << instructionsBuffer << '\n';
-        std::cout << "WORD: " << word << '\n';
+        if (print_debug)
+            std::cout << "INSTRUCTION BUFFER: " << instructionsBuffer << '\n';
+        if (print_debug)
+            std::cout << "WORD: " << word << '\n';
         //std::cin.ignore();
 
         int code = strtol(word.c_str(), NULL, 10);
 
-        std::cout << "CODE: " << code << '\n';
+        if (print_debug)
+            std::cout << "CODE: " << code << '\n';
         //std::cin.ignore();
 
         file << std::hex << std::setfill('0') << std::setw(2) << code << ' ';
 
-        std::cout << "ADD INSTRUCTION TO FILE" << '\n';
+        if (print_debug)
+            std::cout << "ADD INSTRUCTION TO FILE" << '\n';
         //std::cin.ignore();
 
         word = instructionsBuffer.substr(0, instructionsBuffer.find(' '));
@@ -165,54 +181,63 @@ void AssemblerCompiler::saveBinary(const char *f)
         int arg_size = 0;
         while (word != "" || arg_size < op_arg_size)
         {
-            
+
             bool label = false;
             int label_index = 0;
             for (unsigned int j = 0; j < labels.size(); j++)
             {
-                if(labels[j] == word)
+                if (labels[j] == word)
                 {
                     label = true;
                     label_index = j;
                     break;
                 }
             }
-            if(label)
+            if (label)
             {
-                std::cout << "LABEL ";
+                if (print_debug)
+                    std::cout << "LABEL ";
                 int hex = labels_val[label_index];
-                int hex1 = (hex>>8)&0xff;
-                int hex2 = hex&0xff;
+                int hex1 = (hex >> 8) & 0xff;
+                int hex2 = hex & 0xff;
                 file << std::hex << std::setfill('0') << std::setw(2) << hex1 << ' ';
                 file << std::hex << std::setfill('0') << std::setw(2) << hex2;
                 arg_size++;
-            }else if (word.front()==char_reg)
+            }
+            else if (word.front() == char_reg)
             {
-                std::cout << "REG ";
+                if (print_debug)
+                    std::cout << "REG ";
                 for (unsigned int j = 0; j < reg_name.size(); j++)
                 {
-                    if(reg_name[j]==word.substr(1))
+                    if (reg_name[j] == word.substr(1))
                     {
                         file << std::hex << std::setfill('0') << std::setw(2) << std::to_string(reg_code[j]);
                         break;
                     }
                 }
-                
-            }else if (word.front()==char_decimal)
+            }
+            else if (word.front() == char_decimal)
             {
-                std::cout << "DEC ";
+                if (print_debug)
+                    std::cout << "DEC ";
                 file << std::hex << std::setfill('0') << std::setw(2) << strtol(word.substr(1).c_str(), NULL, 10);
-            }else if(word != "" && word.front()!=char_emptyArg)
+            }
+            else if (word != "" && word.front() != char_emptyArg)
             {
-                std::cout << "HEX ";
+                if (print_debug)
+                    std::cout << "HEX ";
                 file << std::hex << std::setfill('0') << std::setw(2) << word;
-            }else
+            }
+            else
             {
-                std::cout << "NOTHING ";
+                if (print_debug)
+                    std::cout << "NOTHING ";
                 file << std::hex << std::setfill('0') << std::setw(2) << "00";
             }
-            
-            std::cout << "WORD: " << word << "[" << arg_size << "]" << '\n';
+
+            if (print_debug)
+                std::cout << "WORD: " << word << "[" << arg_size << "]" << '\n';
             //std::cin.ignore();
 
             file << ' ';
@@ -240,7 +265,8 @@ void AssemblerCompiler::loadAssembler_read1(const char *f)
     }
     else
     {
-        std::cout << "file open \n";
+        if (print_debug)
+            std::cout << "file open \n";
     }
 
     std::string line = "";
@@ -267,7 +293,8 @@ void AssemblerCompiler::loadAssembler_read1(const char *f)
             {
                 line = line.substr(line.find(" ") + 1);
             }
-            std::cout << word << " ";
+            if (print_debug)
+                std::cout << word << " ";
 
             if (!comment && word.find(char_comment) != std::string::npos)
             {
@@ -283,7 +310,8 @@ void AssemblerCompiler::loadAssembler_read1(const char *f)
             //label symbol find a the end of the word
             if (word.back() == char_label && !comment)
             {
-                std::cout << "**LABEL DETECTED**";
+                if (print_debug)
+                    std::cout << "**LABEL DETECTED**";
                 word = word.substr(0, word.length() - 1);
 
                 //special char like reg or dec find
@@ -294,22 +322,26 @@ void AssemblerCompiler::loadAssembler_read1(const char *f)
                 else
                 {
                     //add label
-                    std::cout << "**ADD LABEL**";
+                    if (print_debug)
+                        std::cout << "**ADD LABEL**";
                     labels.push_back(word);
                     labels_pos.push_back(lineCount);
                     labels_val.push_back(0);
-                    std::cout << labels.back();
+                    if (print_debug)
+                        std::cout << labels.back();
                     label = true;
                 }
             }
         }
-        std::cout << '\n';
+        if (print_debug)
+            std::cout << '\n';
         lineCount++;
     }
 
     //close file
     file.close();
-    std::cout << "file close\n";
+    if (print_debug)
+        std::cout << "file close\n";
 }
 
 void AssemblerCompiler::loadAssembler_read2(const char *f)
@@ -324,7 +356,8 @@ void AssemblerCompiler::loadAssembler_read2(const char *f)
     }
     else
     {
-        std::cout << "file open 2\n";
+        if (print_debug)
+            std::cout << "file open 2\n";
     }
 
     std::string line = "";
@@ -349,7 +382,7 @@ void AssemblerCompiler::loadAssembler_read2(const char *f)
             if (labels_pos[i] == lineCount)
             {
                 label = true;
-                labels_val[i] = instructionCounter * (op_arg_size+1);
+                labels_val[i] = instructionCounter * (op_arg_size + 1);
                 break;
             }
         }
@@ -367,24 +400,28 @@ void AssemblerCompiler::loadAssembler_read2(const char *f)
             {
                 line = line.substr(line.find(" ") + 1);
             }
-            std::cout << word << " ";
+            if (print_debug)
+                std::cout << word << " ";
 
             //comment symbol find
             if (word.find(char_comment) != std::string::npos)
             {
-                std::cout << "**COMMENT DETECTED**";
+                if (print_debug)
+                    std::cout << "**COMMENT DETECTED**";
                 int char_com_pos = word.find(char_comment);
                 std::string strBefor = word.substr(0, (char_com_pos < 0) ? 0 : char_com_pos);
                 std::string strAfter = word.substr(word.find(char_comment) + 1);
                 if (strBefor != "")
                 {
-                    std::cout << "**SOMETHING BEFOR COMMENT**\n";
+                    if (print_debug)
+                        std::cout << "**SOMETHING BEFOR COMMENT**\n";
                     line = strBefor + ' ' + char_comment + strAfter + " " + line;
                 }
                 else
                 {
                     comment = true;
-                    std::cout << "**ADD COMMENT**" << strAfter + " " + line;
+                    if (print_debug)
+                        std::cout << "**ADD COMMENT**" << strAfter + " " + line;
                     comments.push_back(strAfter + " " + line);
                     comments_pos.push_back(lineCount);
                     line = "";
@@ -393,13 +430,15 @@ void AssemblerCompiler::loadAssembler_read2(const char *f)
             //check if label is on the line
             else if (label)
             {
-                std::cout << "**LABEL FIND**";
+                if (print_debug)
+                    std::cout << "**LABEL FIND**";
                 label = false;
             }
             //check if any arg remaind
             else if (!cmd_find.empty())
             {
-                std::cout << "**ARGUMENT FOUND**";                
+                if (print_debug)
+                    std::cout << "**ARGUMENT FOUND**";
 
                 //check what type of argument is possible
                 bool reg = false;
@@ -407,7 +446,7 @@ void AssemblerCompiler::loadAssembler_read2(const char *f)
                 bool lab = false;
                 bool emp = true;
                 int argSize = 0;
-                while(emp)
+                while (emp)
                 {
                     emp = false;
                     for (unsigned int i = 0; i < cmd_find.size(); i++)
@@ -433,9 +472,10 @@ void AssemblerCompiler::loadAssembler_read2(const char *f)
                             argSize = op_arg[cmd_find[i]];
                         }
                     }
-                    if(emp)
+                    if (emp)
                     {
-                        std::cout << "**EMPTY ARG**";
+                        if (print_debug)
+                            std::cout << "**EMPTY ARG**";
                         cmd_arg++;
                         cmd = cmd + char_emptyArg;
                         cmd = cmd + ' ';
@@ -443,21 +483,23 @@ void AssemblerCompiler::loadAssembler_read2(const char *f)
                 }
                 if (argSize <= cmd_arg)
                 {
-                    std::cout << "**ERROR: TOO MANY ARG**";
+                    std::cout << "\n#!#!#!# " << lineCount << " ERROR: TOO MANY ARG #!#!#!#\n";
                 }
                 else
                 {
                     int change = -1;
                     if (word.front() == char_reg && reg)
                     {
-                        std::cout << "**TYPE REG**";
+                        if (print_debug)
+                            std::cout << "**TYPE REG**";
                         cmd += word + ' ';
                         change = REG;
                         cmd_arg++;
                     }
                     else if ((word.front() == char_decimal || isHex(word)) && val)
                     {
-                        std::cout << "**TYPE VAL**";
+                        if (print_debug)
+                            std::cout << "**TYPE VAL**";
                         cmd += word + ' ';
                         change = VAL;
                         cmd_arg++;
@@ -475,21 +517,28 @@ void AssemblerCompiler::loadAssembler_read2(const char *f)
                         }
                         if (findLabel)
                         {
-                            std::cout << "**TYPE LABEL**";
+                            if (print_debug)
+                                std::cout << "**TYPE LABEL**";
                             cmd += word + ' ';
                             change = LABEL;
                             cmd_arg++;
                         }
+                        else if(word=="")
+                        {
+                            if (print_debug)
+                                std::cout << "**SPACE**";
+                        }
                         else
                         {
-                            std::cout << "**ERROR: ARG TYPE INCORRECT**";
+                            std::cout << "\n#!#!#!# " << lineCount << " ERROR: ARG TYPE INCORRECT #!#!#!#\n";
                         }
                     }
 
                     //change possible command
                     if (change > -1)
                     {
-                        std::cout << "**CHANGE**";
+                        if (print_debug)
+                            std::cout << "**CHANGE**";
                         std::vector<int> tmp;
                         for (unsigned int i = 0; i < cmd_find.size(); i++)
                         {
@@ -501,10 +550,12 @@ void AssemblerCompiler::loadAssembler_read2(const char *f)
                         cmd_find = tmp;
                     }
 
-                    std::cout << "*[" << cmd_find.size() << "][" << cmd_arg << "][" << (int)(op_arg[cmd_find[0]]) << "]*";
+                    if (print_debug)
+                        std::cout << "*[" << cmd_find.size() << "][" << cmd_arg << "][" << (int)(op_arg[cmd_find[0]]) << "]*";
                     if (cmd_find.size() == 1 && cmd_arg == op_arg[cmd_find[0]])
                     {
-                        std::cout << "**ADD CMD**";
+                        if (print_debug)
+                            std::cout << "**ADD CMD**";
                         cmd = std::to_string(op_code[cmd_find[0]]) + cmd.substr(cmd.find(' '));
                         instructions.push_back(cmd);
                         instructions_pos.push_back(lineCount);
@@ -514,7 +565,8 @@ void AssemblerCompiler::loadAssembler_read2(const char *f)
             //command find (maybe)
             else
             {
-                std::cout << "**CHECK COMMAND NAME**";
+                if (print_debug)
+                    std::cout << "**CHECK COMMAND NAME**";
                 unsigned int i = 0;
                 bool addCmd = false;
                 // while command name not find
@@ -535,26 +587,30 @@ void AssemblerCompiler::loadAssembler_read2(const char *f)
                 }
                 if (cmd_find.empty())
                 {
-                    std::cout << "**ERROR: NOT A COMMAND NAME**";
+                    std::cout << "\n#!#!#!# " << lineCount << " ERROR: ERROR: NOT A COMMAND NAME #!#!#!#\n";
                 }
                 else
                 {
-                    std::cout << "**COMMAND NAME FOUND[" << cmd_find.size() << "]**";
+                    if (print_debug)
+                        std::cout << "**COMMAND NAME FOUND[" << cmd_find.size() << "]**";
                     instructionCounter++;
                     if (cmd_find.size() == 1 && op_arg[cmd_find.at(0)] == 0)
                     {
-                        std::cout << "**ADD CMD**";
+                        if (print_debug)
+                            std::cout << "**ADD CMD**";
                         instructions.push_back(std::to_string(op_code[cmd_find[0]]));
                         instructions_pos.push_back(lineCount);
                     }
                 }
             }
         }
-        std::cout << '\n';
+        if (print_debug)
+            std::cout << '\n';
         lineCount++;
     }
 
     //close file
     file.close();
-    std::cout << "file close 2\n";
+    if (print_debug)
+        std::cout << "file close 2\n";
 }

@@ -5,9 +5,13 @@
 #include "AssemblerCompiler.hpp"
 #include "Computer.hpp"
 #include "DISK.hpp"
+#include "global.hpp"
+
+bool print_debug;
 
 int main()
 {
+    print_debug = false;
     std::string file = "";
     int choice = 0;
     AssemblerCompiler *compiler;
@@ -44,14 +48,16 @@ int main()
         com->addDevice(disk1, 0, 0xFF);
         com->addDevice(disk2, 0x100, 0xFFFF);
         com->setPwr();
-        std::cout << "Computer ON" << std::endl;
+        if (print_debug)
+            std::cout << "Computer ON" << std::endl;
 
         while (com->getPwr())
         {
             com->cycle();
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
-        std::cout << "Computer OFF" << std::endl;
+        if (print_debug)
+            std::cout << "Computer OFF" << std::endl;
         com->removeDevice(disk1);
         com->removeDevice(disk2);
 
