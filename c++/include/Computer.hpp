@@ -20,4 +20,6 @@ public:
 
     void addDevice(Device *d, int adrStart, int adrEnd);
     void removeDevice(Device *d);
+
+    void print(int x, int y);
 };

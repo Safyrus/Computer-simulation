@@ -59,7 +59,9 @@ int main()
         while (com->getPwr())
         {
             com->cycle();
-            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            if (!print_debug)
+                com->print(10, 5);
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
         if (print_debug)
             std::cout << "Computer OFF" << std::endl;
