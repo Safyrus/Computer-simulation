@@ -744,12 +744,12 @@ void CPU::print(int x, int y)
     std::stringstream ss;
     ss << "\x1b[" << y << ";" << x << "H";
     std::cout << ss.str() << "|REG:";
-    std::cout << "  A=" << std::setfill('0') << std::setw(2) << reg[1];
-    std::cout << "  B=" << std::setfill('0') << std::setw(2) << reg[2];
-    std::cout << "  C=" << std::setfill('0') << std::setw(2) << reg[3];
-    std::cout << "  D=" << std::setfill('0') << std::setw(2) << reg[4];
-    std::cout << "  E=" << std::setfill('0') << std::setw(2) << reg[5];
-    std::cout << "  F=" << std::setfill('0') << std::setw(2) << reg[6];
-    std::cout << "  R=" << std::setfill('0') << std::setw(2) << reg[7];
+    std::cout << "  A=" << std::setfill('0') << std::setw(2) << (reg[1]&0xff);
+    std::cout << "  B=" << std::setfill('0') << std::setw(2) << (reg[2]&0xff);
+    std::cout << "  C=" << std::setfill('0') << std::setw(2) << (reg[3]&0xff);
+    std::cout << "  D=" << std::setfill('0') << std::setw(2) << (reg[4]&0xff);
+    std::cout << "  E=" << std::setfill('0') << std::setw(2) << (reg[5]&0xff);
+    std::cout << "  F=" << std::setfill('0') << std::setw(2) << (reg[6]&0xff);
+    std::cout << "  R=" << std::setfill('0') << std::setw(2) << (reg[7]&0xff);
     std::cout << std::flush;
 }

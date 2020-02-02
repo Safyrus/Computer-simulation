@@ -144,7 +144,7 @@ void Computer::print(int x, int y)
     std::cout << ss.str() << "|ADR:  " << std::setfill('0') << std::setw(4) << cpu->getAdr();
     ss.clear();
     ss << "\x1b[" << y+2 << ";" << x << "H";
-    std::cout << ss.str() << "|ADR:  ";
+    std::cout << ss.str() << "|DATA: ";
     std::cout << std::setfill('0') << std::setw(2) << ((cpu->getData()>>24)&0xff) << "  ";
     std::cout << std::setfill('0') << std::setw(2) << ((cpu->getData()>>16)&0xff) << "  ";
     std::cout << std::setfill('0') << std::setw(2) << ((cpu->getData()>>8)&0xff) << "  ";
