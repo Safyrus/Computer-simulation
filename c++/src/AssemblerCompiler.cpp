@@ -562,6 +562,11 @@ void AssemblerCompiler::loadAssembler_read2(const char *f)
                     }
                 }
             }
+            else if(word == "")
+            {
+                if (print_debug)
+                    std::cout << "**SPACE**";
+            }
             //command find (maybe)
             else
             {
