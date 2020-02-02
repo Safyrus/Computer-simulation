@@ -7,6 +7,10 @@ Device::Device(int l)
     len = l;
     adr = 0;
     data = new int8_t[len];
+    for (int i = 0; i < len; i++)
+    {
+        data[i] = 0;
+    }
 }
 
 Device::~Device()
