@@ -7,6 +7,8 @@
 #include "DISK.hpp"
 #include "global.hpp"
 #include "console.hpp"
+#include "Keyboard.hpp"
+#include "Screen.hpp"
 
 bool print_debug;
 
@@ -19,8 +21,13 @@ int main()
     int choice = 0;
     AssemblerCompiler *compiler;
     Computer *com;
+    DISK *disk1;
+    DISK *disk2;
+    Keyboard *key;
+    Screen *scr;
+    int8_t c;
 
-    std::cout << "--- What do you want to test ? ---\n0 - Assembler\n1 - CPU" << std::endl;
+    std::cout << "--- What do you want to test ? ---\n0 - Assembler\n1 - CPU\n2 - Input\n3 - Screen"<< std::endl;
     std::cin >> choice;
     switch (choice)
     {
@@ -45,12 +52,12 @@ int main()
         std::cout << std::hex;
 
         com = new Computer();
-        DISK *disk1 = new DISK(0x100);
-        DISK *disk2 = new DISK(0xFF00);
+        disk1 = new DISK(0x100);
+        disk2 = new DISK(0x7F00);
         disk1->load("test1");
         disk2->load("test2");
         com->addDevice(disk1, 0, 0xFF);
-        com->addDevice(disk2, 0x100, 0xFFFF);
+        com->addDevice(disk2, 0x100, 0x7FFF);
 
         com->setPwr();
         if (print_debug)
@@ -71,6 +78,35 @@ int main()
         delete com;
         delete disk1;
         delete disk2;
+        break;
+    case 2:
+        key = new Keyboard(8);
+        c = 0;
+        while(c != 27)
+        {
+            key->getKey();
+            c = key->getData();
+            std::cout << (char)c;
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
+        delete key;
+        break;
+    case 3:
+        scr = new Screen(0x103);
+        scr->setAdr(0);
+        scr->setData(16);
+        scr->setAdr(1);
+        scr->setData(8);
+        scr->setAdr(2);
+        scr->setData(0);
+        for (int i = 3; i < scr->getLen(); i++)
+        {
+            scr->setAdr(i);
+            scr->setData(rand()%2);
+        }
+        scr->print(0, 0);
+        
+        delete scr;
         break;
     }
 
