@@ -139,8 +139,10 @@ void Computer::print(int x, int y)
     std::stringstream ss;
     ss << "\x1b[" << y << ";" << x << "H";
     std::cout << ss.str() << "|CPU:  stp=" << cpu->getStep() << "  clk=" << cpu->getClk() << "  pwr=" << cpu->getPwr() << "  load=" << cpu->getLoad();
+    ss.clear();
     ss << "\x1b[" << y+1 << ";" << x << "H";
     std::cout << ss.str() << "|ADR:  " << std::setfill('0') << std::setw(4) << cpu->getAdr();
+    ss.clear();
     ss << "\x1b[" << y+2 << ";" << x << "H";
     std::cout << ss.str() << "|ADR:  ";
     std::cout << std::setfill('0') << std::setw(2) << ((cpu->getData()>>24)&0xff) << "  ";
