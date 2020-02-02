@@ -7,6 +7,7 @@
 #include "DISK.hpp"
 #include "global.hpp"
 #include "console.hpp"
+#include "RAM.hpp"
 #include "Keyboard.hpp"
 #include "Screen.hpp"
 
@@ -23,11 +24,12 @@ int main()
     Computer *com;
     DISK *disk1;
     DISK *disk2;
+    RAM *ram;
     Keyboard *key;
     Screen *scr;
     int8_t c;
 
-    std::cout << "--- What do you want to test ? ---\n0 - Assembler\n1 - CPU\n2 - Input\n3 - Screen"<< std::endl;
+    std::cout << "--- What do you want to test ? ---\n0 - Assembler\n1 - CPU\n2 - Input\n3 - Screen\n4 - Computer" << std::endl;
     std::cin >> choice;
     switch (choice)
     {
@@ -82,7 +84,7 @@ int main()
     case 2:
         key = new Keyboard(8);
         c = 0;
-        while(c != 27)
+        while (c != 27)
         {
             key->getKey();
             c = key->getData();
@@ -102,12 +104,62 @@ int main()
         for (int i = 3; i < scr->getLen(); i++)
         {
             scr->setAdr(i);
-            scr->setData(rand()%2);
+            scr->setData(rand() % 2);
         }
         scr->print(0, 0);
-        
+
         delete scr;
         break;
+    case 4:
+        std::cout << std::hex;
+        std::cout << "\x1b[2J";
+        com = new Computer();
+        disk1 = new DISK(0x8000);
+        ram = new RAM(0x1000);
+        key = new Keyboard(8);
+        scr = new Screen(0x103);
+
+        disk1->load("test_com_io");
+
+        com->addDevice(disk1, 0x0000, 0x7FFF);
+        com->addDevice(ram, 0x8000, 0x8FFF);
+        com->addDevice(key, 0x9000, 0x9007);
+        com->addDevice(scr, 0x9100, 0x9203);
+
+        com->setPwr();
+        if (print_debug)
+            std::cout << "Computer ON" << std::endl;
+
+        int cycle = 0;
+        int Hz = 20;
+        int refresh = 0;
+        while (com->getPwr())
+        {
+            com->cycle();
+            if (!print_debug)
+            {
+                com->print(17, 1);
+                key->getKey();
+                key->print(17, 10);
+                if (cycle % Hz > Hz / 2)
+                {
+                    cycle = 0;
+                    scr->print(1, 1);
+                    refresh++;
+                    std::cout << refresh;
+                }
+            }
+            cycle++;
+            std::this_thread::sleep_for(std::chrono::nanoseconds(1000000000 / Hz));
+        }
+        if (print_debug)
+            std::cout << "Computer OFF" << std::endl;
+
+        delete com;
+        delete disk1;
+        delete ram;
+        delete key;
+        delete scr;
     }
 
     std::cout << "\n-=#[ Done ]#=-" << std::endl;
