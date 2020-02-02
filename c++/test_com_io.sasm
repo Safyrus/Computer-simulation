@@ -1,0 +1,31 @@
+# adr of devices:
+# disk : 0000 - 7FFF
+# ram  : 8000 - 8FFF
+# key  : 9000 - 9007
+# scr  : 9100 - 9203
+
+
+# Setup screen
+    SET 10 91 00 # resX
+    SET 10 91 01 # resY
+    SET 00 91 02 # mode
+
+# While ...
+MAIN:
+    # Get char from keyboard
+    GET $A 90 00
+
+    # Check if something was press
+    CMP $A 00
+
+    # if not, redo
+    JMP 04 MAIN
+
+    # else send random value to the pixel equal to the char value
+    ADD $B $A 03
+    SET $R 91 $B
+
+    # loop
+    JMP $F MAIN
+STOP:
+    OFF
