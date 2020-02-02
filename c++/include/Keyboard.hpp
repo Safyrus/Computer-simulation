@@ -5,6 +5,7 @@
 class Keyboard : public Device
 {
 private:
+    int cursor;
     char get_Key();
 public:
     Keyboard(int l);
@@ -12,4 +13,5 @@ public:
 
     int8_t getData();
     void getKey();
+    void print(int x, int y);
 };
