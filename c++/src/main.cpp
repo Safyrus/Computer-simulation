@@ -2,6 +2,9 @@
 #include <iomanip>
 #include <chrono>
 #include <thread>
+
+#include <SFML/Graphics.hpp>
+
 #include "AssemblerCompiler.hpp"
 #include "Computer.hpp"
 #include "DISK.hpp"
@@ -12,10 +15,16 @@
 #include "Screen.hpp"
 
 bool print_debug;
+sf::Font baseFont;
 
 int main()
 {
     print_debug = false;
+    if (!baseFont.loadFromFile("test.ttf"))
+    {
+        std::cout << "ERROR: could not load font";
+    }
+
     setupConsole();
     std::cout << "\x1b[1;1H\x1b[2J";
 
@@ -30,8 +39,7 @@ int main()
     Screen *scr;
     int8_t c;
 
-
-    std::cout << "--- What do you want to test ? ---\n0 - Assembler\n1 - CPU\n2 - Input\n3 - Screen\n4 - Computer" << std::endl;
+    std::cout << "--- What do you want to test ? ---\n0 - Assembler\n1 - CPU\n2 - Input\n3 - Screen\n4 - Computer\n 5 - SFML" << std::endl;
     std::cin >> choice;
     switch (choice)
     {
@@ -156,7 +164,54 @@ int main()
 
         delete com;
         rawConsole(false);
+        break;
     case 5:
+        rawConsole(true);
+        std::cout << std::hex;
+        std::cout << "\x1b[1;1H\x1b[2J";
+        com = new Computer();
+        disk1 = new DISK(0x8000);
+        disk2 = new DISK(0x4000);
+        ram = new RAM(0x2000);
+        key = new Keyboard(0x100);
+        scr = new Screen(0xFA10);
+
+        disk1->load("");
+        disk2->load("");
+
+        com->addDevice(disk1, 0x0000, 0x7FFF);
+        com->addDevice(disk2, 0x8000, 0xBFFF);
+        com->addDevice(ram, 0xC000, 0xDFFF);
+        com->addDevice(key, 0xE000, 0xE0FF);
+        com->addDevice(scr, 0xE100, 0xE1FF);
+
+        sf::RenderWindow window(sf::VideoMode(640, 360), "S257-01");
+        window.setFramerateLimit(60);
+
+        while (window.isOpen())
+        {
+            sf::Event event;
+            while (window.pollEvent(event))
+            {
+                if (event.type == sf::Event::Closed)
+                {
+                    window.close();
+                }
+                if (event.type == sf::Event::KeyPressed)
+                {
+                    std::cout << "keypressed \n";
+                }
+            }
+
+            window.clear(sf::Color::Black);
+
+            com->display(window, 0,0);
+
+            window.display();
+        }
+
+        delete com;
+        rawConsole(false);
         break;
     }
 

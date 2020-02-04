@@ -1,5 +1,8 @@
 #pragma once
 #include <vector>
+
+#include <SFML/Graphics.hpp>
+
 #include "CPU.hpp"
 #include "Device.hpp"
 
@@ -30,4 +33,5 @@ public:
     void removeDevice(Device *d);
 
     void print(int x, int y);
+    void display(sf::RenderWindow &window, int x, int y);
 };

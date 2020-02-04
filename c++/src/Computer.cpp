@@ -2,6 +2,9 @@
 #include <vector>
 #include <iomanip>
 #include <sstream>
+
+#include <SFML/Graphics.hpp>
+
 #include "Computer.hpp"
 #include "global.hpp"
 
@@ -187,4 +190,63 @@ void Computer::print(int x, int y)
     std::cout << std::setfill('0') << std::setw(2) << ((cpu->getData())&0xff);
     std::cout << std::flush;
     cpu->print(x, y+4);
+}
+
+void Computer::display(sf::RenderWindow &window, int x, int y)
+{
+    int charSize = 10;
+    sf::Text text;
+    text.setFont(baseFont);
+    text.setCharacterSize(charSize);
+
+    text.setFillColor(sf::Color::White);
+    text.setPosition(x, y);
+
+    std::stringstream ss;
+    ss << "   HZ=" << std::hex << std::uppercase << std::setfill('0') << std::setw(8) << Hz;
+    ss << "  CLK #";
+    ss << "\nCYCLE=" << std::uppercase << std::setfill('0') << std::setw(8) << cycleCount;
+    ss << "  PWR #";
+    ss << "\n  STP=" << std::uppercase << std::setfill('0') << std::setw(2) << cpu->getStep();
+    ss << "        LD  #";
+    ss << "\n  ADR=" << std::uppercase << std::setfill('0') << std::setw(4) << cpu->getAdr();
+    ss << "\n DATA=";
+    ss << std::uppercase << std::setfill('0') << std::setw(2) << ((cpu->getData()>>24)&0xff) << " ";
+    ss << std::uppercase << std::setfill('0') << std::setw(2) << ((cpu->getData()>>16)&0xff) << " ";
+    ss << std::uppercase << std::setfill('0') << std::setw(2) << ((cpu->getData()>>8)&0xff) << " ";
+    ss << std::uppercase << std::setfill('0') << std::setw(2) << ((cpu->getData())&0xff);
+
+    text.setString(ss.str());
+    window.draw(text);
+
+    sf::RectangleShape rect(sf::Vector2f(charSize, charSize*(5/4)));
+    if(cpu->getClk())
+    {
+        rect.setFillColor(sf::Color::Green);
+    }else
+    {
+        rect.setFillColor(sf::Color::Red);
+    }
+    rect.setPosition(x + charSize*16,y + charSize*0);
+    window.draw(rect);
+
+    if(cpu->getPwr())
+    {
+        rect.setFillColor(sf::Color::Green);
+    }else
+    {
+        rect.setFillColor(sf::Color::Red);
+    }
+    rect.setPosition(x + charSize*16,y + charSize*1);
+    window.draw(rect);
+
+    if(cpu->getLoad())
+    {
+        rect.setFillColor(sf::Color::Green);
+    }else
+    {
+        rect.setFillColor(sf::Color::Red);
+    }
+    rect.setPosition(x + charSize*16,y + charSize*2);
+    window.draw(rect);
 }
