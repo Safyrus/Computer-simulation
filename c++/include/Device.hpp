@@ -10,7 +10,7 @@ protected:
 
 public:
     Device(int l);
-    ~Device();
+    virtual ~Device();
 
     virtual int getAdr();
     virtual void setAdr(int a);

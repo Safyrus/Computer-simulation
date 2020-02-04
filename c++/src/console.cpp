@@ -1,13 +1,12 @@
 #ifndef LINEARNODE_H
 #define LINEARNODE_H
-#ifdef _WIN32
-#include <windows.h>
-#endif
 
 #include <stdio.h>
 #include "console.hpp"
 
 #ifdef _WIN32
+#include <windows.h>
+
 // Some old MinGW/CYGWIN distributions don't define this:
 #ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
 #define ENABLE_VIRTUAL_TERMINAL_PROCESSING  0x0004
@@ -44,7 +43,6 @@ void setupConsole(void)
 
 void restoreConsole(void)
 {
-    // Reset colors
     printf("\x1b[0m");
 
     // Reset console mode
@@ -70,12 +68,41 @@ void SetWindow(int Width, int Height)
     SetConsoleScreenBufferSize(Handle, coord);            // Set Buffer Size
     SetConsoleWindowInfo(Handle, TRUE, &Rect);            // Set Window Size
 }
+
+void rawConsole(bool raw)
+{
+}
+
 #else
-void setupConsole(void) {}
+#define _XOPEN_SOURCE 700
+#include <stdlib.h>
+#include <string.h>
+#include <termios.h>
+#include <time.h>
+
+static struct termios orig_term_attr;
+static struct termios new_term_attr;
+
+void setupConsole(void) {
+}
+
+void rawConsole(bool raw){
+    if(raw)
+    {
+        tcgetattr(fileno(stdin), &orig_term_attr);
+        memcpy(&new_term_attr, &orig_term_attr, sizeof(struct termios));
+        new_term_attr.c_lflag &= ~(ECHO | ICANON);
+        new_term_attr.c_cc[VTIME] = 0;
+        new_term_attr.c_cc[VMIN] = 0;
+        tcsetattr(fileno(stdin), TCSANOW, &new_term_attr);
+    }else
+    {
+        tcsetattr(fileno(stdin), TCSANOW, &orig_term_attr);
+    }
+}
 
 void restoreConsole(void)
 {
-    // Reset colors
     printf("\x1b[0m");
 }
 

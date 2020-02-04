@@ -29,6 +29,7 @@ int main()
     Screen *scr;
     int8_t c;
 
+
     std::cout << "--- What do you want to test ? ---\n0 - Assembler\n1 - CPU\n2 - Input\n3 - Screen\n4 - Computer" << std::endl;
     std::cin >> choice;
     switch (choice)
@@ -82,16 +83,18 @@ int main()
         delete disk2;
         break;
     case 2:
+        rawConsole(true);
         key = new Keyboard(8);
         c = 0;
         while (c != 27)
         {
             key->getKey();
             c = key->getData();
-            std::cout << (char)c;
+            std::cout << (char)c << std::flush;
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
         delete key;
+        rawConsole(false);
         break;
     case 3:
         scr = new Screen(0x103);
@@ -111,6 +114,7 @@ int main()
         delete scr;
         break;
     case 4:
+        rawConsole(true);
         std::cout << std::hex;
         std::cout << "\x1b[2J";
         com = new Computer();
@@ -131,7 +135,7 @@ int main()
             std::cout << "Computer ON" << std::endl;
 
         int cycle = 0;
-        int Hz = 20;
+        int Hz = 50;
         int refresh = 0;
         while (com->getPwr())
         {
@@ -141,7 +145,7 @@ int main()
                 com->print(17, 1);
                 key->getKey();
                 key->print(17, 10);
-                if (cycle % Hz > Hz / 2)
+                if (cycle % Hz >= Hz / 4)
                 {
                     cycle = 0;
                     scr->print(1, 1);
@@ -160,6 +164,7 @@ int main()
         delete ram;
         delete key;
         delete scr;
+        rawConsole(false);
     }
 
     std::cout << "\n-=#[ Done ]#=-" << std::endl;

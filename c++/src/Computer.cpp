@@ -12,7 +12,7 @@ Computer::Computer()
 
 Computer::~Computer()
 {
-    for (int i = 0; i < devices.size(); i++)
+    for (unsigned int i = 0; i < devices.size(); i++)
     {
         delete devices[i];
     }
@@ -22,7 +22,7 @@ Computer::~Computer()
 void Computer::cycle()
 {
     int dev = -1;
-    for (int i = 0; i < devices.size(); i++)
+    for (unsigned int i = 0; i < devices.size(); i++)
     {
         if (cpu->getAdr() >= adrDeviceStart[i] && cpu->getAdr() <= adrDeviceEnd[i])
         {

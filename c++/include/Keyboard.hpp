@@ -6,7 +6,7 @@ class Keyboard : public Device
 {
 private:
     int cursor;
-    char get_Key();
+    int get_Key();
 public:
     Keyboard(int l);
     ~Keyboard();
