@@ -17,6 +17,7 @@ int main()
 {
     print_debug = false;
     setupConsole();
+    std::cout << "\x1b[1;1H\x1b[2J";
 
     std::string file = "";
     int choice = 0;
@@ -97,6 +98,7 @@ int main()
         rawConsole(false);
         break;
     case 3:
+        std::cout << "\x1b[1;1H\x1b[2J";
         scr = new Screen(0x103);
         scr->setAdr(0);
         scr->setData(16);
@@ -116,7 +118,7 @@ int main()
     case 4:
         rawConsole(true);
         std::cout << std::hex;
-        std::cout << "\x1b[2J";
+        std::cout << "\x1b[1;1H\x1b[2J";
         com = new Computer();
         disk1 = new DISK(0x8000);
         ram = new RAM(0x1000);
@@ -127,16 +129,13 @@ int main()
 
         com->addDevice(disk1, 0x0000, 0x7FFF);
         com->addDevice(ram, 0x8000, 0x8FFF);
-        com->addDevice(key, 0x9000, 0x9007);
+        com->addDevice(key, 0x9000, 0x90FF);
         com->addDevice(scr, 0x9100, 0x9203);
 
         com->setPwr();
         if (print_debug)
             std::cout << "Computer ON" << std::endl;
 
-        int cycle = 0;
-        int Hz = 50;
-        int refresh = 0;
         while (com->getPwr())
         {
             com->cycle();
@@ -145,31 +144,26 @@ int main()
                 com->print(17, 1);
                 key->getKey();
                 key->print(17, 10);
-                if (cycle % Hz >= Hz / 4)
+                if (com->getCycle() % com->getHz() >= com->getHz() / 4)
                 {
-                    cycle = 0;
                     scr->print(1, 1);
-                    refresh++;
-                    std::cout << refresh;
                 }
             }
-            cycle++;
-            std::this_thread::sleep_for(std::chrono::nanoseconds(1000000000 / Hz));
+            std::this_thread::sleep_for(std::chrono::nanoseconds(1000000000 / com->getHz()));
         }
         if (print_debug)
             std::cout << "Computer OFF" << std::endl;
 
         delete com;
-        delete disk1;
-        delete ram;
-        delete key;
-        delete scr;
         rawConsole(false);
+    case 5:
+        break;
     }
 
     std::cout << "\n-=#[ Done ]#=-" << std::endl;
     std::cin.ignore();
     std::cin.ignore();
 
+    std::cout << "\x1b[1;1H\x1b[2J";
     restoreConsole();
 }

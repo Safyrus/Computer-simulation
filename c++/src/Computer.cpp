@@ -7,6 +7,15 @@
 
 Computer::Computer()
 {
+    Hz = 10;
+    cycleCount = 0;
+    cpu = new CPU();
+}
+
+Computer::Computer(int hz)
+{
+    Hz = hz;
+    cycleCount = 0;
     cpu = new CPU();
 }
 
@@ -90,6 +99,10 @@ void Computer::cycle()
     {
         cpu->setClk();
     }
+    if(cpu->getClk())
+    {
+        cycleCount++;
+    }
 
     if (print_debug)
         std::cout << "CPU: adr[" << cpu->getAdr() << "]  data[" << cpu->getData() << "] step[" << cpu->getStep() << "]  clk[" << cpu->getClk() << "]  load[" << cpu->getLoad() << "]  pwr[" << cpu->getPwr() << "]" << std::endl;
@@ -98,6 +111,7 @@ void Computer::cycle()
 void Computer::setPwr()
 {
     cpu->setPwr();
+    cycleCount = 0;
 }
 
 bool Computer::getPwr()
@@ -134,21 +148,43 @@ void Computer::removeDevice(Device *d)
     }
 }
 
+void Computer::setHz(unsigned int hz)
+{
+    Hz = hz;
+}
+
+void Computer::setCycle(unsigned int c)
+{
+    cycleCount = c;
+}
+
+unsigned int Computer::getHz()
+{
+    return Hz;
+}
+
+unsigned int Computer::getCycle()
+{
+    return cycleCount;
+}
+
 void Computer::print(int x, int y)
 {
     std::stringstream ss;
     ss << "\x1b[" << y << ";" << x << "H";
+    std::cout << ss.str() << "|COM:  hz=" << Hz << "  cycle=" << cycleCount;
+    ss << "\x1b[" << y+1 << ";" << x << "H";
     std::cout << ss.str() << "|CPU:  stp=" << cpu->getStep() << "  clk=" << cpu->getClk() << "  pwr=" << cpu->getPwr() << "  load=" << cpu->getLoad();
     ss.clear();
-    ss << "\x1b[" << y+1 << ";" << x << "H";
+    ss << "\x1b[" << y+2 << ";" << x << "H";
     std::cout << ss.str() << "|ADR:  " << std::setfill('0') << std::setw(4) << cpu->getAdr();
     ss.clear();
-    ss << "\x1b[" << y+2 << ";" << x << "H";
+    ss << "\x1b[" << y+3 << ";" << x << "H";
     std::cout << ss.str() << "|DATA: ";
     std::cout << std::setfill('0') << std::setw(2) << ((cpu->getData()>>24)&0xff) << "  ";
     std::cout << std::setfill('0') << std::setw(2) << ((cpu->getData()>>16)&0xff) << "  ";
     std::cout << std::setfill('0') << std::setw(2) << ((cpu->getData()>>8)&0xff) << "  ";
     std::cout << std::setfill('0') << std::setw(2) << ((cpu->getData())&0xff);
     std::cout << std::flush;
-    cpu->print(x, y+3);
+    cpu->print(x, y+4);
 }
