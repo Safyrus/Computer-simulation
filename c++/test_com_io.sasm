@@ -21,6 +21,10 @@ MAIN:
     # if not, redo
     JMP 04 MAIN
 
+    # if ESC was press then stop else continue
+    CMP $A 1B
+    JMP 04 STOP
+
     # else send random value to the pixel equal to the char value
     ADD $B $A 03
     SET $R 91 $B
