@@ -2,6 +2,11 @@
 #include "Device.hpp"
 #include "global.hpp"
 
+Device::Device()
+{
+    len = 0;
+    adr = 0;
+}
 Device::Device(int l)
 {
     len = l;

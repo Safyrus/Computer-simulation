@@ -9,6 +9,7 @@ protected:
     int adr;
 
 public:
+    Device();
     Device(int l);
     virtual ~Device();
 
