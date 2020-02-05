@@ -39,6 +39,9 @@ int main()
     Screen *scr;
     int8_t c;
 
+    sf::RenderWindow window(sf::VideoMode(640, 360), "S257-01");
+    window.setFramerateLimit(1);
+
     std::cout << "--- What do you want to test ? ---\n0 - Assembler\n1 - CPU\n2 - Input\n3 - Screen\n4 - Computer\n 5 - SFML" << std::endl;
     std::cin >> choice;
     switch (choice)
@@ -107,7 +110,7 @@ int main()
         break;
     case 3:
         std::cout << "\x1b[1;1H\x1b[2J";
-        scr = new Screen(0x103);
+        scr = new Screen();//(0x103);
         scr->setAdr(0);
         scr->setData(16);
         scr->setAdr(1);
@@ -131,7 +134,7 @@ int main()
         disk1 = new DISK(0x8000);
         ram = new RAM(0x1000);
         key = new Keyboard(8);
-        scr = new Screen(0x103);
+        scr = new Screen();//(0x103);
 
         disk1->load("test_com_io");
 
@@ -174,7 +177,7 @@ int main()
         disk2 = new DISK(0x4000);
         ram = new RAM(0x2000);
         key = new Keyboard(0x100);
-        scr = new Screen(0xFA10);
+        scr = new Screen();
 
         disk1->load("");
         disk2->load("");
@@ -185,9 +188,18 @@ int main()
         com->addDevice(key, 0xE000, 0xE0FF);
         com->addDevice(scr, 0xE100, 0xE1FF);
 
-        sf::RenderWindow window(sf::VideoMode(640, 360), "S257-01");
         window.setFramerateLimit(60);
 
+        scr->setAdr(3);
+        scr->setData(0x80);
+        for (int i = 0; i < 16; i+=2)
+        {
+            scr->setAdr(0x40+i);
+            scr->setData(i<<4);
+            scr->setAdr(0x40+i+1);
+            scr->setData(i+1);
+        }
+        
         while (window.isOpen())
         {
             sf::Event event;
@@ -203,15 +215,18 @@ int main()
                 }
             }
 
-            window.clear(sf::Color::Black);
+            window.clear(sf::Color(60, 60, 60));
 
             com->display(window, 0,0);
+            scr->display(window, 0xc0, 0);
 
             window.display();
         }
 
         delete com;
         rawConsole(false);
+        break;
+    default:
         break;
     }
 
