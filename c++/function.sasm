@@ -1,0 +1,84 @@
+# program to test if function call and callback can be done
+# ADR CONFIG:
+# - DISK : 0000-BFFF (min ????)
+# - RAM  : C000-DFFF (min 00FF)
+
+
+MOV $A 00
+SET 02 C0 00 #stack pointer
+
+#function call
+JMP $F FCT_ADD
+JMP $F FCT_ADD
+JMP $F FCT_SUB
+JMP $F FCT_ADD
+JMP $F FCT_ADD
+JMP $F FCT_ADD
+JMP $F FCT_SUB
+
+#if result = 3 then stop else error=1
+CMP $A 03
+JMP 04 STOP
+MOV $E 01
+ERROR_RESULT:
+JMP $F ERROR_RESULT
+
+
+#########################################
+FCT_ADD:
+    # save call
+    GET $B C0 00    # get stack pointer
+    SET $J1 C0 $B   # add J1 to stack
+    ADD $B $B 01    # add 1 to pointer
+    SET $J2 C0 $B   # add J2 to stack
+    ADD $B $B 01    # add 1 to pointer
+    SET $B C0 00    # refresh stack pointer
+
+    # middle
+    ADD $A $A 01
+
+    # callback
+    GET $B C0 00
+    SUB $B $B 01
+    GET $C C0 $B
+    SUB $B $B 01
+    GET $D C0 $B
+    SET $B C0 00
+    JMP $F $D $C
+
+#########################################
+
+
+#########################################
+FCT_SUB:
+    # save call
+    GET $B C0 00
+    SET $J1 C0 $B
+    ADD $B $B 01
+    SET $J2 C0 $B
+    ADD $B $B 01
+    SET $B C0 00
+
+    # middle
+    SUB $A $A 01
+
+    # callback
+    GET $B C0 00
+    SUB $B $B 01
+    GET $C C0 $B
+    SUB $B $B 01
+    GET $D C0 $B
+    SET $B C0 00
+    JMP $F $D $C
+
+#########################################
+
+
+
+MOV $E 02
+ERROR_FCT:
+JMP $F ERROR_FCT
+
+
+STOP:
+    OFF
