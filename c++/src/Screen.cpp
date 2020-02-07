@@ -4,10 +4,11 @@
 #include <SFML/Graphics.hpp>
 
 #include "Screen.hpp"
+#include "global.hpp"
 
 Screen::Screen()
 {
-    len = W*H;
+    len = W * H;
     adr = 0;
     data = new int8_t[len];
     for (int i = 0; i < len; i++)
@@ -19,11 +20,11 @@ Screen::Screen()
 
     RT.create(W, H);
 
-    pixMat.resize(W*H);
-    for (int i=0;i<H;++i)
-            for (int j=0;j<W;++j)
-                    pixMat[(i*W)+j] = sf::Vertex(sf::Vector2f(j+.5f, i+.5f), sf::Color(0, 0, 0));
-    
+    pixMat.resize(W * H);
+    for (int i = 0; i < H; ++i)
+        for (int j = 0; j < W; ++j)
+            pixMat[(i * W) + j] = sf::Vertex(sf::Vector2f(j + .5f, i + .5f), sf::Color(0, 0, 0));
+
     color[0] = 0x00;
     color[1] = 0x03;
     color[2] = 0x0c;
@@ -48,55 +49,65 @@ Screen::~Screen()
 
 void Screen::setData(int8_t d)
 {
-    std::cout << (int)d << "\n" << std::flush;
-    if(adr>15)
+    if (print_debug)
+        std::cout << (int)d << "\n"
+                  << std::flush;
+    if (adr > 15)
     {
-        unsigned int ind = data[3]&0xff;
-        data[adr*ind] = d;
-        std::cout << (int)(data[adr*ind]) << " " << adr << std::flush;
+        unsigned int ind = data[3] & 0xff;
+        data[adr * ind] = d;
+        if (print_debug)
+            std::cout << (int)(data[adr * ind]) << " " << adr << std::flush;
         int colorIndex;
         unsigned int dat = data[adr];
-        if(adr%2==0)
+        if (adr % 2 == 0)
         {
-            colorIndex = ((data[adr*ind]&0xf0)>>4);
-        }else
-        {
-            colorIndex = data[adr*ind]&0x0f;
+            colorIndex = ((data[adr * ind] & 0xf0) >> 4);
         }
-        int r = ((color[colorIndex]&0xc0)>>6)*43;
-        int g = ((color[colorIndex]&0x30)>>4)*43;
-        int b = ((color[colorIndex]&0x0c)>>2)*43;
-        int a = ((color[colorIndex]&0x03)>>0)*43;
-        if(r>0x7f)
+        else
         {
-            r=0x7f;
+            colorIndex = data[adr * ind] & 0x0f;
         }
-        if(g>0x7f)
+        int r = ((color[colorIndex] & 0xc0) >> 6) * 43;
+        int g = ((color[colorIndex] & 0x30) >> 4) * 43;
+        int b = ((color[colorIndex] & 0x0c) >> 2) * 43;
+        int a = ((color[colorIndex] & 0x03) >> 0) * 43;
+        if (r > 0x7f)
         {
-            g=0x7f;
+            r = 0x7f;
         }
-        if(b>0x7f)
+        if (g > 0x7f)
         {
-            b=0x7f;
+            g = 0x7f;
         }
-        if(a>0x7f)
+        if (b > 0x7f)
         {
-            a=0x7f;
+            b = 0x7f;
+        }
+        if (a > 0x7f)
+        {
+            a = 0x7f;
         }
 
-        std::cout << "color: " << colorIndex << " " << a << " " << r+a << " " << g+a << " " << b+a << "\n" << std::flush;
+        if (print_debug)
+            std::cout << "color: " << colorIndex << " " << a << " " << r + a << " " << g + a << " " << b + a << "\n"
+                      << std::flush;
 
         switch (data[2])
         {
         case 0:
-            std::cout << (int)(adr-16) << " " << (int)(ind) << " " << (int)(((adr-16)*W)+ind) << "\n" << std::flush;
-            pixMat[(((adr-16)*W)+ind)] = sf::Vertex(sf::Vector2f(ind+.5f, (adr-16)+.5f), sf::Color(r+a, g+a, b+a));
+            if (print_debug)
+                std::cout << (int)(adr - 16) << " " << (int)(ind) << " " << (int)(((adr - 16) * W) + ind) << "\n"
+                          << std::flush;
+            pixMat[(((adr - 16) * W) + ind)] = sf::Vertex(sf::Vector2f(ind + .5f, (adr - 16) + .5f), sf::Color(r + a, g + a, b + a));
             break;
         }
-    }else if(adr==5)
+    }
+    else if (adr == 5)
     {
         color[data[4]] = d;
-    }else
+    }
+    else
     {
         data[adr] = d;
     }
@@ -104,16 +115,16 @@ void Screen::setData(int8_t d)
 
 int8_t Screen::getData()
 {
-    if(adr>15)
+    if (adr > 15)
     {
-        return data[adr*data[3]];
+        return data[adr * data[3]];
     }
     return data[adr];
 }
 
 void Screen::setAdr(int a)
 {
-    adr = a%256;
+    adr = a % 256;
 }
 
 void Screen::print(int x, int y)
@@ -167,7 +178,7 @@ void Screen::display(sf::RenderWindow &window, int x, int y)
     //data[5] = color
 
     //Draws the pixel matrix
-    RT.draw(pixMat.data(), H*W, sf::Points);
+    RT.draw(pixMat.data(), H * W, sf::Points);
 
     //And finally draws the RenderTexture to the RenderWindow
     RT.display();
