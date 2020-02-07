@@ -63,9 +63,9 @@ AssemblerCompiler::AssemblerCompiler()
     op_arg_size = 3;
 
     reg_name = {
-        "X", "A", "B", "C", "D", "E", "F", "R"};
+        "X", "A", "B", "C", "D", "E", "F", "R", "J1", "J2"};
     reg_code = {
-        0, 1, 2, 3, 4, 5, 6, 7};
+        0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 }
 
 AssemblerCompiler::AssemblerCompiler(const char *configFile)

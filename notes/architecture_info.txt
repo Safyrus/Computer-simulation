@@ -90,6 +90,7 @@ Carry
 PC(16)
 RNG(8)
 FLAG(8)
+JUMPBACK(16)
 
 
 ##NORMAL_REG##

@@ -38,7 +38,7 @@ int main()
     Keyboard *key;
     Screen *scr;
     int8_t c;
-    int fps = 60;
+    int fps = 10;
 
     sf::RenderWindow window(sf::VideoMode(640, 360), "S257-01");
     window.setFramerateLimit(1);
@@ -173,14 +173,14 @@ int main()
         rawConsole(true);
         std::cout << std::hex;
         std::cout << "\x1b[1;1H\x1b[2J";
-        com = new Computer(5000000);
+        com = new Computer(10);
         disk1 = new DISK(0x8000);
         disk2 = new DISK(0x4000);
         ram = new RAM(0x2000);
         key = new Keyboard(0x08);
         scr = new Screen();
 
-        disk1->load("test");
+        disk1->load("function");
         disk2->load("");
 
         com->addDevice(disk1, 0x0000, 0x7FFF);
