@@ -1,5 +1,8 @@
 #include <sstream>
 #include <iostream>
+
+#include <SFML/Graphics.hpp>
+
 #ifdef _WIN32
 #include <conio.h>
 #else
@@ -11,6 +14,7 @@
 #include <time.h>
 #endif // _WIN32
 #include "Keyboard.hpp"
+#include "global.hpp"
 
 Keyboard::Keyboard(int l) : Device(l)
 {
@@ -64,6 +68,17 @@ int8_t Keyboard::getData()
     return c;
 }
 
+void Keyboard::setKey(int c)
+{
+    char key = c;
+    if (key != EOF && key != 0)
+    {
+        data[cursor] = key;
+        if (cursor < len)
+            cursor++;
+    }
+}
+
 void Keyboard::print(int x, int y)
 {
     std::stringstream ss;
@@ -83,4 +98,23 @@ void Keyboard::print(int x, int y)
             std::cout << (data[i]&0xff) << " ";
         }
     }
+}
+
+void Keyboard::display(sf::RenderWindow &window, int x, int y)
+{
+    int charSize = 10;
+    sf::Text text;
+    text.setCharacterSize(charSize);
+    text.setFont(baseFont);
+    text.setPosition(x, y);
+    std::stringstream ss;
+
+    ss << "KEYBOARD BUFFER:\n";
+    for (int i = 0; i < len; i++)
+    {
+        ss << (char)(data[i]&0xff) << " ";
+    }
+    
+    text.setString(ss.str());
+    window.draw(text);
 }
