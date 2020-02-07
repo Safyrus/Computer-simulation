@@ -38,11 +38,12 @@ int main()
     Keyboard *key;
     Screen *scr;
     int8_t c;
+    int fps = 60;
 
     sf::RenderWindow window(sf::VideoMode(640, 360), "S257-01");
     window.setFramerateLimit(1);
 
-    std::cout << "--- What do you want to test ? ---\n0 - Assembler\n1 - CPU\n2 - Input\n3 - Screen\n4 - Computer\n 5 - SFML" << std::endl;
+    std::cout << "--- What do you want to test ? ---\n0 - Assembler\n1 - CPU\n2 - Input\n3 - Screen\n4 - Computer\n5 - SFML" << std::endl;
     std::cin >> choice;
     switch (choice)
     {
@@ -110,7 +111,7 @@ int main()
         break;
     case 3:
         std::cout << "\x1b[1;1H\x1b[2J";
-        scr = new Screen();//(0x103);
+        scr = new Screen(); //(0x103);
         scr->setAdr(0);
         scr->setData(16);
         scr->setAdr(1);
@@ -134,7 +135,7 @@ int main()
         disk1 = new DISK(0x8000);
         ram = new RAM(0x1000);
         key = new Keyboard(8);
-        scr = new Screen();//(0x103);
+        scr = new Screen(); //(0x103);
 
         disk1->load("test_com_io");
 
@@ -172,14 +173,14 @@ int main()
         rawConsole(true);
         std::cout << std::hex;
         std::cout << "\x1b[1;1H\x1b[2J";
-        com = new Computer();
+        com = new Computer(5000000);
         disk1 = new DISK(0x8000);
         disk2 = new DISK(0x4000);
         ram = new RAM(0x2000);
-        key = new Keyboard(0x100);
+        key = new Keyboard(0x08);
         scr = new Screen();
 
-        disk1->load("");
+        disk1->load("test");
         disk2->load("");
 
         com->addDevice(disk1, 0x0000, 0x7FFF);
@@ -188,18 +189,18 @@ int main()
         com->addDevice(key, 0xE000, 0xE0FF);
         com->addDevice(scr, 0xE100, 0xE1FF);
 
-        window.setFramerateLimit(60);
+        window.setFramerateLimit(fps);
 
         scr->setAdr(3);
         scr->setData(0x80);
-        for (int i = 0; i < 16; i+=2)
+        for (int i = 0; i < 16; i += 2)
         {
-            scr->setAdr(0x40+i);
-            scr->setData(i<<4);
-            scr->setAdr(0x40+i+1);
-            scr->setData(i+1);
+            scr->setAdr(0x40 + i);
+            scr->setData(i << 4);
+            scr->setAdr(0x40 + i + 1);
+            scr->setData(i + 1);
         }
-        
+
         while (window.isOpen())
         {
             sf::Event event;
@@ -209,16 +210,42 @@ int main()
                 {
                     window.close();
                 }
+                if (event.type == sf::Event::TextEntered)
+                {
+                    // Handle ASCII characters only
+                    if (event.text.unicode < 128)
+                    {
+                        std::cout << "key pressed: " << event.text.unicode << "\n";
+                        key->setKey(event.text.unicode);
+                    }
+                }
                 if (event.type == sf::Event::KeyPressed)
                 {
-                    std::cout << "keypressed \n";
+                    if (event.key.code == sf::Keyboard::F1)
+                    {
+                        com->setPwr();
+                    }
+                }
+            }
+
+            if (com->getPwr())
+            {
+                int nbCycle = (com->getHz() / fps) * 2;
+                std::chrono::nanoseconds timePercycle(1000000000 / nbCycle);
+                for (int i = 0; i < nbCycle; i++)
+                {
+                    com->halfCycle();
+                    //std::this_thread::sleep_for(timePercycle);
                 }
             }
 
             window.clear(sf::Color(60, 60, 60));
 
-            com->display(window, 0,0);
-            scr->display(window, 0xc0, 0);
+            int charSizeX = 8;
+            int charSizeY = 10;
+            com->display(window, 0, 0);
+            key->display(window, 0, 8 * charSizeY);
+            scr->display(window, charSizeX * 30, 0);
 
             window.display();
         }
