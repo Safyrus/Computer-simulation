@@ -31,6 +31,18 @@ Computer::~Computer()
     delete cpu;
 }
 
+void Computer::halfCycle()
+{
+    cycle();
+    while (cpu->getClk() && cpu->getStep() != 0)
+    {
+        cycle();
+    }
+    if (print_debug)
+        std::cout << cpu->getClk() << "  " << cpu->getStep() << "\n"
+                  << std::flush;
+}
+
 void Computer::cycle()
 {
     int dev = -1;
@@ -101,8 +113,9 @@ void Computer::cycle()
     else
     {
         cpu->setClk();
+        cpu->stp();
     }
-    if(cpu->getClk())
+    if (cpu->getClk())
     {
         cycleCount++;
     }
@@ -176,20 +189,20 @@ void Computer::print(int x, int y)
     std::stringstream ss;
     ss << "\x1b[" << y << ";" << x << "H";
     std::cout << ss.str() << "|COM:  hz=" << Hz << "  cycle=" << cycleCount;
-    ss << "\x1b[" << y+1 << ";" << x << "H";
+    ss << "\x1b[" << y + 1 << ";" << x << "H";
     std::cout << ss.str() << "|CPU:  stp=" << cpu->getStep() << "  clk=" << cpu->getClk() << "  pwr=" << cpu->getPwr() << "  load=" << cpu->getLoad();
     ss.clear();
-    ss << "\x1b[" << y+2 << ";" << x << "H";
+    ss << "\x1b[" << y + 2 << ";" << x << "H";
     std::cout << ss.str() << "|ADR:  " << std::setfill('0') << std::setw(4) << cpu->getAdr();
     ss.clear();
-    ss << "\x1b[" << y+3 << ";" << x << "H";
+    ss << "\x1b[" << y + 3 << ";" << x << "H";
     std::cout << ss.str() << "|DATA: ";
-    std::cout << std::setfill('0') << std::setw(2) << ((cpu->getData()>>24)&0xff) << "  ";
-    std::cout << std::setfill('0') << std::setw(2) << ((cpu->getData()>>16)&0xff) << "  ";
-    std::cout << std::setfill('0') << std::setw(2) << ((cpu->getData()>>8)&0xff) << "  ";
-    std::cout << std::setfill('0') << std::setw(2) << ((cpu->getData())&0xff);
+    std::cout << std::setfill('0') << std::setw(2) << ((cpu->getData() >> 24) & 0xff) << "  ";
+    std::cout << std::setfill('0') << std::setw(2) << ((cpu->getData() >> 16) & 0xff) << "  ";
+    std::cout << std::setfill('0') << std::setw(2) << ((cpu->getData() >> 8) & 0xff) << "  ";
+    std::cout << std::setfill('0') << std::setw(2) << ((cpu->getData()) & 0xff);
     std::cout << std::flush;
-    cpu->print(x, y+4);
+    cpu->print(x, y + 4);
 }
 
 void Computer::display(sf::RenderWindow &window, int x, int y)
@@ -211,42 +224,45 @@ void Computer::display(sf::RenderWindow &window, int x, int y)
     ss << "        LD  #";
     ss << "\n  ADR=" << std::uppercase << std::setfill('0') << std::setw(4) << cpu->getAdr();
     ss << "\n DATA=";
-    ss << std::uppercase << std::setfill('0') << std::setw(2) << ((cpu->getData()>>24)&0xff) << " ";
-    ss << std::uppercase << std::setfill('0') << std::setw(2) << ((cpu->getData()>>16)&0xff) << " ";
-    ss << std::uppercase << std::setfill('0') << std::setw(2) << ((cpu->getData()>>8)&0xff) << " ";
-    ss << std::uppercase << std::setfill('0') << std::setw(2) << ((cpu->getData())&0xff);
+    ss << std::uppercase << std::setfill('0') << std::setw(2) << ((cpu->getData() >> 24) & 0xff) << " ";
+    ss << std::uppercase << std::setfill('0') << std::setw(2) << ((cpu->getData() >> 16) & 0xff) << " ";
+    ss << std::uppercase << std::setfill('0') << std::setw(2) << ((cpu->getData() >> 8) & 0xff) << " ";
+    ss << std::uppercase << std::setfill('0') << std::setw(2) << ((cpu->getData()) & 0xff);
 
     text.setString(ss.str());
     window.draw(text);
 
-    sf::RectangleShape rect(sf::Vector2f(charSize, charSize*(5/4)));
-    if(cpu->getClk())
+    sf::RectangleShape rect(sf::Vector2f(charSize, charSize * (5 / 4)));
+    if (cpu->getClk())
     {
         rect.setFillColor(sf::Color::Green);
-    }else
+    }
+    else
     {
         rect.setFillColor(sf::Color::Red);
     }
-    rect.setPosition(x + charSize*16,y + charSize*0);
+    rect.setPosition(x + charSize * 16, y + charSize * 0);
     window.draw(rect);
 
-    if(cpu->getPwr())
+    if (cpu->getPwr())
     {
         rect.setFillColor(sf::Color::Green);
-    }else
+    }
+    else
     {
         rect.setFillColor(sf::Color::Red);
     }
-    rect.setPosition(x + charSize*16,y + charSize*1);
+    rect.setPosition(x + charSize * 16, y + charSize * 1);
     window.draw(rect);
 
-    if(cpu->getLoad())
+    if (cpu->getLoad())
     {
         rect.setFillColor(sf::Color::Green);
-    }else
+    }
+    else
     {
         rect.setFillColor(sf::Color::Red);
     }
-    rect.setPosition(x + charSize*16,y + charSize*2);
+    rect.setPosition(x + charSize * 16, y + charSize * 2);
     window.draw(rect);
 }

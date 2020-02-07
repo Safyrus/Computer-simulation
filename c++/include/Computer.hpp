@@ -21,7 +21,7 @@ public:
     Computer();
     Computer(int hz);
     ~Computer();
-    void cycle();
+
     void setPwr();
     bool getPwr();
     void setHz(unsigned int hz);
@@ -29,6 +29,8 @@ public:
     unsigned int getHz();
     unsigned int getCycle();
 
+    void cycle();
+    void halfCycle();
     void addDevice(Device *d, int adrStart, int adrEnd);
     void removeDevice(Device *d);
 
