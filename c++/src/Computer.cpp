@@ -33,14 +33,19 @@ Computer::~Computer()
 
 void Computer::halfCycle()
 {
+    bool clkActive = cpu->getClk();
     cycle();
-    while (cpu->getClk() && cpu->getStep() != 0)
+    while (cpu->getClk() == clkActive)
     {
         cycle();
     }
     if (print_debug)
         std::cout << cpu->getClk() << "  " << cpu->getStep() << "\n"
                   << std::flush;
+    if (cpu->getClk())
+    {
+        cycleCount++;
+    }
 }
 
 void Computer::cycle()
@@ -114,10 +119,6 @@ void Computer::cycle()
     {
         cpu->setClk();
         cpu->stp();
-    }
-    if (cpu->getClk())
-    {
-        cycleCount++;
     }
 
     if (print_debug)
