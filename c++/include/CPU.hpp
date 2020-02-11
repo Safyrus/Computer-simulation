@@ -20,7 +20,7 @@ private:
     int reg[REGMAX];
 
     int CU();
-    int8_t ALU(int8_t a, int8_t b, int8_t op, bool flag);
+    int ALU(int8_t a, int8_t b, int8_t op, bool flag);
 
 public:
     CPU();

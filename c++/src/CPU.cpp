@@ -91,10 +91,10 @@ void CPU::setPwr()
 
 int CPU::CU()
 {
-    int8_t cmd = data >> 24 & 0xff;
-    int8_t arg1 = data >> 16 & 0xff;
-    int8_t arg2 = data >> 8 & 0xff;
-    int8_t arg3 = data & 0xff;
+    int cmd = data >> 24 & 0xff;
+    int arg1 = data >> 16 & 0xff;
+    int arg2 = data >> 8 & 0xff;
+    int arg3 = data & 0xff;
     if (step != 0)
     {
         cmd = dataBack >> 24 & 0xff;
@@ -665,7 +665,7 @@ int CPU::CU()
     return res;
 }
 
-int8_t CPU::ALU(int8_t a, int8_t b, int8_t op, bool flag)
+int CPU::ALU(int8_t a, int8_t b, int8_t op, bool flag)
 {
     bool carry = false;
     int res = 0;
