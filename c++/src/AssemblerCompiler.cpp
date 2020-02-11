@@ -68,9 +68,9 @@ AssemblerCompiler::AssemblerCompiler()
         0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 }
 
-AssemblerCompiler::AssemblerCompiler(const char *configFile)
+/*AssemblerCompiler::AssemblerCompiler(const char *configFile)
 {
-}
+}*/
 
 AssemblerCompiler::~AssemblerCompiler()
 {
@@ -123,13 +123,13 @@ void AssemblerCompiler::loadAssembler(const char *f)
         std::cout << "#------------------------------#\n";
 }
 
-void AssemblerCompiler::loadBinary(const char *f)
+/*void AssemblerCompiler::loadBinary(const char *f)
 {
-}
+}*/
 
-void AssemblerCompiler::saveAssembler(const char *f)
+/*void AssemblerCompiler::saveAssembler(const char *f)
 {
-}
+}*/
 
 void AssemblerCompiler::saveBinary(const char *f)
 {
@@ -372,7 +372,7 @@ void AssemblerCompiler::loadAssembler_read2(const char *f)
 
         int cmd_arg = 0;
         std::string cmd = "";
-        bool comment = false;
+        //bool comment = false;
         bool label = false;
         std::vector<int> cmd_find;
 
@@ -419,7 +419,7 @@ void AssemblerCompiler::loadAssembler_read2(const char *f)
                 }
                 else
                 {
-                    comment = true;
+                    //comment = true;
                     if (print_debug)
                         std::cout << "**ADD COMMENT**" << strAfter + " " + line;
                     comments.push_back(strAfter + " " + line);
@@ -443,7 +443,7 @@ void AssemblerCompiler::loadAssembler_read2(const char *f)
                 //check what type of argument is possible
                 bool reg = false;
                 bool val = false;
-                bool lab = false;
+                //bool lab = false;
                 bool emp = true;
                 int argSize = 0;
                 while (emp)
@@ -457,7 +457,7 @@ void AssemblerCompiler::loadAssembler_read2(const char *f)
                         }
                         else if (op_arg_type[cmd_find[i]][cmd_arg] == LABEL)
                         {
-                            lab = true;
+                            //lab = true;
                         }
                         else if (op_arg_type[cmd_find[i]][cmd_arg] == VAL)
                         {

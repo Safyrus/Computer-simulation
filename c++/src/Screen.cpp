@@ -59,7 +59,7 @@ void Screen::setData(int8_t d)
         if (print_debug)
             std::cout << (int)(data[adr * ind]) << " " << adr << std::flush;
         int colorIndex;
-        unsigned int dat = data[adr];
+        //unsigned int dat = data[adr];
         if (adr % 2 == 0)
         {
             colorIndex = ((data[adr * ind] & 0xf0) >> 4);
@@ -170,11 +170,11 @@ void Screen::print(int x, int y)
 
 void Screen::display(sf::RenderWindow &window, int x, int y)
 {
-    int resX = data[0];
+    /*int resX = data[0];
     int resY = data[1];
     int mode = data[2];
     int index = data[3];
-    int indexColor = data[4];
+    int indexColor = data[4];*/
     //data[5] = color
 
     //Draws the pixel matrix
