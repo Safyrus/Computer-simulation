@@ -767,29 +767,29 @@ int CPU::ALU(int8_t a, int8_t b, int8_t op, bool flag)
         switch (op)
         {
         case 0x0:
-            res = abs(a) + abs(b);
+            res = (a&0x000000ff) + (b&0x000000ff);
             carry = (res > 255);
             break;
         case 0x8:
-            res = abs(a) + abs(b) + 1;
+            res = (a&0x000000ff) + (b&0x000000ff) + 1;
             carry = (res > 255);
             break;
         case 0x1:
-            res = abs(a) - abs(b);
+            res = (a&0x000000ff) - (b&0x000000ff);
             carry = (res < 0);
             break;
         case 0x9:
-            res = abs(a) - abs(b) - 1;
+            res = (a&0x000000ff) - (b&0x000000ff) - 1;
             carry = (res < 0);
             break;
         case 0x2:
-            res = abs(a) * abs(b);
+            res = (a&0x000000ff) * (b&0x000000ff);
             carry = (res > 255);
             break;
         case 0x3:
-            if (abs(b) != 0)
+            if ((b&0x000000ff) != 0)
             {
-                res = (unsigned)a / abs(b);
+                res = (a&0x000000ff) / (b&0x000000ff);
             }
             else
             {
@@ -797,9 +797,9 @@ int CPU::ALU(int8_t a, int8_t b, int8_t op, bool flag)
             }
             break;
         case 0x4:
-            if (abs(b) != 0)
+            if ((b&0x000000ff) != 0)
             {
-                res = (unsigned)a % abs(b);
+                res = (a&0x000000ff) % (b&0x000000ff);
             }
             else
             {
@@ -807,13 +807,13 @@ int CPU::ALU(int8_t a, int8_t b, int8_t op, bool flag)
             }
             break;
         case 0x5:
-            res = abs(a) & abs(b);
+            res = (a&0x000000ff) & (b&0x000000ff);
             break;
         case 0x6:
-            res = abs(a) | abs(b);
+            res = (a&0x000000ff) | (b&0x000000ff);
             break;
         case 0x7:
-            res = abs(a) ^ abs(b);
+            res = (a&0x000000ff) ^ (b&0x000000ff);
             break;
         default:
             //no operation found
@@ -821,7 +821,7 @@ int CPU::ALU(int8_t a, int8_t b, int8_t op, bool flag)
         }
         if (flag)
         {
-            if (abs(a) == abs(b))
+            if ((a&0x000000ff) == (b&0x000000ff))
             {
                 reg[FLAG] |= 0x04;
             }
@@ -829,7 +829,7 @@ int CPU::ALU(int8_t a, int8_t b, int8_t op, bool flag)
             {
                 reg[FLAG] &= 0xfb;
             }
-            if (abs(a) < abs(b))
+            if ((a&0x000000ff) < (b&0x000000ff))
             {
                 reg[FLAG] |= 0x08;
             }
@@ -837,7 +837,7 @@ int CPU::ALU(int8_t a, int8_t b, int8_t op, bool flag)
             {
                 reg[FLAG] &= 0xf7;
             }
-            if (abs(a) > abs(b))
+            if ((a&0x000000ff) > (b&0x000000ff))
             {
                 reg[FLAG] |= 0x02;
             }
@@ -899,3 +899,28 @@ void CPU::print(int x, int y)
     std::cout << "  R=" << std::setfill('0') << std::setw(2) << (reg[7] & 0xff);
     std::cout << std::flush;
 }
+
+void CPU::display(sf::RenderWindow &window, int x, int y)
+{
+    int charSize = 10;
+    sf::Text text;
+    text.setFont(baseFont);
+    text.setCharacterSize(charSize);
+
+    text.setFillColor(sf::Color::White);
+    text.setPosition(x, y);
+
+    std::stringstream ss;
+    ss << "REG:" << std::hex;
+    ss << "  A=" << std::uppercase << std::setfill('0') << std::setw(2) << (reg[1] & 0xff);
+    ss << "  B=" << std::uppercase << std::setfill('0') << std::setw(2) << (reg[2] & 0xff);
+    ss << "  C=" << std::uppercase << std::setfill('0') << std::setw(2) << (reg[3] & 0xff);
+    ss << "  D=" << std::uppercase << std::setfill('0') << std::setw(2) << (reg[4] & 0xff) << "\n    ";
+    ss << "  E=" << std::uppercase << std::setfill('0') << std::setw(2) << (reg[5] & 0xff);
+    ss << "  F=" << std::uppercase << std::setfill('0') << std::setw(2) << (reg[6] & 0xff);
+    ss << "  R=" << std::uppercase << std::setfill('0') << std::setw(2) << (reg[7] & 0xff) << "\n    ";
+    ss << "  J1=" << std::uppercase << std::setfill('0') << std::setw(2) << (reg[8] & 0xff);
+    ss << "  J2=" << std::uppercase << std::setfill('0') << std::setw(2) << (reg[9] & 0xff);
+
+    text.setString(ss.str());
+    window.draw(text);}

@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <SFML/Graphics.hpp>
 
 class CPU
 {
@@ -40,4 +41,5 @@ public:
     void setPwr();
 
     void print(int x, int y);
+    void display(sf::RenderWindow &window, int x, int y);
 };
