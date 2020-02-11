@@ -2,6 +2,7 @@
 #include <iomanip>
 #include <chrono>
 #include <thread>
+#include <atomic>
 
 #include <SFML/Graphics.hpp>
 
@@ -13,9 +14,42 @@
 #include "RAM.hpp"
 #include "Keyboard.hpp"
 #include "Screen.hpp"
+#include "Timer.hpp"
 
 bool print_debug;
 sf::Font baseFont;
+
+std::atomic<bool> stop = false;
+
+void run(Computer *com)
+{
+    std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
+    std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
+    std::chrono::nanoseconds timePercycle(1000000000 / com->getHz());
+    std::chrono::nanoseconds waiting(100000000);
+    std::chrono::duration<long, std::nano> time_span;
+
+    while (!stop)
+    {
+        if (com != NULL && com-> getPwr())
+        {
+            t2 = std::chrono::steady_clock::now();
+            time_span = std::chrono::duration_cast<std::chrono::duration<long, std::nano>>(t2 - t1);
+            if(time_span >= timePercycle)
+            {
+                t1 = std::chrono::steady_clock::now();
+                com->halfCycle();
+            }else
+            {
+                std::this_thread::sleep_for(timePercycle/4);
+            }
+        }else
+        {
+            std::this_thread::sleep_for(waiting);
+        }
+    }
+}
+
 
 int main()
 {
@@ -37,6 +71,9 @@ int main()
     RAM *ram;
     Keyboard *key;
     Screen *scr;
+    Timer *timer;
+    std::thread comThread;
+
     int8_t c;
     int fps = 10;
 
@@ -70,8 +107,8 @@ int main()
         com = new Computer();
         disk1 = new DISK(0x100);
         disk2 = new DISK(0x7F00);
-        disk1->load("test1");
-        disk2->load("test2");
+        disk1->load("prog/test1");
+        disk2->load("prog/test2");
         com->addDevice(disk1, 0, 0xFF);
         com->addDevice(disk2, 0x100, 0x7FFF);
 
@@ -137,7 +174,7 @@ int main()
         key = new Keyboard(8);
         scr = new Screen(); //(0x103);
 
-        disk1->load("test_com_io");
+        disk1->load("prog/test_com_io");
 
         com->addDevice(disk1, 0x0000, 0x7FFF);
         com->addDevice(ram, 0x8000, 0x8FFF);
@@ -173,14 +210,15 @@ int main()
         rawConsole(true);
         std::cout << std::hex;
         std::cout << "\x1b[1;1H\x1b[2J";
-        com = new Computer(10);
+        com = new Computer(100);
         disk1 = new DISK(0x8000);
         disk2 = new DISK(0x4000);
         ram = new RAM(0x2000);
         key = new Keyboard(0x08);
         scr = new Screen();
+        timer = new Timer();
 
-        disk1->load("function");
+        disk1->load("prog/time");
         disk2->load("");
 
         com->addDevice(disk1, 0x0000, 0x7FFF);
@@ -188,6 +226,7 @@ int main()
         com->addDevice(ram, 0xC000, 0xDFFF);
         com->addDevice(key, 0xE000, 0xE0FF);
         com->addDevice(scr, 0xE100, 0xE1FF);
+        com->addDevice(timer, 0xFF00, 0xFF01);
 
         window.setFramerateLimit(fps);
 
@@ -200,6 +239,8 @@ int main()
             scr->setAdr(0x40 + i + 1);
             scr->setData(i + 1);
         }
+
+        comThread = std::thread(run, com);
 
         while (window.isOpen())
         {
@@ -228,16 +269,6 @@ int main()
                 }
             }
 
-            if (com->getPwr())
-            {
-                int nbCycle = (com->getHz() / fps) * 2;
-                std::chrono::nanoseconds timePercycle(1000000000 / nbCycle);
-                for (int i = 0; i < nbCycle; i++)
-                {
-                    com->halfCycle();
-                    //std::this_thread::sleep_for(timePercycle);
-                }
-            }
 
             window.clear(sf::Color(60, 60, 60));
 
@@ -249,6 +280,8 @@ int main()
 
             window.display();
         }
+        stop = true;
+        comThread.join();
 
         delete com;
         rawConsole(false);
