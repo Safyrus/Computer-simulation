@@ -91,10 +91,10 @@ void CPU::setPwr()
 
 int CPU::CU()
 {
-    int cmd = data >> 24 & 0xff;
-    int arg1 = data >> 16 & 0xff;
-    int arg2 = data >> 8 & 0xff;
-    int arg3 = data & 0xff;
+    int8_t cmd = data >> 24 & 0xff;
+    int8_t arg1 = data >> 16 & 0xff;
+    int8_t arg2 = data >> 8 & 0xff;
+    int8_t arg3 = data & 0xff;
     if (step != 0)
     {
         cmd = dataBack >> 24 & 0xff;
@@ -103,7 +103,7 @@ int CPU::CU()
         arg3 = dataBack & 0xff;
     }
     if (print_debug)
-        std::cout << "[CU] : cmd=" << cmd << "  arg1=" << arg1 << "  arg2=" << arg2 << "  arg3=" << arg3 << std::endl;
+        std::cout << "[CU] : cmd=" << (int)cmd << "  arg1=" << (int)arg1 << "  arg2=" << (int)arg2 << "  arg3=" << (int)arg3 << std::endl;
 
     int res = 0;
     switch (cmd)
@@ -261,9 +261,9 @@ int CPU::CU()
             adrBack = adr;
             adrBack += 4;
             adrBack %= 0xffff;
-            reg[8] = ((adrBack>>8)&0xff);
-            reg[9] = (adrBack&0xff);
-            if(print_debug)
+            reg[8] = ((adrBack >> 8) & 0xff);
+            reg[9] = (adrBack & 0xff);
+            if (print_debug)
                 std::cout << "CPU: JUMP BACK =" << reg[8] << " " << reg[9] << "\n";
             int jmp = (reg[arg2] << 8) + reg[arg3];
             adr = jmp;
@@ -279,9 +279,9 @@ int CPU::CU()
             adrBack = adr;
             adrBack += 4;
             adrBack %= 0xffff;
-            reg[8] = ((adrBack>>8)&0xff);
-            reg[9] = (adrBack&0xff);
-            if(print_debug)
+            reg[8] = ((adrBack >> 8) & 0xff);
+            reg[9] = (adrBack & 0xff);
+            if (print_debug)
                 std::cout << "CPU: JUMP BACK =" << reg[8] << " " << reg[9] << "\n";
             int jmp = (arg2 << 8) + reg[arg3];
             adr = jmp;
@@ -297,9 +297,9 @@ int CPU::CU()
             adrBack = adr;
             adrBack += 4;
             adrBack %= 0xffff;
-            reg[8] = ((adrBack>>8)&0xff);
-            reg[9] = (adrBack&0xff);
-            if(print_debug)
+            reg[8] = ((adrBack >> 8) & 0xff);
+            reg[9] = (adrBack & 0xff);
+            if (print_debug)
                 std::cout << "CPU: JUMP BACK =" << reg[8] << " " << reg[9] << "\n";
             int jmp = (reg[arg2] << 8) + arg3;
             adr = jmp;
@@ -315,9 +315,9 @@ int CPU::CU()
             adrBack = adr;
             adrBack += 4;
             adrBack %= 0xffff;
-            reg[8] = ((adrBack>>8)&0xff);
-            reg[9] = (adrBack&0xff);
-            if(print_debug)
+            reg[8] = ((adrBack >> 8) & 0xff);
+            reg[9] = (adrBack & 0xff);
+            if (print_debug)
                 std::cout << "CPU: JUMP BACK =" << reg[8] << " " << reg[9] << "\n";
             int jmp = (arg2 << 8) + arg3;
             adr = jmp;
@@ -333,9 +333,9 @@ int CPU::CU()
             adrBack = adr;
             adrBack += 4;
             adrBack %= 0xffff;
-            reg[8] = ((adrBack>>8)&0xff);
-            reg[9] = (adrBack&0xff);
-            if(print_debug)
+            reg[8] = ((adrBack >> 8) & 0xff);
+            reg[9] = (adrBack & 0xff);
+            if (print_debug)
                 std::cout << "CPU: JUMP BACK =" << reg[8] << " " << reg[9] << "\n";
             int jmp = (reg[arg2] << 8) + reg[arg3];
             adr = jmp;
@@ -351,9 +351,9 @@ int CPU::CU()
             adrBack = adr;
             adrBack += 4;
             adrBack %= 0xffff;
-            reg[8] = ((adrBack>>8)&0xff);
-            reg[9] = (adrBack&0xff);
-            if(print_debug)
+            reg[8] = ((adrBack >> 8) & 0xff);
+            reg[9] = (adrBack & 0xff);
+            if (print_debug)
                 std::cout << "CPU: JUMP BACK =" << reg[8] << " " << reg[9] << "\n";
             int jmp = (arg2 << 8) + reg[arg3];
             adr = jmp;
@@ -369,9 +369,9 @@ int CPU::CU()
             adrBack = adr;
             adrBack += 4;
             adrBack %= 0xffff;
-            reg[8] = ((adrBack>>8)&0xff);
-            reg[9] = (adrBack&0xff);
-            if(print_debug)
+            reg[8] = ((adrBack >> 8) & 0xff);
+            reg[9] = (adrBack & 0xff);
+            if (print_debug)
                 std::cout << "CPU: JUMP BACK =" << reg[8] << " " << reg[9] << "\n";
             int jmp = (reg[arg2] << 8) + arg3;
             adr = jmp;
@@ -387,9 +387,9 @@ int CPU::CU()
             adrBack = adr;
             adrBack += 4;
             adrBack %= 0xffff;
-            reg[8] = ((adrBack>>8)&0xff);
-            reg[9] = (adrBack&0xff);
-            if(print_debug)
+            reg[8] = ((adrBack >> 8) & 0xff);
+            reg[9] = (adrBack & 0xff);
+            if (print_debug)
                 std::cout << "CPU: JUMP BACK =" << reg[8] << " " << reg[9] << "\n";
             int jmp = (arg2 << 8) + arg3;
             adr = jmp;
@@ -665,98 +665,194 @@ int CPU::CU()
     return res;
 }
 
-int CPU::ALU(int a, int b, int op, bool flag)
+int8_t CPU::ALU(int8_t a, int8_t b, int8_t op, bool flag)
 {
     bool carry = false;
     int res = 0;
-    switch (op)
+    if ((reg[FLAG] & 0x10) == 0)
     {
-    case 0x0:
-        res = a + b;
-        carry = (res > 127 || res < -128);
-        break;
-    case 0x8:
-        res = a + b + 1;
-        carry = (res > 127 || res < -128);
-        break;
-    case 0x1:
-        res = a - b;
-        carry = (res > 127 || res < -128);
-        break;
-    case 0x9:
-        res = a - b - 1;
-        carry = (res > 127 || res < -128);
-        break;
-    case 0x2:
-        res = a * b;
-        carry = (res > 127 || res < -128);
-        break;
-    case 0x3:
-        if (b != 0)
+        switch (op)
         {
-            res = a / b;
+        case 0x0:
+            res = a + b;
+            carry = (res > 127 || res < -128);
+            break;
+        case 0x8:
+            res = a + b + 1;
+            carry = (res > 127 || res < -128);
+            break;
+        case 0x1:
+            res = a - b;
+            carry = (res > 127 || res < -128);
+            break;
+        case 0x9:
+            res = a - b - 1;
+            carry = (res > 127 || res < -128);
+            break;
+        case 0x2:
+            res = a * b;
+            carry = (res > 127 || res < -128);
+            break;
+        case 0x3:
+            if (b != 0)
+            {
+                res = a / b;
+            }
+            else
+            {
+                res = 0;
+            }
+            break;
+        case 0x4:
+            if (b != 0)
+            {
+                res = a % b;
+            }
+            else
+            {
+                res = 0;
+            }
+            break;
+        case 0x5:
+            res = a & b;
+            break;
+        case 0x6:
+            res = a | b;
+            break;
+        case 0x7:
+            res = a ^ b;
+            break;
+        default:
+            //no operation found
+            break;
         }
-        else
+        if (flag)
         {
-            res = 0;
+            if (a == b)
+            {
+                reg[FLAG] |= 0x04;
+            }
+            else
+            {
+                reg[FLAG] &= 0xfb;
+            }
+            if (a < b)
+            {
+                reg[FLAG] |= 0x08;
+            }
+            else
+            {
+                reg[FLAG] &= 0xf7;
+            }
+            if (a > b)
+            {
+                reg[FLAG] |= 0x02;
+            }
+            else
+            {
+                reg[FLAG] &= 0xfd;
+            }
+            if (carry)
+            {
+                reg[FLAG] |= 0x01;
+            }
+            else
+            {
+                reg[FLAG] &= 0xfe;
+            }
         }
-        break;
-    case 0x4:
-        if (b != 0)
-        {
-            res = a % b;
-        }
-        else
-        {
-            res = 0;
-        }
-        break;
-    case 0x5:
-        res = a & b;
-        break;
-    case 0x6:
-        res = a | b;
-        break;
-    case 0x7:
-        res = a ^ b;
-        break;
-    default:
-        //no operation found
-        break;
     }
-    if (flag)
+    else
     {
-        if (a == b)
+        switch (op)
         {
-            reg[FLAG] |= 0x04;
+        case 0x0:
+            res = abs(a) + abs(b);
+            carry = (res > 255);
+            break;
+        case 0x8:
+            res = abs(a) + abs(b) + 1;
+            carry = (res > 255);
+            break;
+        case 0x1:
+            res = abs(a) - abs(b);
+            carry = (res < 0);
+            break;
+        case 0x9:
+            res = abs(a) - abs(b) - 1;
+            carry = (res < 0);
+            break;
+        case 0x2:
+            res = abs(a) * abs(b);
+            carry = (res > 255);
+            break;
+        case 0x3:
+            if (abs(b) != 0)
+            {
+                res = (unsigned)a / abs(b);
+            }
+            else
+            {
+                res = 0;
+            }
+            break;
+        case 0x4:
+            if (abs(b) != 0)
+            {
+                res = (unsigned)a % abs(b);
+            }
+            else
+            {
+                res = 0;
+            }
+            break;
+        case 0x5:
+            res = abs(a) & abs(b);
+            break;
+        case 0x6:
+            res = abs(a) | abs(b);
+            break;
+        case 0x7:
+            res = abs(a) ^ abs(b);
+            break;
+        default:
+            //no operation found
+            break;
         }
-        else
+        if (flag)
         {
-            reg[FLAG] &= 0xfb;
-        }
-        if (a < b)
-        {
-            reg[FLAG] |= 0x08;
-        }
-        else
-        {
-            reg[FLAG] &= 0xf7;
-        }
-        if (a > b)
-        {
-            reg[FLAG] |= 0x02;
-        }
-        else
-        {
-            reg[FLAG] &= 0xfd;
-        }
-        if (carry)
-        {
-            reg[FLAG] |= 0x01;
-        }
-        else
-        {
-            reg[FLAG] &= 0xfe;
+            if (abs(a) == abs(b))
+            {
+                reg[FLAG] |= 0x04;
+            }
+            else
+            {
+                reg[FLAG] &= 0xfb;
+            }
+            if (abs(a) < abs(b))
+            {
+                reg[FLAG] |= 0x08;
+            }
+            else
+            {
+                reg[FLAG] &= 0xf7;
+            }
+            if (abs(a) > abs(b))
+            {
+                reg[FLAG] |= 0x02;
+            }
+            else
+            {
+                reg[FLAG] &= 0xfd;
+            }
+            if (carry)
+            {
+                reg[FLAG] |= 0x01;
+            }
+            else
+            {
+                reg[FLAG] &= 0xfe;
+            }
         }
     }
     return res;
@@ -794,12 +890,12 @@ void CPU::print(int x, int y)
     std::stringstream ss;
     ss << "\x1b[" << y << ";" << x << "H";
     std::cout << ss.str() << "|REG:";
-    std::cout << "  A=" << std::setfill('0') << std::setw(2) << (reg[1]&0xff);
-    std::cout << "  B=" << std::setfill('0') << std::setw(2) << (reg[2]&0xff);
-    std::cout << "  C=" << std::setfill('0') << std::setw(2) << (reg[3]&0xff);
-    std::cout << "  D=" << std::setfill('0') << std::setw(2) << (reg[4]&0xff);
-    std::cout << "  E=" << std::setfill('0') << std::setw(2) << (reg[5]&0xff);
-    std::cout << "  F=" << std::setfill('0') << std::setw(2) << (reg[6]&0xff);
-    std::cout << "  R=" << std::setfill('0') << std::setw(2) << (reg[7]&0xff);
+    std::cout << "  A=" << std::setfill('0') << std::setw(2) << (reg[1] & 0xff);
+    std::cout << "  B=" << std::setfill('0') << std::setw(2) << (reg[2] & 0xff);
+    std::cout << "  C=" << std::setfill('0') << std::setw(2) << (reg[3] & 0xff);
+    std::cout << "  D=" << std::setfill('0') << std::setw(2) << (reg[4] & 0xff);
+    std::cout << "  E=" << std::setfill('0') << std::setw(2) << (reg[5] & 0xff);
+    std::cout << "  F=" << std::setfill('0') << std::setw(2) << (reg[6] & 0xff);
+    std::cout << "  R=" << std::setfill('0') << std::setw(2) << (reg[7] & 0xff);
     std::cout << std::flush;
 }
