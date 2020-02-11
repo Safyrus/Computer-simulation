@@ -266,4 +266,5 @@ void Computer::display(sf::RenderWindow &window, int x, int y)
     }
     rect.setPosition(x + charSize * 16, y + charSize * 2);
     window.draw(rect);
+    cpu->display(window, x + charSize * 0, y + charSize * 5);
 }
