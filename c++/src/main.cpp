@@ -75,7 +75,7 @@ int main()
     std::thread comThread;
 
     int8_t c;
-    int fps = 30;
+    int fps = 60;
 
     sf::RenderWindow window(sf::VideoMode(640, 360), "S257-01");
     window.setFramerateLimit(1);
@@ -210,7 +210,7 @@ int main()
         rawConsole(true);
         std::cout << std::hex;
         std::cout << "\x1b[1;1H\x1b[2J";
-        com = new Computer(1);
+        com = new Computer(256);
         disk1 = new DISK(0x8000);
         disk2 = new DISK(0x4000);
         ram = new RAM(0x2000);

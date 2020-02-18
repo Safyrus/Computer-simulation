@@ -6,9 +6,9 @@
 
 
 # Setup screen
-    SET 10 E1 00 # resX
-    SET 10 E1 01 # resY
-    SET 00 E1 02 # mode
+SET 10 E1 00 # resX
+SET 10 E1 01 # resY
+SET 00 E1 02 # mode
 
 # While ...
 MAIN:
@@ -28,6 +28,7 @@ MAIN:
     # else send random value to the pixel equal to the char value
     ADD $B $A 03
     SET $R E1 $B
+    #get the data store in the screen to check if it works
     GET $C E1 $B
 
     # loop

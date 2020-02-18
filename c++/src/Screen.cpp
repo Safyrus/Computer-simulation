@@ -60,14 +60,15 @@ void Screen::setData(int8_t d)
             std::cout << (int)(data[adr * ind]) << " " << adr << std::flush;
         int colorIndex;
         //unsigned int dat = data[adr];
-        if (adr % 2 == 0)
+        colorIndex = data[adr * ind] & 0x0f;
+        /*if (adr % 2 == 0)
         {
             colorIndex = ((data[adr * ind] & 0xf0) >> 4);
         }
         else
         {
             colorIndex = data[adr * ind] & 0x0f;
-        }
+        }*/
         int r = ((color[colorIndex] & 0xc0) >> 6) * 43;
         int g = ((color[colorIndex] & 0x30) >> 4) * 43;
         int b = ((color[colorIndex] & 0x0c) >> 2) * 43;
@@ -117,7 +118,8 @@ int8_t Screen::getData()
 {
     if (adr > 15)
     {
-        return data[adr * data[3]];
+        unsigned int ind = data[3] & 0xff;
+        return data[adr * ind];
     }
     return data[adr];
 }
