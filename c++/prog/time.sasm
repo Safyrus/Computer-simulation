@@ -1,7 +1,7 @@
 
 
 # setup registers
-MOV $A 00
+MOV $A 3E
 MOV $C 00
 MOV $F 10
 

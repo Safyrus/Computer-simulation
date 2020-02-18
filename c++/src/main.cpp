@@ -75,7 +75,7 @@ int main()
     std::thread comThread;
 
     int8_t c;
-    int fps = 10;
+    int fps = 30;
 
     sf::RenderWindow window(sf::VideoMode(640, 360), "S257-01");
     window.setFramerateLimit(1);
@@ -210,7 +210,7 @@ int main()
         rawConsole(true);
         std::cout << std::hex;
         std::cout << "\x1b[1;1H\x1b[2J";
-        com = new Computer(100);
+        com = new Computer(1);
         disk1 = new DISK(0x8000);
         disk2 = new DISK(0x4000);
         ram = new RAM(0x2000);
@@ -218,7 +218,7 @@ int main()
         scr = new Screen();
         timer = new Timer();
 
-        disk1->load("prog/time");
+        disk1->load("prog/test_com_io");
         disk2->load("");
 
         com->addDevice(disk1, 0x0000, 0x7FFF);
