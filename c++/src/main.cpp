@@ -14,6 +14,7 @@
 #include "RAM.hpp"
 #include "Keyboard.hpp"
 #include "Screen.hpp"
+#include "ScreenSimple.hpp"
 #include "Timer.hpp"
 
 bool print_debug;
@@ -31,25 +32,26 @@ void run(Computer *com)
 
     while (!stop)
     {
-        if (com != NULL && com-> getPwr())
+        if (com != NULL && com->getPwr())
         {
             t2 = std::chrono::steady_clock::now();
             time_span = std::chrono::duration_cast<std::chrono::duration<long, std::nano>>(t2 - t1);
-            if(time_span >= timePercycle)
+            if (time_span >= timePercycle)
             {
                 t1 = std::chrono::steady_clock::now();
                 com->halfCycle();
-            }else
-            {
-                std::this_thread::sleep_for(timePercycle/4);
             }
-        }else
+            else
+            {
+                std::this_thread::sleep_for(timePercycle / 4);
+            }
+        }
+        else
         {
             std::this_thread::sleep_for(waiting);
         }
     }
 }
-
 
 int main()
 {
@@ -71,6 +73,7 @@ int main()
     RAM *ram;
     Keyboard *key;
     Screen *scr;
+    ScreenSimple *screen;
     Timer *timer;
     std::thread comThread;
 
@@ -210,12 +213,12 @@ int main()
         rawConsole(true);
         std::cout << std::hex;
         std::cout << "\x1b[1;1H\x1b[2J";
-        com = new Computer(256);
+        com = new Computer(64);
         disk1 = new DISK(0x8000);
         disk2 = new DISK(0x4000);
         ram = new RAM(0x2000);
         key = new Keyboard(0x08);
-        scr = new Screen();
+        screen = new ScreenSimple();
         timer = new Timer();
 
         disk1->load("prog/test_com_io");
@@ -223,22 +226,27 @@ int main()
 
         com->addDevice(disk1, 0x0000, 0x7FFF);
         com->addDevice(disk2, 0x8000, 0xBFFF);
-        com->addDevice(ram, 0xC000, 0xDFFF);
-        com->addDevice(key, 0xE000, 0xE0FF);
-        com->addDevice(scr, 0xE100, 0xE1FF);
-        com->addDevice(timer, 0xFF00, 0xFF01);
+        com->addDevice(ram, 0xC000, 0xDFFC);
+        com->addDevice(timer, 0xDFFD, 0xDFFD);
+        com->addDevice(key, 0xDFFE, 0xDFFF);
+        com->addDevice(screen, 0xE000, 0xFFFF);
 
         window.setFramerateLimit(fps);
 
-        scr->setAdr(3);
-        scr->setData(0x80);
-        for (int i = 0; i < 16; i += 2)
+        screen->setAdr(0x0000);
+        screen->setData(0xf0);
+        screen->setAdr(0x003F);
+        screen->setData(0x0f);
+        screen->setAdr(0x1FC0);
+        screen->setData(0xf0);
+        screen->setAdr(0x1FFF);
+        screen->setData(0x0f);
+        /*for (int i = 0; i < 16; i += 2)
         {
-            scr->setAdr(0x40 + i);
-            scr->setData(i << 4);
-            scr->setAdr(0x40 + i + 1);
-            scr->setData(i + 1);
-        }
+            screen->setAdr(((64 * 128) + 64) + i);
+            int pix = i + 1 + (i << 4);
+            screen->setData(pix);
+        }*/
 
         comThread = std::thread(run, com);
 
@@ -256,8 +264,13 @@ int main()
                     // Handle ASCII characters only
                     if (event.text.unicode < 128)
                     {
-                        std::cout << "key pressed: " << event.text.unicode << "\n";
-                        key->setKey(event.text.unicode);
+                        uint32_t k = event.text.unicode;
+                        if((key->getControl()&0x02) == 2)
+                        {
+                            k+=128;
+                        }
+                        std::cout << "key pressed: " << k << "\n";
+                        key->setKey(k);
                     }
                 }
                 if (event.type == sf::Event::KeyPressed)
@@ -266,9 +279,35 @@ int main()
                     {
                         com->setPwr();
                     }
+                    if (event.key.code == sf::Keyboard::LControl)
+                    {
+                        key->setControl(key->getControl() | 1);
+                    }
+                    if (event.key.code == sf::Keyboard::LAlt)
+                    {
+                        key->setControl(key->getControl() | 2);
+                    }
+                    if (event.key.code == sf::Keyboard::LShift)
+                    {
+                        key->setControl(key->getControl() | 4);
+                    }
+                }
+                if (event.type == sf::Event::KeyReleased)
+                {
+                    if (event.key.code == sf::Keyboard::LControl)
+                    {
+                        key->setControl(key->getControl() & 0xfe);
+                    }
+                    if (event.key.code == sf::Keyboard::LAlt)
+                    {
+                        key->setControl(key->getControl() & 0xfd);
+                    }
+                    if (event.key.code == sf::Keyboard::LShift)
+                    {
+                        key->setControl(key->getControl() & 0xfb);
+                    }
                 }
             }
-
 
             window.clear(sf::Color(60, 60, 60));
 
@@ -276,7 +315,7 @@ int main()
             int charSizeY = 10;
             com->display(window, 0, 0);
             key->display(window, 0, 8 * charSizeY);
-            scr->display(window, charSizeX * 30, 0);
+            screen->display(window, charSizeX * 30, 0);
 
             window.display();
         }
