@@ -19,6 +19,7 @@
 Keyboard::Keyboard(int l) : Device(l)
 {
     cursor = 0;
+    control = 0;
 }
 
 Keyboard::~Keyboard()
@@ -53,24 +54,57 @@ void Keyboard::getKey()
 
 int8_t Keyboard::getData()
 {
-    cursor--;
-    if (cursor < 0)
+    if(adr==0)
     {
-        cursor = 0;
-        return 0;
-    }
-    int8_t c = data[0];
-    for (int i = 0; i < len - 1; i++)
+        cursor--;
+        if (cursor < 0)
+        {
+            cursor = 0;
+            return 0;
+        }
+        int8_t c = data[0];
+        for (int i = 0; i < len - 1; i++)
+        {
+            data[i] = data[i + 1];
+        }
+        data[len - 1] = 0;
+        return c;
+    }else if (adr==1)
     {
-        data[i] = data[i + 1];
+        return control;
     }
-    data[len - 1] = 0;
-    return c;
+    return 0;
+    
+}
+
+void Keyboard::setControl(int8_t c)
+{
+    control = c;
+}
+
+int8_t Keyboard::getControl()
+{
+    return control;
+}
+
+void Keyboard::setData(int8_t d)
+{
+    if(adr==0)
+    {
+        setKey(d);
+    }else if (adr==1)
+    {
+        control = d;
+    }
 }
 
 void Keyboard::setKey(int c)
 {
     char key = c;
+    /*if(control&&0x02)
+    {
+        key += 128;
+    }*/
     if (key != EOF && key != 0)
     {
         data[cursor] = key;
@@ -114,6 +148,7 @@ void Keyboard::display(sf::RenderWindow &window, int x, int y)
     {
         ss << (char)(data[i]&0xff) << " ";
     }
+    ss << "\nCTRL: " << std::hex << (int)control;
     
     text.setString(ss.str());
     window.draw(text);
