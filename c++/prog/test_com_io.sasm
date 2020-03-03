@@ -1,8 +1,8 @@
 # adr of devices:
 # disk : 0000 - BFFF
-# ram  : C000 - DFFF
-# key  : E000 - E0FF
-# scr  : E100 - E1FF
+# ram  : C000 - DFFC
+# key  : DFFE - DFFF
+# scr  : E000 - FFFF
 
 
 # Setup screen
@@ -13,7 +13,7 @@ SET 00 E1 02 # mode
 # While ...
 MAIN:
     # Get char from keyboard
-    GET $A E0 00
+    GET $A DF FE
 
     # Check if something was press
     CMP $A 00
@@ -26,10 +26,11 @@ MAIN:
     JMP 04 STOP
 
     # else send random value to the pixel equal to the char value
-    ADD $B $A 03
-    SET $R E1 $B
+    OR  $B $R E0
+    MOV $C $R
+    SET $A $B $C
     #get the data store in the screen to check if it works
-    GET $C E1 $B
+    GET $D $B $C
 
     # loop
     JMP $F MAIN
