@@ -855,6 +855,7 @@ int CPU::ALU(int8_t a, int8_t b, int8_t op, bool flag)
             }
         }
     }
+    res &= 0x000000ff;
     return res;
 }
 
@@ -873,7 +874,7 @@ void CPU::stp()
         }
     }
     reg[0] = 0;
-    reg[7] = rand() & 0xff;
+    reg[7] = (unsigned)(rand()) & 0xff;
     if (print_debug)
         std::cout << "[CPU] : reg ";
     for (int i = 0; i < REGMAX; i++)
