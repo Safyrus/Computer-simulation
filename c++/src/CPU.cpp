@@ -669,29 +669,24 @@ int CPU::ALU(int8_t a, int8_t b, int8_t op, bool flag)
 {
     bool carry = false;
     int res = 0;
-    if ((reg[FLAG] & 0x10) == 0)
+    if ((reg[FLAG] & 0x10) != 0)
     {
         switch (op)
         {
         case 0x0:
             res = a + b;
-            carry = (res > 127 || res < -128);
             break;
         case 0x8:
             res = a + b + 1;
-            carry = (res > 127 || res < -128);
             break;
         case 0x1:
             res = a - b;
-            carry = (res > 127 || res < -128);
             break;
         case 0x9:
             res = a - b - 1;
-            carry = (res > 127 || res < -128);
             break;
         case 0x2:
             res = a * b;
-            carry = (res > 127 || res < -128);
             break;
         case 0x3:
             if (b != 0)
@@ -728,6 +723,7 @@ int CPU::ALU(int8_t a, int8_t b, int8_t op, bool flag)
         }
         if (flag)
         {
+            carry = (res > 127 || res < -128);
             if (a == b)
             {
                 reg[FLAG] |= 0x04;
@@ -768,23 +764,18 @@ int CPU::ALU(int8_t a, int8_t b, int8_t op, bool flag)
         {
         case 0x0:
             res = (a&0x000000ff) + (b&0x000000ff);
-            carry = (res > 255);
             break;
         case 0x8:
             res = (a&0x000000ff) + (b&0x000000ff) + 1;
-            carry = (res > 255);
             break;
         case 0x1:
             res = (a&0x000000ff) - (b&0x000000ff);
-            carry = (res < 0);
             break;
         case 0x9:
             res = (a&0x000000ff) - (b&0x000000ff) - 1;
-            carry = (res < 0);
             break;
         case 0x2:
             res = (a&0x000000ff) * (b&0x000000ff);
-            carry = (res > 255);
             break;
         case 0x3:
             if ((b&0x000000ff) != 0)
@@ -821,6 +812,7 @@ int CPU::ALU(int8_t a, int8_t b, int8_t op, bool flag)
         }
         if (flag)
         {
+            carry = ( (a&0x000000ff) + (b&0x000000ff) > 255);
             if ((a&0x000000ff) == (b&0x000000ff))
             {
                 reg[FLAG] |= 0x04;
@@ -921,7 +913,13 @@ void CPU::display(sf::RenderWindow &window, int x, int y)
     ss << "  F=" << std::uppercase << std::setfill('0') << std::setw(2) << (reg[6] & 0xff);
     ss << "  R=" << std::uppercase << std::setfill('0') << std::setw(2) << (reg[7] & 0xff) << "\n    ";
     ss << "  J1=" << std::uppercase << std::setfill('0') << std::setw(2) << (reg[8] & 0xff);
-    ss << "  J2=" << std::uppercase << std::setfill('0') << std::setw(2) << (reg[9] & 0xff);
+    ss << "  J2=" << std::uppercase << std::setfill('0') << std::setw(2) << (reg[9] & 0xff) << "\n    ";
+    ss << "  G0=" << std::uppercase << std::setfill('0') << std::setw(2) << (reg[10] & 0xff);
+    ss << "  G1=" << std::uppercase << std::setfill('0') << std::setw(2) << (reg[11] & 0xff);
+    ss << "  G2=" << std::uppercase << std::setfill('0') << std::setw(2) << (reg[12] & 0xff) << "\n    ";
+    ss << "  G3=" << std::uppercase << std::setfill('0') << std::setw(2) << (reg[13] & 0xff);
+    ss << "  G4=" << std::uppercase << std::setfill('0') << std::setw(2) << (reg[14] & 0xff);
+    ss << "  G5=" << std::uppercase << std::setfill('0') << std::setw(2) << (reg[15] & 0xff);
 
     text.setString(ss.str());
     window.draw(text);}

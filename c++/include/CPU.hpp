@@ -10,7 +10,7 @@ private:
     bool pwr;
     bool load;
 
-    static const int REGMAX = 10;
+    static const int REGMAX = 16;
     static const int FLAG = 6;
     static const int RAN = 7;
 
