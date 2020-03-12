@@ -62,10 +62,8 @@ AssemblerCompiler::AssemblerCompiler()
         {REG, REG, REG}, {REG, VAL, REG}, {REG, REG, VAL}, {REG, VAL, VAL}, {REG, LABEL}, {VAL, REG, REG}, {VAL, VAL, REG}, {VAL, REG, VAL}, {VAL, VAL, VAL}, {VAL, LABEL}};
     op_arg_size = 3;
 
-    reg_name = {
-        "X", "A", "B", "C", "D", "E", "F", "R", "J1", "J2"};
-    reg_code = {
-        0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    reg_name = { "O", "A", "B", "C", "D", "E", "F", "R", "J1", "J2", "G0", "G1", "G2", "G3", "G4", "G5"};
+    reg_code = { "00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "0A", "0B", "0C", "0D", "0E", "0F"};
 }
 
 /*AssemblerCompiler::AssemblerCompiler(const char *configFile)
@@ -212,7 +210,7 @@ void AssemblerCompiler::saveBinary(const char *f)
                 {
                     if (reg_name[j] == word.substr(1))
                     {
-                        file << std::hex << std::setfill('0') << std::setw(2) << std::to_string(reg_code[j]);
+                        file << reg_code[j];
                         break;
                     }
                 }
@@ -374,6 +372,7 @@ void AssemblerCompiler::loadAssembler_read2(const char *f)
         std::string cmd = "";
         //bool comment = false;
         bool label = false;
+        std::string labelTitle = "";
         std::vector<int> cmd_find;
 
         //set label to true if this line contain label
@@ -382,6 +381,7 @@ void AssemblerCompiler::loadAssembler_read2(const char *f)
             if (labels_pos[i] == lineCount)
             {
                 label = true;
+                labelTitle = labels[i];
                 labels_val[i] = instructionCounter * (op_arg_size + 1);
                 break;
             }
@@ -431,8 +431,13 @@ void AssemblerCompiler::loadAssembler_read2(const char *f)
             else if (label)
             {
                 if (print_debug)
-                    std::cout << "**LABEL FIND**";
-                label = false;
+                    std::cout << "**MAYBE LABEL**";
+                if (word.substr(0, word.length() - 1) == labelTitle)
+                {
+                    if (print_debug)
+                        std::cout << "**LABEL FIND**";
+                    label = false;
+                }                
             }
             //check if any arg remaind
             else if (!cmd_find.empty())

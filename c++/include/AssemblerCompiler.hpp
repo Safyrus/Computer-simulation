@@ -20,7 +20,7 @@ private:
     int8_t op_arg_size;
 
     std::vector<std::string> reg_name;
-    std::vector<int8_t> reg_code;
+    std::vector<std::string> reg_code;
 
     char char_comment;
     char char_reg;
