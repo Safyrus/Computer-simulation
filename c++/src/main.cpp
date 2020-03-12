@@ -213,7 +213,7 @@ int main()
         rawConsole(true);
         std::cout << std::hex;
         std::cout << "\x1b[1;1H\x1b[2J";
-        com = new Computer(4);
+        com = new Computer(8);
         disk1 = new DISK(0x8000);
         //disk2 = new DISK(0x4000);
         ram = new RAM(0x2000);
