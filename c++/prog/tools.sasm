@@ -1,4 +1,11 @@
 ####################===[GENERAL]===#########################
+#
+# +--------------+
+# | ver: 0.0.2.0 |
+# | by : Safyrus |
+# +--------------+
+#
+#
 # Devices adresses:
 #   0000 - 7FFF : DISK
 #   8000 - D7FF : RAM
@@ -9,7 +16,7 @@
 # memory map:
 #    x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 xA xB xC xD xE xF
 # 0x [F_P] [F_L]
-# 1x [F_1]
+# 1x [F_1] [SYSTEM_REGISTER]
 # 2x
 # 3x
 # 4x
@@ -50,9 +57,9 @@
 SYST_INIT:
 
     # var function stack size
-    SET 80 80 00
+    SET 81 80 00
     SET 00 80 01
-    SET 80 80 02
+    SET 81 80 02
     SET FF 80 03
 
 
@@ -61,64 +68,46 @@ SYST_INIT:
 ###############
 SYST_MAIN:
 
-    # put 16bit integer 1010 and 2015 in function param
-    MOV $A 10
-    MOV $B 10
-    MOV $C 20
-    MOV $D 15
-
-    # test general register
-    MOV $G1 88
-
-    # call 16bit integer compare function
-    JMP $F SYST_16_CMP
-
-    # check if result is lesser than
-    CMP $G0 FF
-    AND $F $F FE
-
-    # if OK then jump to the next instruction
-    JMP 04 MAIN_NEXT1
-    # else error
-    MOV $E 01
-    MAIN_ERROR1:
-    JMP $F MAIN_ERROR1
-
-    MAIN_NEXT1:
-    # put 16bit integer 1010 and 2015 in function param
-    MOV $A 10
-    MOV $B 10
-    MOV $C 20
-    MOV $D F5
-
-    # call the function to add two 16bit integer
-    JMP $F SYST_16_ADD
-
-    CMP $G0 31
-    JMP 04 MAIN_NEXT2
-    # else error
-    MOV $E 02
-    MAIN_ERROR2:
-    JMP $F MAIN_ERROR2
-
-    MAIN_NEXT2:
-    CMP $G1 05
-    JMP 04 MAIN_NEXT3
-    # else error
-    MOV $E 03
-    MAIN_ERROR3:
-    JMP $F MAIN_ERROR3
-
-    MAIN_NEXT3:
-    OFF
-
+JMP $F FUNC_TEST
+JMP $F FUNC_TEST_3
+OFF
 
 
 ###############
 #  FUNCTIONS  #
 ###############
 
-# nothing sorry ¯\_(ツ)_/¯
+FUNC_TEST:
+    MOV $A $J1
+    MOV $B $J2
+    JMP $F SYST_FCT_PROLOGUE
+
+    MOV $G0 11
+    MOV $G1 22
+    JMP $F FUNC_TEST_2
+
+    JMP $F SYST_FCT_EPILOGUE
+
+FUNC_TEST_2:
+    MOV $A $J1
+    MOV $B $J2
+    JMP $F SYST_FCT_PROLOGUE
+
+    MOV $G2 33
+    MOV $G3 44
+    
+    JMP $F SYST_FCT_EPILOGUE
+
+FUNC_TEST_3:
+    MOV $A $J1
+    MOV $B $J2
+    JMP $F SYST_FCT_PROLOGUE
+
+    MOV $G4 55
+    MOV $G5 66
+
+    JMP $F SYST_FCT_EPILOGUE
+
 
 ###############
 #  FUNCTIONS  #
@@ -173,6 +162,88 @@ SYST_16_ADD:
         MOV $G0 $A
         MOV $G1 $B
         JMP $F SYST_FCT1_END
+
+
+# FUNCTION PROLOGUE #
+# param  : $AB = call adress
+# return : none
+SYST_FCT_PROLOGUE:
+    SET $J1 80 10
+    SET $J2 80 11
+
+    GET $C 80 00
+    GET $D 80 01
+
+    # check if end of stack part 1
+    GET $E 80 02
+    CMP $C $E
+    AND $F $F FE
+    JMP 08 SYST_FCT_PROLOGUE_NEXT
+
+    # check if end of stack part 2
+    CMP $D FD
+    AND $F $F FE
+    JMP 02 SYST_FCT_PROLOGUE_ERROR
+    ADD $D $D 02
+    GET $E 80 03
+    CMP $D $E
+    AND $F $F FE
+    JMP 02 SYST_FCT_PROLOGUE_ERROR
+    SUB $D $D 02
+
+    SYST_FCT_PROLOGUE_NEXT:
+        # reset error reg
+        MOV $E 00
+
+        # save first part of the adress in stack
+        SET $A $C $D
+        CMP $D FF
+        AND $F $F FE
+        JMP 04 SYST_FCT_PROLOGUE_ADD
+        ADD $D $D 01
+
+        # save last part of the adress in stack
+        SET $B $C $D
+        CMP $D FF
+        AND $F $F FE
+        JMP 04 SYST_FCT_PROLOGUE_ADD
+        ADD $D $D 01
+
+        # refresh stack pointer
+        SET $C 80 00
+        SET $D 80 01
+        JMP $F SYST_FCT1_END
+    SYST_FCT_PROLOGUE_ADD:
+            ADD $C $C 01
+            JMP $F SYST_FCT1_END
+    SYST_FCT_PROLOGUE_ERROR:
+            MOV $E 01
+            JMP $F SYST_FCT1_END
+
+
+# FUNCTION EPILOGUE #
+# param  : none
+# return : none
+SYST_FCT_EPILOGUE:
+    GET $A 80 00
+    GET $B 80 01
+    CMP $B 00
+    JMP 04 SYT_FCT_EPILOGUE_SUB
+    SUB $B $B 01
+
+    GET $C $A $B
+    CMP $B 00
+    JMP 04 SYT_FCT_EPILOGUE_SUB
+    SUB $B $B 01
+    GET $D $A $B
+
+    SET $A 80 00
+    SET $B 80 01
+    JMP $F $D $C
+
+    SYT_FCT_EPILOGUE_SUB:
+            SUB $A $A 01
+            JMP $F $J1 $J2
 
 
 # FUNCTION ONE CALLBACK #
