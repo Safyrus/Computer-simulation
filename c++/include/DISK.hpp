@@ -10,4 +10,6 @@ public:
 
     bool load(const char *f);
     bool save(const char *f);
+
+    void display(sf::RenderWindow &window, int x, int y);
 };
