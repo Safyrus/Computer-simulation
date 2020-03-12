@@ -221,7 +221,7 @@ int main()
         screen = new ScreenSimple();
         timer = new Timer();
 
-        disk1->load("prog/test_com_io");
+        disk1->load("prog/tools");
         //disk2->load("");
 
         com->addDevice(disk1, 0x0000, 0x7FFF);
@@ -265,9 +265,9 @@ int main()
                     if (event.text.unicode < 128)
                     {
                         uint32_t k = event.text.unicode;
-                        if((key->getControl()&0x02) == 2)
+                        if ((key->getControl() & 0x02) == 2)
                         {
-                            k+=128;
+                            k += 128;
                         }
                         std::cout << "key pressed: " << k << "\n";
                         key->setKey(k);
@@ -317,9 +317,12 @@ int main()
 
             int charSizeX = 8;
             int charSizeY = 10;
-            com->display(window, 0, 0);
-            key->display(window, 0, 10 * charSizeY);
-            screen->display(window, charSizeX * 30, 0);
+
+            screen->display(window, 0, 0);
+            com->display(window, 0, charSizeY * 26);
+            key->display(window, charSizeX * 32, charSizeY * 34);
+            ram->display(window, charSizeX * 32, 0);
+            disk1->display(window, charSizeX * 32, charSizeY * 16);
 
             window.display();
         }

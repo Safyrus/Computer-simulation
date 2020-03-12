@@ -895,10 +895,10 @@ void CPU::print(int x, int y)
 
 void CPU::display(sf::RenderWindow &window, int x, int y)
 {
-    int charSize = 10;
     sf::Text text;
     text.setFont(baseFont);
-    text.setCharacterSize(charSize);
+    text.setCharacterSize(20);
+    text.setScale(0.5, 0.5);
 
     text.setFillColor(sf::Color::White);
     text.setPosition(x, y);

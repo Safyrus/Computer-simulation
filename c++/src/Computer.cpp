@@ -226,10 +226,12 @@ void Computer::print(int x, int y)
 
 void Computer::display(sf::RenderWindow &window, int x, int y)
 {
-    int charSize = 10;
+    int charSizeX = 8;
+    int charSizeY = 10;
     sf::Text text;
     text.setFont(baseFont);
-    text.setCharacterSize(charSize);
+    text.setCharacterSize(20);
+    text.setScale(0.5, 0.5);
 
     text.setFillColor(sf::Color::White);
     text.setPosition(x, y);
@@ -252,7 +254,7 @@ void Computer::display(sf::RenderWindow &window, int x, int y)
     text.setString(ss.str());
     window.draw(text);
 
-    sf::RectangleShape rect(sf::Vector2f(charSize, charSize * (5 / 4)));
+    sf::RectangleShape rect(sf::Vector2f(charSizeX, charSizeY));
     if (cpu->getClk())
     {
         rect.setFillColor(sf::Color::Green);
@@ -261,7 +263,7 @@ void Computer::display(sf::RenderWindow &window, int x, int y)
     {
         rect.setFillColor(sf::Color::Red);
     }
-    rect.setPosition(x + charSize * 16, y + charSize * 0);
+    rect.setPosition(x + charSizeX * 20, y + charSizeY * 0);
     window.draw(rect);
 
     if (cpu->getPwr())
@@ -272,7 +274,7 @@ void Computer::display(sf::RenderWindow &window, int x, int y)
     {
         rect.setFillColor(sf::Color::Red);
     }
-    rect.setPosition(x + charSize * 16, y + charSize * 1);
+    rect.setPosition(x + charSizeX * 20, y + charSizeY * 1);
     window.draw(rect);
 
     if (cpu->getLoad())
@@ -283,7 +285,7 @@ void Computer::display(sf::RenderWindow &window, int x, int y)
     {
         rect.setFillColor(sf::Color::Red);
     }
-    rect.setPosition(x + charSize * 16, y + charSize * 2);
+    rect.setPosition(x + charSizeX * 20, y + charSizeY * 2);
     window.draw(rect);
 
     if (pause)
@@ -294,8 +296,8 @@ void Computer::display(sf::RenderWindow &window, int x, int y)
     {
         rect.setFillColor(sf::Color::Red);
     }
-    rect.setPosition(x + charSize * 16, y + charSize * 3);
+    rect.setPosition(x + charSizeX * 20, y + charSizeY * 3);
     window.draw(rect);
 
-    cpu->display(window, x + charSize * 0, y + charSize * 5);
+    cpu->display(window, x + charSizeX * 0, y + charSizeY * 5);
 }

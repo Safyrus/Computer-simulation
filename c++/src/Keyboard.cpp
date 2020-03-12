@@ -136,9 +136,9 @@ void Keyboard::print(int x, int y)
 
 void Keyboard::display(sf::RenderWindow &window, int x, int y)
 {
-    int charSize = 10;
     sf::Text text;
-    text.setCharacterSize(charSize);
+    text.setCharacterSize(20);
+    text.setScale(0.5, 0.5);
     text.setFont(baseFont);
     text.setPosition(x, y);
     std::stringstream ss;
