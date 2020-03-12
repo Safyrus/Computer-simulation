@@ -11,6 +11,7 @@ class Computer
 private:
     unsigned int Hz;
     unsigned int cycleCount;
+    bool pause;
 
     CPU *cpu;
     std::vector<Device*> devices;
@@ -24,6 +25,8 @@ public:
 
     void setPwr();
     bool getPwr();
+    void setPause();
+    bool getPause();
     void setHz(unsigned int hz);
     void setCycle(unsigned int c);
     unsigned int getHz();
