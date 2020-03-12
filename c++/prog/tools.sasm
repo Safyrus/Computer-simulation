@@ -163,12 +163,12 @@ SYST_16_ADD:
         CMP $B $D
         AND $F $F F1
         JMP 01 SYST_16_ADD_CARRY1
-        ADD $B $B $D
         JMP $F SYST_16_ADD_STP2
     SYST_16_ADD_CARRY1:
         ADD $A $A 01
 
     SYST_16_ADD_STP2:
+        ADD $B $B $D
         ADD $A $A $C
         MOV $G0 $A
         MOV $G1 $B
