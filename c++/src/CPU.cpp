@@ -260,12 +260,12 @@ int CPU::CU()
         {
             adrBack = adr;
             adrBack += 4;
-            adrBack %= 0xffff;
+            adrBack = (adrBack&0x0000ffff);
             reg[8] = ((adrBack >> 8) & 0xff);
             reg[9] = (adrBack & 0xff);
             if (print_debug)
                 std::cout << "CPU: JUMP BACK =" << reg[8] << " " << reg[9] << "\n";
-            int jmp = (reg[arg2] << 8) + reg[arg3];
+            int jmp = ((reg[arg2] << 8)&0x0000ff00) + (reg[arg3]&0x000000ff);
             adr = jmp;
         }
         else
@@ -283,7 +283,7 @@ int CPU::CU()
             reg[9] = (adrBack & 0xff);
             if (print_debug)
                 std::cout << "CPU: JUMP BACK =" << reg[8] << " " << reg[9] << "\n";
-            int jmp = (arg2 << 8) + reg[arg3];
+            int jmp = ((arg2 << 8)&0x0000ff00) + (reg[arg3]&0x000000ff);
             adr = jmp;
         }
         else
@@ -301,7 +301,7 @@ int CPU::CU()
             reg[9] = (adrBack & 0xff);
             if (print_debug)
                 std::cout << "CPU: JUMP BACK =" << reg[8] << " " << reg[9] << "\n";
-            int jmp = (reg[arg2] << 8) + arg3;
+            int jmp = ((reg[arg2] << 8)&0x0000ff00) + (arg3&0x000000ff);
             adr = jmp;
         }
         else
@@ -319,7 +319,7 @@ int CPU::CU()
             reg[9] = (adrBack & 0xff);
             if (print_debug)
                 std::cout << "CPU: JUMP BACK =" << reg[8] << " " << reg[9] << "\n";
-            int jmp = (arg2 << 8) + arg3;
+            int jmp = ((arg2 << 8)&0x0000ff00) + (arg3&0x000000ff);
             adr = jmp;
         }
         else
@@ -337,7 +337,7 @@ int CPU::CU()
             reg[9] = (adrBack & 0xff);
             if (print_debug)
                 std::cout << "CPU: JUMP BACK =" << reg[8] << " " << reg[9] << "\n";
-            int jmp = (reg[arg2] << 8) + reg[arg3];
+            int jmp = ((reg[arg2] << 8)&0x0000ff00) + (reg[arg3]&0x000000ff);
             adr = jmp;
         }
         else
@@ -355,7 +355,7 @@ int CPU::CU()
             reg[9] = (adrBack & 0xff);
             if (print_debug)
                 std::cout << "CPU: JUMP BACK =" << reg[8] << " " << reg[9] << "\n";
-            int jmp = (arg2 << 8) + reg[arg3];
+            int jmp = ((arg2 << 8)&0x0000ff00) + (reg[arg3]&0x000000ff);
             adr = jmp;
         }
         else
@@ -373,7 +373,7 @@ int CPU::CU()
             reg[9] = (adrBack & 0xff);
             if (print_debug)
                 std::cout << "CPU: JUMP BACK =" << reg[8] << " " << reg[9] << "\n";
-            int jmp = (reg[arg2] << 8) + arg3;
+            int jmp = ((reg[arg2] << 8)&0x0000ff00) + (arg3&0x000000ff);
             adr = jmp;
         }
         else
@@ -391,7 +391,7 @@ int CPU::CU()
             reg[9] = (adrBack & 0xff);
             if (print_debug)
                 std::cout << "CPU: JUMP BACK =" << reg[8] << " " << reg[9] << "\n";
-            int jmp = (arg2 << 8) + arg3;
+            int jmp = ((arg2 << 8)&0x0000ff00) + (arg3&0x000000ff);
             adr = jmp;
         }
         else
