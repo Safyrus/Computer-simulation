@@ -213,20 +213,20 @@ int main()
         rawConsole(true);
         std::cout << std::hex;
         std::cout << "\x1b[1;1H\x1b[2J";
-        com = new Computer(64);
+        com = new Computer(4);
         disk1 = new DISK(0x8000);
-        disk2 = new DISK(0x4000);
+        //disk2 = new DISK(0x4000);
         ram = new RAM(0x2000);
         key = new Keyboard(0x08);
         screen = new ScreenSimple();
         timer = new Timer();
 
         disk1->load("prog/test_com_io");
-        disk2->load("");
+        //disk2->load("");
 
         com->addDevice(disk1, 0x0000, 0x7FFF);
-        com->addDevice(disk2, 0x8000, 0xBFFF);
-        com->addDevice(ram, 0xC000, 0xDFFC);
+        //com->addDevice(disk2, 0x8000, 0xBFFF);
+        com->addDevice(ram, 0x8000, 0xDFFC);
         com->addDevice(timer, 0xDFFD, 0xDFFD);
         com->addDevice(key, 0xDFFE, 0xDFFF);
         com->addDevice(screen, 0xE000, 0xFFFF);
@@ -279,6 +279,10 @@ int main()
                     {
                         com->setPwr();
                     }
+                    if (event.key.code == sf::Keyboard::F2)
+                    {
+                        com->setPause();
+                    }
                     if (event.key.code == sf::Keyboard::LControl)
                     {
                         key->setControl(key->getControl() | 1);
@@ -314,7 +318,7 @@ int main()
             int charSizeX = 8;
             int charSizeY = 10;
             com->display(window, 0, 0);
-            key->display(window, 0, 8 * charSizeY);
+            key->display(window, 0, 10 * charSizeY);
             screen->display(window, charSizeX * 30, 0);
 
             window.display();
