@@ -1,0 +1,184 @@
+####################===[GENERAL]===#########################
+# Devices adresses:
+#   0000 - 7FFF : DISK
+#   8000 - D7FF : RAM
+#   D800 - DFFF : IO
+#   E000 - FFFF : VRAM
+#
+#
+# memory map:
+#    x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 xA xB xC xD xE xF
+# 0x [F_P] [F_L]
+# 1x [F_1]
+# 2x
+# 3x
+# 4x
+# 5x
+# 6x
+# 7x
+#
+#
+# reg:
+#      A   B   C   D   E   ... G0-G5
+# usr: [ INPUT/GENERAL ]       [GENERAL/OUTPUT]
+# pgr: [ INPUT/GENERAL ]       [OUTPUT FUNCTION]
+#      [BACK]        [ERR]
+#
+#
+############################################################
+
+
+#####################===[ANNEX]===##########################
+#
+# MEMORY:
+#
+# F_P = Function pointer
+# F_L = Function stack length (where it end)
+# F_1 = Function One callback
+#
+#
+# FUNCTION:
+# SYST_... = Start of all functions of this program
+# FCT1 = Function one call : meaning a function that does not call any other function and therefore only needs one variable to return to the address of the call.
+#
+############################################################
+
+
+###############
+#    INIT     #
+###############
+SYST_INIT:
+
+    # var function stack size
+    SET 80 80 00
+    SET 00 80 01
+    SET 80 80 02
+    SET FF 80 03
+
+
+###############
+#  MAIN LOOP  #
+###############
+SYST_MAIN:
+
+    # put 16bit integer 1010 and 2015 in function param
+    MOV $A 10
+    MOV $B 10
+    MOV $C 20
+    MOV $D 15
+
+    # test general register
+    MOV $G1 88
+
+    # call 16bit integer compare function
+    JMP $F SYST_16_CMP
+
+    # check if result is lesser than
+    CMP $G0 FF
+    AND $F $F FE
+
+    # if OK then jump to the next instruction
+    JMP 04 MAIN_NEXT1
+    # else error
+    MOV $E 01
+    MAIN_ERROR1:
+    JMP $F MAIN_ERROR1
+
+    MAIN_NEXT1:
+    # put 16bit integer 1010 and 2015 in function param
+    MOV $A 10
+    MOV $B 10
+    MOV $C 20
+    MOV $D F5
+
+    # call the function to add two 16bit integer
+    JMP $F SYST_16_ADD
+
+    CMP $G0 31
+    JMP 04 MAIN_NEXT2
+    # else error
+    MOV $E 02
+    MAIN_ERROR2:
+    JMP $F MAIN_ERROR2
+
+    MAIN_NEXT2:
+    CMP $G1 05
+    JMP 04 MAIN_NEXT3
+    # else error
+    MOV $E 03
+    MAIN_ERROR3:
+    JMP $F MAIN_ERROR3
+
+    MAIN_NEXT3:
+    OFF
+
+
+
+###############
+#  FUNCTIONS  #
+###############
+
+# nothing sorry ¯\_(ツ)_/¯
+
+###############
+#  FUNCTIONS  #
+#  ONE CALL   #
+###############
+
+
+# 16 BIT INTERGER COMPARE#
+# param  : $AB = 1st number, $CD = 2nd number
+# return : $G0 = compare result
+SYST_16_CMP:
+    SET $J1 80 10
+    SET $J2 80 11
+
+    CMP $A $C
+    AND $F $F FE
+    JMP 02 SYST_16_CMP_GREATER
+    JMP 08 SYST_16_CMP_LESSER
+    CMP $B $D
+    AND $F $F FE
+    JMP 02 SYST_16_CMP_GREATER
+    JMP 08 SYST_16_CMP_LESSER
+
+    SYST_16_CMP_EQUAL:
+            MOV $G0 00
+            JMP $F SYST_FCT1_END
+    SYST_16_CMP_LESSER:
+            MOV $G0 FF
+            JMP $F SYST_FCT1_END
+    SYST_16_CMP_GREATER:
+            MOV $G0 01
+            JMP $F SYST_FCT1_END
+
+# 16 BIT INTERGER ADDITION #
+# param  : $AB = 1st number, $CD = 2nd number
+# return : $G0-1 = addition result
+SYST_16_ADD:
+    SET $J1 80 10
+    SET $J2 80 11
+
+    SYST_16_ADD_STP1:
+        CMP $B $D
+        AND $F $F F1
+        JMP 01 SYST_16_ADD_CARRY1
+        ADD $B $B $D
+        JMP $F SYST_16_ADD_STP2
+    SYST_16_ADD_CARRY1:
+        ADD $A $A 01
+
+    SYST_16_ADD_STP2:
+        ADD $A $A $C
+        MOV $G0 $A
+        MOV $G1 $B
+        JMP $F SYST_FCT1_END
+
+
+# FUNCTION ONE CALLBACK #
+# param  : none
+# return : none
+SYST_FCT1_END:
+    GET $C 80 10
+    GET $D 80 11
+    JMP $F $C $D
