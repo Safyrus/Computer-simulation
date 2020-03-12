@@ -660,7 +660,7 @@ int CPU::CU()
         adr += 4;
     }
 
-    adr %= 0xffff;
+    adr = (adr&0x0000ffff);
 
     return res;
 }
