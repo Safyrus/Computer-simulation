@@ -1,7 +1,7 @@
 ####################===[GENERAL]===#########################
 #
 # +--------------+
-# | ver: 0.0.2.1 |
+# | ver: 0.0.3.0 |
 # | by : Safyrus |
 # +--------------+
 #
@@ -68,11 +68,20 @@ SYST_INIT:
 ###############
 SYST_MAIN:
 
-    JMP $F FUNC_TEST
-    JMP $F FUNC_TEST_3
-    JMP $F FUNC_RECURSIVE
-    CMP $E 01
+    MOV $A 11
+    MOV $B 28
+    MOV $C 01
+    MOV $D 29
+    JMP $F SYST_16_SUB
+    CMP $G0 0F
+    JMP 04 MAIN_NXT1
+    MOV $E 01
+    JMP $F MAIN_ERROR
+    MAIN_NXT1:
+    CMP $G1 FF
     JMP 04 MAIN_STOP
+    MOV $E 02
+    JMP $F MAIN_ERROR
     MAIN_ERROR:
         JMP $F MAIN_ERROR
     MAIN_STOP:
@@ -83,46 +92,6 @@ SYST_MAIN:
 #  FUNCTIONS  #
 ###############
 
-FUNC_TEST:
-    MOV $A $J1
-    MOV $B $J2
-    JMP $F SYST_FCT1_PROLOGUE
-
-    MOV $G0 11
-    MOV $G1 22
-    JMP $F FUNC_TEST_2
-
-    JMP $F SYST_FCT1_EPILOGUE
-
-FUNC_TEST_2:
-    MOV $A $J1
-    MOV $B $J2
-    JMP $F SYST_FCT1_PROLOGUE
-
-    MOV $G2 33
-    MOV $G3 44
-    
-    JMP $F SYST_FCT1_EPILOGUE
-
-FUNC_TEST_3:
-    MOV $A $J1
-    MOV $B $J2
-    JMP $F SYST_FCT1_PROLOGUE
-
-    MOV $G4 55
-    MOV $G5 66
-
-    JMP $F SYST_FCT1_EPILOGUE
-
-FUNC_RECURSIVE:
-    MOV $A $J1
-    MOV $B $J2
-    JMP $F SYST_FCT1_PROLOGUE
-
-    ADD $G0 $G0 01
-    JMP $F FUNC_RECURSIVE
-
-    JMP $F SYST_FCT1_EPILOGUE
 
 
 ###############
@@ -167,16 +136,33 @@ SYST_16_ADD:
     SYST_16_ADD_STP1:
         CMP $B $D
         AND $F $F F1
-        JMP 01 SYST_16_ADD_CARRY1
+        JMP 01 SYST_16_ADD_CARRY
         JMP $F SYST_16_ADD_STP2
-    SYST_16_ADD_CARRY1:
+    SYST_16_ADD_CARRY:
         ADD $A $A 01
-
     SYST_16_ADD_STP2:
-        ADD $B $B $D
-        ADD $A $A $C
-        MOV $G0 $A
-        MOV $G1 $B
+        ADD $G1 $B $D
+        ADD $G0 $A $C
+        JMP $F SYST_FCT1_END
+
+
+# 16 BIT INTERGER SUBSTRACTION #
+# param  : $AB = 1st number, $CD = 2nd number
+# return : $G0-1 = substraction result
+SYST_16_SUB:
+    SET $J1 80 10
+    SET $J2 80 11
+
+    SYST_16_SUB_STP1:
+        CMP $B $D
+        AND $F $F FE
+        JMP 08 SYST_16_SUB_BORROW
+        JMP $F SYST_16_SUB_STP2
+    SYST_16_SUB_BORROW:
+        SUB $A $A 01
+    SYST_16_SUB_STP2:
+        SUB $G1 $B $D
+        SUB $G0 $A $C
         JMP $F SYST_FCT1_END
 
 
