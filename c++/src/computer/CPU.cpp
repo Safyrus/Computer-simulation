@@ -1,7 +1,7 @@
 #include <iostream>
 #include <iomanip>
 #include <sstream>
-#include "CPU.hpp"
+#include "computer/CPU.hpp"
 #include "global.hpp"
 
 CPU::CPU()

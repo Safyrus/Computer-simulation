@@ -1,5 +1,5 @@
 #include <iostream>
-#include "Device.hpp"
+#include "computer/Device.hpp"
 #include "global.hpp"
 
 Device::Device()

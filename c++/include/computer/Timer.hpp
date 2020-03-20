@@ -1,5 +1,5 @@
 #pragma once
-#include "Device.hpp"
+#include "computer/Device.hpp"
 
 class Timer : public Device
 {

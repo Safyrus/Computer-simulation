@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include "Device.hpp"
+#include "computer/Device.hpp"
 
 class Keyboard : public Device
 {

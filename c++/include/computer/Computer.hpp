@@ -3,8 +3,8 @@
 
 #include <SFML/Graphics.hpp>
 
-#include "CPU.hpp"
-#include "Device.hpp"
+#include "computer/CPU.hpp"
+#include "computer/Device.hpp"
 
 class Computer
 {

@@ -5,7 +5,7 @@
 
 #include <SFML/Graphics.hpp>
 
-#include "Computer.hpp"
+#include "computer/Computer.hpp"
 #include "global.hpp"
 
 Computer::Computer()
