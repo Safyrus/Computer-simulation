@@ -1,0 +1,28 @@
+@prog/b.sasm
+
+NOP
+
+THING:
+FF FF A8 %14 49
+$A $B $C $D $E
+:LABEL
+
+
+MOV $A 01
+MOV $B $A
+
+GET $D :THING
+
+SET 05 75 $B
+SET $A 75 00
+
+# some comment
+
+AND $A 12 %100
+
+    LABEL: #another comment OFF
+
+LABEL2: JMP $F :LABEL2
+
+
+OFF

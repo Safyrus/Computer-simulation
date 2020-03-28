@@ -1,0 +1,12 @@
+MOV $C 03
+
+CMP %10                              $C
+
+JMP
+                $F
+  :STOP
+
+
+
+                 STOP:
+                  OFF
