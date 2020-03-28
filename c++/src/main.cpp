@@ -3,10 +3,15 @@
 #include <chrono>
 #include <thread>
 #include <atomic>
+#include <fstream>
+#include <string.h>
 
 #include <SFML/Graphics.hpp>
 
 #include "assembler/AssemblerCompiler.hpp"
+#include "assembler/Interpreter.hpp"
+#include "assembler/Parser.hpp"
+#include "assembler/Lexer.hpp"
 #include "computer/Computer.hpp"
 #include "computer/DISK.hpp"
 #include "global.hpp"
@@ -17,7 +22,7 @@
 #include "computer/ScreenSimple.hpp"
 #include "computer/Timer.hpp"
 
-bool print_debug;
+bool print_debug = false;
 sf::Font baseFont;
 
 std::atomic<bool> stop = false;
@@ -53,9 +58,75 @@ void run(Computer *com)
     }
 }
 
-int main()
+std::string openFile(std::string f)
 {
-    print_debug = false;
+    //open file
+    std::string fileName = f;
+    std::ifstream file;
+    file.open(f);
+    if (!file.is_open())
+    {
+        std::string e = "Unable to open file " + fileName + "\n";
+        throw e;
+    }
+    else
+    {
+        if (print_debug)
+            std::cout << "file " + fileName + " open \n";
+    }
+
+    // get file content
+    if (print_debug)
+        std::cout << "read file " + fileName + " ...";
+    std::string str = "";
+    std::string line = "";
+    while (getline(file, line))
+    {
+        str += line + '\n';
+    }
+    if (print_debug)
+        std::cout << "done\n";
+
+    //close file
+    file.close();
+    if (print_debug)
+        std::cout << "file " + fileName + " close\n";
+
+    return str;
+}
+
+void writeFile(std::string content, std::string fileName)
+{
+    std::ofstream file;
+    file.open(fileName);
+    int spaceCount = 0;
+    for (unsigned int i = 0; i < content.size(); i++)
+    {
+        file << content[i];
+        if (content[i] == ' ')
+        {
+            spaceCount++;
+            if (spaceCount >= 16)
+            {
+                file << '\n';
+                spaceCount = 0;
+            }
+            else if (spaceCount % 4 == 0)
+            {
+                file << ' ';
+            }
+        }
+    }
+    file.close();
+}
+
+int main(int argc, char const *argv[])
+{
+    if (argc > 1)
+    {
+        if (strcmp(argv[1], "true")==0 || strcmp(argv[1], "1")==0)
+            print_debug = true;
+    }
     if (!baseFont.loadFromFile("test.ttf"))
     {
         std::cout << "ERROR: could not load font";
@@ -76,14 +147,29 @@ int main()
     ScreenSimple *screen;
     Timer *timer;
     std::thread comThread;
-
     int8_t c;
+
+    //Assembler
+    Lexer *lexer;
+    Parser *parser;
+    Interpreter *interpreter;
+    std::vector<Token> tokens;
+    std::vector<Node *> nodes;
+    bool error = false;
+    std::string fileOut = "";
+    std::string content = "";
+
     int fps = 60;
+    int hz = 8;
+    if (argc > 3)
+    {
+        hz = std::stoi(argv[3], NULL, 10);
+    }
 
     sf::RenderWindow window(sf::VideoMode(640, 360), "S257-01");
-    window.setFramerateLimit(1);
+    window.setFramerateLimit(fps);
 
-    std::cout << "--- What do you want to test ? ---\n0 - Assembler\n1 - CPU\n2 - Input\n3 - Screen\n4 - Computer\n5 - SFML" << std::endl;
+    std::cout << "--- What do you want to test ? ---\n0 - Old assembler(don't use)\n1 - test CPU\n2 - test Input\n3 - test Screen\n4 - test Computer\n5 - SFML\n6 - Assembler" << std::endl;
     std::cin >> choice;
     switch (choice)
     {
@@ -213,7 +299,7 @@ int main()
         rawConsole(true);
         std::cout << std::hex;
         std::cout << "\x1b[1;1H\x1b[2J";
-        com = new Computer(8);
+        com = new Computer(hz);
         disk1 = new DISK(0x8000);
         //disk2 = new DISK(0x4000);
         ram = new RAM(0x2000);
@@ -221,7 +307,15 @@ int main()
         screen = new ScreenSimple();
         timer = new Timer();
 
-        disk1->load("prog/tools");
+        if (argc > 2)
+        {
+            file = argv[2];
+        }else
+        {
+            file = "prog/test_com_io";
+        }
+        
+        disk1->load(file.c_str());
         //disk2->load("");
 
         com->addDevice(disk1, 0x0000, 0x7FFF);
@@ -331,6 +425,100 @@ int main()
 
         delete com;
         rawConsole(false);
+        break;
+    case 6:
+        std::cout << "--- Enter file name to assemble ---" << std::endl;
+        std::cin >> file;
+        try
+        {
+            content = openFile(file);
+        }
+        catch (std::string e)
+        {
+            std::cout << e;
+            break;
+        }
+
+        //lexing
+        lexer = new Lexer(content, file);
+        tokens = lexer->makeToken();
+        delete lexer;
+
+        //verif lexing
+        for (unsigned int i = 0; i < tokens.size(); i++)
+        {
+            if (tokens[i].getType() == Token::ERROR)
+            {
+                error = true;
+            }
+            if (print_debug)
+            {
+                tokens[i].print();
+                std::cout << ", ";
+            }
+        }
+        if (print_debug)
+            std::cout << "\n\n";
+        if (error)
+        {
+            std::cout << "Error during Lexing, cannot continue\n"
+                      << std::flush;
+            break;
+        }
+
+        //parsing
+        parser = new Parser(tokens);
+        nodes = parser->parse();
+        delete parser;
+
+        //print parsing
+        for (unsigned int i = 0; i < nodes.size(); i++)
+        {
+            if (print_debug)
+                nodes[i]->print();
+            if (nodes[i]->getToken(0).getType().compare(Token::ERROR) == 0)
+            {
+                error = true;
+            }
+            if (print_debug)
+                std::cout << ", ";
+        }
+        if (print_debug)
+            std::cout << "\n\n";
+        if (error)
+        {
+            std::cout << "Error during Parsing, cannot continue\n"
+                      << std::flush;
+            for (unsigned int i = 0; i < nodes.size(); i++)
+            {
+                delete nodes[i];
+            }
+            break;
+        }
+
+        //interpreting
+        interpreter = new Interpreter(nodes, file);
+        fileOut = interpreter->interprete();
+        delete interpreter;
+
+        //verif interpreting
+        std::cout << "\n\n"
+                  << std::flush;
+        if (print_debug)
+            std::cout << fileOut;
+
+        for (unsigned int i = 0; i < nodes.size(); i++)
+        {
+            delete nodes[i];
+        }
+        error = fileOut.find("FFFFFFFF") != std::string::npos;
+        if (error)
+        {
+            std::cout << "Error during Interpreting, cannot continue\n";
+            break;
+        }
+        writeFile(fileOut, file.substr(0, file.find_last_of('.')));
+
         break;
     default:
         break;
