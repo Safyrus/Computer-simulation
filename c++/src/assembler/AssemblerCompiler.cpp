@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 #include <sstream>
-#include "AssemblerCompiler.hpp"
+#include "assembler/AssemblerCompiler.hpp"
 #include "global.hpp"
 
 bool isHex(const std::string &s)

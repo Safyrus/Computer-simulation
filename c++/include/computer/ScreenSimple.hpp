@@ -3,25 +3,22 @@
 
 #include <SFML/Graphics.hpp>
 
-#include "Device.hpp"
+#include "computer/Device.hpp"
 
-class Screen : public Device
+class ScreenSimple : public Device
 {
 private:
-    const int W = 256;
-    const int H = 250;
+    const int W = 128;
+    const int H = 128;
     sf::RenderTexture RT;
     std::vector<sf::Vertex> pixMat;
 
-    int8_t color[16];
+    sf::Color color[16];
 public:
-    Screen();
-    ~Screen();
+    ScreenSimple();
+    ~ScreenSimple();
 
     void setData(int8_t d);
-    int8_t getData();
-    void setAdr(int a);
 
-    void print(int x, int y);
     void display(sf::RenderWindow &window, int x, int y);
 };

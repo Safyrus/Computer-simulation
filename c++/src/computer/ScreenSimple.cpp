@@ -3,7 +3,7 @@
 
 #include <SFML/Graphics.hpp>
 
-#include "ScreenSimple.hpp"
+#include "computer/ScreenSimple.hpp"
 #include "global.hpp"
 
 ScreenSimple::ScreenSimple()

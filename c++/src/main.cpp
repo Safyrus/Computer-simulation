@@ -6,16 +6,16 @@
 
 #include <SFML/Graphics.hpp>
 
-#include "AssemblerCompiler.hpp"
-#include "Computer.hpp"
-#include "DISK.hpp"
+#include "assembler/AssemblerCompiler.hpp"
+#include "computer/Computer.hpp"
+#include "computer/DISK.hpp"
 #include "global.hpp"
 #include "console.hpp"
-#include "RAM.hpp"
-#include "Keyboard.hpp"
-#include "Screen.hpp"
-#include "ScreenSimple.hpp"
-#include "Timer.hpp"
+#include "computer/RAM.hpp"
+#include "computer/Keyboard.hpp"
+#include "computer/Screen.hpp"
+#include "computer/ScreenSimple.hpp"
+#include "computer/Timer.hpp"
 
 bool print_debug;
 sf::Font baseFont;
