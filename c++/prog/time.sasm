@@ -8,10 +8,10 @@ MOV $F 10
 WAIT:
 GET $B FF 00    # get current ms
 CMP $A $B       # while current ms < A
-JMP 19 STEP     #   wait
-JMP $F WAIT     # overwise step
+JMP 19 :STEP     #   wait
+JMP $F :WAIT     # overwise step
 
 STEP:
 ADD $C $C 01    # inc C
 ADD $A $A 40    # add to A ms to wait
-JMP $F WAIT     # go back to wait
+JMP $F :WAIT     # go back to wait
