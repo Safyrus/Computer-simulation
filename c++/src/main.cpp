@@ -44,6 +44,7 @@ void run(Computer *com)
             if (time_span >= timePercycle)
             {
                 t1 = std::chrono::steady_clock::now();
+                timePercycle = (std::chrono::nanoseconds)(1000000000 / com->getHz());
                 com->halfCycle();
             }
             else
@@ -301,7 +302,6 @@ int main(int argc, char const *argv[])
         std::cout << "\x1b[1;1H\x1b[2J";
         com = new Computer(hz);
         disk1 = new DISK(0x8000);
-        //disk2 = new DISK(0x4000);
         ram = new RAM(0x2000);
         key = new Keyboard(0x08);
         screen = new ScreenSimple();
@@ -316,32 +316,14 @@ int main(int argc, char const *argv[])
         }
         
         disk1->load(file.c_str());
-        //disk2->load("");
 
         com->addDevice(disk1, 0x0000, 0x7FFF);
-        //com->addDevice(disk2, 0x8000, 0xBFFF);
         com->addDevice(ram, 0x8000, 0xDFFC);
         com->addDevice(timer, 0xDFFD, 0xDFFD);
         com->addDevice(key, 0xDFFE, 0xDFFF);
         com->addDevice(screen, 0xE000, 0xFFFF);
 
         window.setFramerateLimit(fps);
-
-        screen->setAdr(0x0000);
-        screen->setData(0xf0);
-        screen->setAdr(0x003F);
-        screen->setData(0x0f);
-        screen->setAdr(0x1FC0);
-        screen->setData(0xf0);
-        screen->setAdr(0x1FFF);
-        screen->setData(0x0f);
-        /*for (int i = 0; i < 16; i += 2)
-        {
-            screen->setAdr(((64 * 128) + 64) + i);
-            int pix = i + 1 + (i << 4);
-            screen->setData(pix);
-        }*/
-
         comThread = std::thread(run, com);
 
         while (window.isOpen())
@@ -376,6 +358,18 @@ int main(int argc, char const *argv[])
                     if (event.key.code == sf::Keyboard::F2)
                     {
                         com->setPause();
+                    }
+                    if (event.key.code == sf::Keyboard::F3)
+                    {
+                        hz = (int)(hz/2.0);
+                        if(hz == 0)
+                            hz = 1;
+                        com->setHz(hz);
+                    }
+                    if (event.key.code == sf::Keyboard::F4)
+                    {
+                        hz = (int)(hz*2.0);
+                        com->setHz(hz);
                     }
                     if (event.key.code == sf::Keyboard::LControl)
                     {
