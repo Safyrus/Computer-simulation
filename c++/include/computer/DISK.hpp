@@ -8,6 +8,8 @@ public:
     DISK(int l);
     ~DISK();
 
+    void reset();
+
     bool load(const char *f);
     bool save(const char *f);
 

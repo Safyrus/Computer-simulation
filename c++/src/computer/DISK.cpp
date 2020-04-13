@@ -154,3 +154,12 @@ void DISK::display(sf::RenderWindow &window, int x, int y)
     text.setString(ss.str());
     window.draw(text);
 }
+
+void DISK::reset()
+{
+    if(print_debug)
+        std::cout << "reset disk\n";
+    adr = 0;
+    if(print_debug)
+        std::cout << "end reset disk\n";
+}

@@ -71,3 +71,16 @@ int Device::getLen()
 {
     return len;
 }
+
+void Device::reset()
+{
+    if(print_debug)
+        std::cout << "reset device\n";
+    adr = 0;
+    for (int i = 0; i < len; i++)
+    {
+        data[i] = 0;
+    }
+    if(print_debug)
+        std::cout << "end reset device\n";
+}

@@ -136,7 +136,14 @@ void Computer::cycle()
 void Computer::setPwr()
 {
     cpu->setPwr();
-    cycleCount = 0;
+    if(cpu->getPwr())
+    {
+        cycleCount = 0;
+        for (unsigned int i = 0; i < devices.size(); i++)
+        {
+            devices[i]->reset();
+        }
+    }
 }
 
 bool Computer::getPwr()

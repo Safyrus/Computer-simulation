@@ -13,6 +13,7 @@ public:
     Device(int l);
     virtual ~Device();
 
+    virtual void reset();
     virtual int getAdr();
     virtual void setAdr(int a);
     virtual int8_t getData();

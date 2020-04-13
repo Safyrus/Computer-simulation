@@ -12,4 +12,5 @@ public:
     int8_t getData();
     int getData4();
     void setData(int8_t d);
+    void reset();
 };

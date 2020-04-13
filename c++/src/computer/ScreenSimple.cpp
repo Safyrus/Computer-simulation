@@ -37,7 +37,7 @@ ScreenSimple::ScreenSimple()
     pixMat.resize(W * H);
     for (int i = 0; i < H; ++i)
         for (int j = 0; j < W; ++j)
-            pixMat[(i * W) + j] = sf::Vertex(sf::Vector2f(j + .5f, i + .5f), color[0]);
+            pixMat[(i * W) + j] = sf::Vertex(sf::Vector2f(j + .5f, i + .5f), color[(j*16/W)]);
 }
 
 ScreenSimple::~ScreenSimple()
@@ -66,4 +66,16 @@ void ScreenSimple::display(sf::RenderWindow &window, int x, int y)
     spr.setPosition((float)x, (float)y);
     spr.setScale(2, 2);
     window.draw(spr);
+}
+
+void ScreenSimple::reset()
+{
+    adr = 0;
+    for (int i = 0; i < len; i++)
+    {
+        data[i] = 0;
+    }
+    for (int i = 0; i < H; ++i)
+        for (int j = 0; j < W; ++j)
+            pixMat[(i * W) + j] = sf::Vertex(sf::Vector2f(j + .5f, i + .5f), color[0]);
 }

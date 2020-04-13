@@ -19,6 +19,7 @@ public:
     ~ScreenSimple();
 
     void setData(int8_t d);
+    void reset();
 
     void display(sf::RenderWindow &window, int x, int y);
 };

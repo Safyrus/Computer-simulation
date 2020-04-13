@@ -1,5 +1,6 @@
 #include <chrono>
 #include <iostream>
+#include "global.hpp"
 #include "computer/Timer.hpp"
 
 Timer::Timer()
@@ -15,6 +16,8 @@ Timer::~Timer()
 void Timer::setData(int8_t d)
 {
     //do nothing
+    if(false)
+        std::cout << d;
 }
 
 int Timer::getData4()
@@ -37,4 +40,13 @@ int8_t Timer::getData()
         return 0;
         break;
     }
+}
+
+void Timer::reset()
+{
+    if(print_debug)
+        std::cout << "reset timer\n";
+    adr = 0;
+    if(print_debug)
+        std::cout << "end reset timer\n";
 }
