@@ -1,0 +1,82 @@
+tools version history:
+    legend:
+        versionning: (Totaly new program).(major functionnality).(minor functionnality).(fix)
+        signes:
+            # : added something big
+            + : added something
+            ~ : changed something
+            * : changed something big
+            - : removed something
+            = : removed something big
+
+    - 0.0.1.0 [2020/03/12]:
+                            # Creation of the first version of the OS. Contains an initialization phase followed by a main phase.
+                            # 2 function about 16bit integers can be used, one to compare them and the other to add them.
+                            # 1 function(SYST_FCT1_END) allows you to return to the location of the call.
+                            + Beginning of memory allocation to have more advanced functions (able to use a stack).
+                            + Added comments to help understand the code.
+
+
+    - 0.0.1.1 [2020/03/12]:
+                            ~ Fixed 16 bit addition: fixed a bug during the carry. the addition of the lower part did not occur.
+
+
+    - 0.0.2.0 [2020/03/12]:
+                            # Added 2 functions (prologue and epilogue) to make custom functions.
+                            + Added version number and author in the program.
+                            + Added 3 custom functions (use for testing, they just put values in registers).
+                            - Remove the old main function.
+                            + Added new main function to test custom functions.
+                            ~ Fixed function stack adress.
+
+
+    - 0.0.2.1 [2020/03/12]:
+                            ~ Fixed prologue function: now calls epilogue if stack is full.
+                            ~ Renamed SYST_FCT_PROLOGUE in SYST_FCT1_PROLOGUE and SYST_FCT_EPILOGUE in SYST_FCT1_EPILOGUE.
+                            + Added a recursive function to fill the stack.
+                            ~ Fixed prolog function: will now go to the end of the stack and won't leave 2 bytes out.
+
+
+    - 0.0.3.0 [2020/03/14]:
+                            + Added a 16bit substraction function.
+                            ~ Optimised a little bit the 16bit add function.
+                            - Removed test functions.
+                            ~ Changed main function to test 16bit sub.
+
+
+    Device update
+    - 0.1.0.0 [2020/04/13]:
+                    Addition:
+                        General:
+                            # Added 7 tests in main
+                            + Added a location in RAM to store reg from A to E
+                            + Added error codes to functions
+                            + Added a function to shift 16bits number
+                            + Added 2 function to load and save register in RAM
+                        Device:
+                            + Added a location in RAM where to find devices
+                            # Added a function to get device adress
+                            # Added a function to get device length
+                            # Added a function to transmit data to any devices(driver need to be install)
+                            + Added a driver for keyboard
+                        Variable stack:
+                            + Added a stack to store values
+                            # Added a function to push a value in the stack
+                            # Added a function to pop a value in the stack
+                            # Added a function to push general registers in the stack
+                            # Added a function to pop general registers in the stack
+                        Graphics:
+                            # Added 2 functions to draw a pixel to the screen(one of them will be remove soon)
+                            # Added a file with font data
+                            # Added a function to draw characters to the screen
+                            + Added locations in RAM to store graphical data(like screen location, cursor position, etc)
+                    Modification:
+                        Fix:
+                            ~ Fixed functions that use the flag register to jump
+                            ~ Fixed comments about functions
+                        Organisation:
+                            ~ Changed param and return regs for some functions
+                            ~ separate the code in muliple files
+                            ~ Renamed "function one call" by "subroutine"
+                            ~ move subroutine in a separated file
+                            ~ Replaced FCT1 by FCT in some subroutine name

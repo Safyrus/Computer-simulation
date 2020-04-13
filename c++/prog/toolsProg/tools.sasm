@@ -1,0 +1,914 @@
+####################===[GENERAL]===#########################
+#
+# +--------------+
+# | ver: 0.1.0.0 |
+# | by : Safyrus |
+# +--------------+
+#
+#
+# Devices adresses:
+#   0000 - 7FFF : DISK
+#   8000 - D7FF : RAM
+#   D800 - DFFF : IO
+#   E000 - FFFF : VRAM
+#
+#
+# memory map:
+# 80 x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 xA xB xC xD xE xF
+# 0x [F_P] [F_L] [VAR STACK]
+# 1x [RTN] [ SAVE ABCDE ] [] [   SYSTEM_REGISTER   ]
+# 2x [                DEVICE ADRESS                ]
+# 3x [                DEVICE ADRESS                ]
+# 4x [SCRN][CURS][C_A][CO]
+# 5x
+# 6x
+# ..
+#
+# other memory location are alocated in SYST_INIT (like function stack)
+#
+############################################################
+
+
+###################===[FUNCTIONS]===########################
+#
+# register use for function:
+#   IN : A-F = param
+#   OUT: E   = error
+#        ??? = return
+#
+############################################################
+
+#####################===[ANNEX]===##########################
+#
+# MEMORY:
+#
+# F_P  = Function pointer
+# F_L  = Function stack length (where it end)
+# RTN  = Subroutine callback
+# SCRN = screen location
+# CURS = cursor position for characters
+# C_A  = cursor adress
+# CO   = color for the front and the back of characters
+#
+#
+# FUNCTION:
+# SYST_... = Start of all functions of this program
+#
+############################################################
+
+
+####################===[DEVICES]===#########################
+#
+# CODE:
+#   00 - no device
+#   01 - DISK
+#   02 - RAM
+#   03 - KEYBOARD
+#   04 - SCREEN
+#
+# memory:
+# devices adresses are represented by an array of pair(code, start adress)
+#
+############################################################
+
+
+#####################===[ERROR]===##########################
+#
+# 01 = function stack full
+# 02 = function stack empty
+# 03 = variable stack full
+# 04 = variable stack empty
+# 05 = can't push in variable stack
+# 06 = can't pop in variable stack
+# 07 = device not found
+# 08 = no driver found
+#
+############################################################
+
+JMP $F :SYST_INIT
+#import data
+@prog/toolsDevData.sasm
+#import functions one call
+@prog/toolsDevSubRoutine.sasm
+
+
+###############
+#    INIT     #
+###############
+SYST_INIT:
+
+    # function stack
+    SET 81 80 00
+    SET 00 80 01
+    SET 81 80 02
+    SET 1F 80 03
+
+    # function stack
+    SET 81 80 04
+    SET 20 80 05
+    SET 81 80 06
+    SET 20 80 07
+    SET 81 80 08
+    SET 3D 80 09
+
+    ###devices adresses###
+    # number of devices
+    SET 04 80 20
+    # max number of devices
+    SET 0A 80 21
+    # DISK
+    SET 01 80 22
+    SET 00 80 23
+    SET 00 80 24
+    # RAM
+    SET 02 80 25
+    SET 80 80 26
+    SET 00 80 27
+    # KEYBOARD
+    SET 03 80 28
+    SET DF 80 29
+    SET FE 80 2A
+    # SCREEN
+    SET 04 80 2B
+    SET E0 80 2C
+    SET 00 80 2D
+
+    # save screen location
+    SET E0 80 40
+    SET 00 80 41
+
+    SET 00 80 42
+    SET 00 80 43
+    SET E0 80 44
+    SET 00 80 45
+    SET F0 80 46
+
+###############
+#  MAIN LOOP  #
+###############
+SYST_MAIN:
+
+    SYST_MAIN_TEST_CHAR:
+        GET $A DF FE
+        CMP $A 00
+        JMP 04 :SYST_MAIN_TEST_CHAR
+
+        JMP $F :SYST_GRAPHICS_DRAW_CHAR
+
+        JMP $F :SYST_MAIN_TEST_CHAR
+
+    SYST_MAIN_TEST_SCREEN:
+        MOV $A E0
+        MOV $B 00
+        MOV $C 00
+        MOV $D 00
+        MOV $E 0F
+        JMP $F :SYST_DEV_SCREEN_DRAW_PIXEL
+
+        MOV $A E0
+        MOV $B 00
+        MOV $C 00
+        MOV $D 01
+        MOV $E 0A
+        JMP $F :SYST_DEV_SCREEN_DRAW_PIXEL
+
+        MOV $A E0
+        MOV $B 00
+        MOV $C 01
+        MOV $D 00
+        MOV $E 09
+        JMP $F :SYST_DEV_SCREEN_DRAW_PIXEL
+
+        MOV $G0 00
+        SYST_MAIN_TEST_SCREEN_DO:
+            CMP $G0 80
+            AND $F $F 0E
+            JMP 04 :SYST_MAIN_TEST_SCREEN_DONE
+
+            # save general registers
+            JMP $F :SYST_PUSH_GENERAL
+            CMP $E 00
+            MOV $E 87
+            JMP 02 :SYST_MAIN_ERROR
+            # insert param
+            MOV $A E0
+            MOV $B 00
+            MOV $C 3F
+            MOV $D $G0
+            MOD $E $G0 10
+            #call function
+            JMP $F :SYST_DEV_SCREEN_DRAW_PIXEL
+            #restor general registers
+            JMP $F :SYST_POP_GENERAL
+            MOV $F 00
+
+            ADD $G0 $G0 01
+            JMP $F :SYST_MAIN_TEST_SCREEN_DO
+        SYST_MAIN_TEST_SCREEN_DONE:
+
+        MOV $G0 00
+        SYST_MAIN_TEST_SCREEN_DO_2:
+            CMP $G0 80
+            AND $F $F 0E
+            JMP 04 :SYST_MAIN_TEST_SCREEN_DONE_2
+
+            # insert param
+            MOV $A 4F
+            MOV $B $G0
+            MOD $C $G0 10
+            #call function
+            JMP $F :SYST_GRAPHICS_DRAW_PIX
+
+            ADD $G0 $G0 01
+            JMP $F :SYST_MAIN_TEST_SCREEN_DO_2
+        SYST_MAIN_TEST_SCREEN_DONE_2:
+        OFF
+
+    SYST_MAIN_TEST_DEVICE_TRANSMIT:
+        MOV $A 00
+        JMP $F :SYST_DEV_TRANSMIT
+        CMP $E 00
+        JMP 04 :SYST_MAIN_ERROR
+
+        MOV $A 01 #actually, no driver for the disk is install
+        JMP $F :SYST_DEV_TRANSMIT
+        CMP $E 00
+        JMP 04 :SYST_MAIN_ERROR
+
+        SYST_MAIN_TEST_DEVICE_TRANSMIT_KEY:
+        MOV $A 03
+        JMP $F :SYST_DEV_TRANSMIT
+        CMP $D 61
+        JMP 04 :SYST_MAIN_STOP
+        JMP $F :SYST_MAIN_TEST_DEVICE_TRANSMIT_KEY
+
+    SYST_MAIN_TEST_DEVICE:
+        # save general registers
+        JMP $F :SYST_PUSH_GENERAL
+        CMP $E 00
+        JMP 02 :SYST_MAIN_ERROR
+
+        # insert param
+        MOV $A 02
+
+        #call function
+        JMP $F :SYST_DEV_GET_ADR
+
+        #restor general registers
+        JMP $F :SYST_POP_GENERAL
+
+        MOV $F 00
+        CMP $A 80
+        AND $F $F FE
+        JMP 04 :SYST_MAIN_NEXT1
+        MOV $E 81
+        JMP $F :SYST_MAIN_ERROR
+
+        SYST_MAIN_NEXT1:
+        CMP $B 00
+        AND $F $F FE
+        JMP 04 :SYST_MAIN_NEXT2
+        MOV $E 82
+        JMP $F :SYST_MAIN_ERROR
+
+        SYST_MAIN_NEXT2:
+        MOV $A 02
+        JMP $F :SYST_DEV_GET_LENGTH
+        CMP $A 5F
+        AND $F $F 0E
+        JMP 04 :SYST_MAIN_NEXT3
+        MOV $E 83
+        JMP $F :SYST_MAIN_ERROR
+
+        SYST_MAIN_NEXT3:
+        CMP $B F0
+        AND $F $F FE
+        JMP 04 :SYST_MAIN_STOP
+        MOV $E 84
+        JMP $F :SYST_MAIN_ERROR
+
+    SYST_MAIN_TEST_STACK_GENERAL:
+        MOV $G0 11
+        MOV $G1 22
+        MOV $G2 33
+        MOV $G3 44
+        MOV $G4 55
+        MOV $G5 66
+        JMP $F :SYST_PUSH_GENERAL
+        CMP $E 00
+        JMP 02 :SYST_MAIN_ERROR
+        JMP $F :SYST_PUSH_GENERAL
+        CMP $E 00
+        JMP 04 :SYST_MAIN_ERROR
+
+        MOV $G0 00
+        MOV $G1 00
+        MOV $G2 00
+        MOV $G3 00
+        MOV $G4 00
+        MOV $G5 00
+        JMP $F :SYST_POP_GENERAL
+        CMP $E 00
+        JMP 02 :SYST_MAIN_ERROR
+        JMP $F :SYST_POP_GENERAL
+        CMP $E 00
+        JMP 04 :SYST_MAIN_ERROR
+        OFF
+
+    SYST_MAIN_TEST_STACK:
+        MOV $A 01
+        JMP $F :SYST_STACK_PUSH
+        CMP $E 00
+        JMP 02 :SYST_MAIN_ERROR
+        MOV $A 02
+        JMP $F :SYST_STACK_PUSH
+        MOV $A 03
+        JMP $F :SYST_STACK_PUSH
+        MOV $A 04
+        JMP $F :SYST_STACK_PUSH
+        MOV $A 05
+        JMP $F :SYST_STACK_PUSH
+        CMP $E 00
+        JMP 04 :SYST_MAIN_ERROR
+        JMP $F :SYST_STACK_POP
+        CMP $A 04
+        JMP 04 :SYST_MAIN_TESTP
+        MOV $E 81
+        JMP $F :SYST_MAIN_ERROR
+        SYST_MAIN_TESTP:
+        JMP $F :SYST_STACK_POP
+        JMP $F :SYST_STACK_POP
+        JMP $F :SYST_STACK_POP
+        JMP $F :SYST_STACK_POP
+        CMP $E 00
+        JMP 04 :SYST_MAIN_ERROR
+        OFF
+
+    SYST_MAIN_TEST_16_ADD:
+        # 16 BIT ADD TEST #
+        MOV $A 10
+        MOV $B FF
+        MOV $C 02
+        MOV $D 48
+        JMP $F :SYST_16_ADD
+        CMP $A 13
+        AND $F $F FE
+        JMP 04 :MAIN_YES_1
+        MOV $E 81
+        JMP $F :SYST_MAIN_ERROR
+        MAIN_YES_1:
+        CMP $B 47
+        AND $F $F FE
+        JMP 04 :SYST_MAIN_STOP
+        MOV $E 82
+        JMP $F :SYST_MAIN_ERROR
+
+
+    SYST_MAIN_STOP:
+        OFF
+    SYST_MAIN_ERROR:
+        JMP $F :SYST_MAIN_ERROR
+
+
+
+###############
+#  FUNCTIONS  #
+###############
+
+# GET ADRESS OF A DEVICE #
+# param  : $A = device Code
+# return : $AB = device adress
+# use    : $A-F, $G0
+SYST_DEV_GET_ADR:
+    MOV $F 00
+    MOV $G0 $A
+    MOV $A $J1
+    MOV $B $J2
+    JMP $F :SYST_FCT_PROLOGUE
+    MOV $A $G0
+
+    # check if any device is connected
+    # if search device is 00
+    CMP $A 00
+    JMP 04 :SYST_DEV_GET_ADR_ERR_NOTFIND
+    # if devices number is 00
+    GET $B 80 20
+
+    # while not find
+    MOV $C 00
+    SYST_DEV_GET_ADR_WHILE:
+        CMP $B $C
+        JMP 04 :SYST_DEV_GET_ADR_ERR_NOTFIND
+        
+        MOV $D $C
+        MUL $D $D 03
+        ADD $D $D 22
+
+        GET $E 80 $D
+        CMP $E $A
+        JMP 04 :SYST_DEV_GET_ADR_FIND
+
+        ADD $C $C 01
+        JMP $F :SYST_DEV_GET_ADR_WHILE
+
+
+    SYST_DEV_GET_ADR_FIND:
+        MOV $E 00
+        ADD $D $D 01
+        GET $A 80 $D
+        ADD $D $D 01
+        GET $B 80 $D
+        JMP $F :SYST_FCT_EPILOGUE
+    SYST_DEV_GET_ADR_ERR_NOTFIND:
+        MOV $E 07
+        JMP $F :SYST_FCT_EPILOGUE
+
+
+# GET LENGTH OF A DEVICE #
+# param  : $A = device Code
+# return : $AB = device length
+# use    : $A-F, $G0
+SYST_DEV_GET_LENGTH:
+    MOV $F 00
+    MOV $G0 $A
+    MOV $A $J1
+    MOV $B $J2
+    JMP $F :SYST_FCT_PROLOGUE
+    MOV $A $G0
+
+    # check if any device is connected
+    # if search device is 00
+    CMP $A 00
+    JMP 04 :SYST_DEV_GET_LENGTH_ERR_NOTFIND
+    # if devices number is 00
+    GET $B 80 20
+
+    # while not find
+    MOV $C 00
+    SYST_DEV_GET_LENGTH_WHILE:
+        CMP $B $C
+        JMP 04 :SYST_DEV_GET_LENGTH_ERR_NOTFIND
+        
+        MOV $D $C
+        MUL $D $D 03
+        ADD $D $D 22
+
+        GET $E 80 $D
+        CMP $E $A
+        JMP 04 :SYST_DEV_GET_LENGTH_FIND
+
+        ADD $C $C 01
+        JMP $F :SYST_DEV_GET_LENGTH_WHILE
+
+
+    SYST_DEV_GET_LENGTH_FIND:
+        MOV $E $D
+
+        ADD $E $E 01
+        GET $C 80 $E
+        ADD $E $E 01
+        GET $D 80 $E
+        ADD $E $E 02
+        GET $A 80 $E
+        ADD $E $E 01
+        GET $B 80 $E
+
+        MOV $E 00
+        JMP $F :SYST_16_SUB
+
+        JMP $F :SYST_FCT_EPILOGUE
+    SYST_DEV_GET_LENGTH_ERR_NOTFIND:
+        MOV $E 02
+        JMP $F :SYST_FCT_EPILOGUE
+
+
+# TRANSMIT DATA TO A DEVICE #
+# param  : $A = device Code, $BC = operation, $DE = data or array(with first 2 bytes for array size)
+# return : $DE = data array(with first 2 bytes for array size)
+# use    : $A-F, $G0-4
+SYST_DEV_TRANSMIT:
+    # save param in general registers
+    MOV $F 00
+    MOV $G0 $A
+    MOV $G1 $B
+    MOV $G2 $C
+    MOV $G3 $D
+    MOV $G4 $E
+    # prologue
+    MOV $A $J1
+    MOV $B $J2
+    JMP $F :SYST_FCT_PROLOGUE
+
+    # check if device exist
+    MOV $A $G0
+    JMP $F :SYST_DEV_GET_ADR
+    CMP $E 00
+    JMP 04 :SYST_DEV_TRANSMIT_SWITCH
+    JMP $F :SYST_FCT_EPILOGUE
+
+    # find the driver
+    SYST_DEV_TRANSMIT_SWITCH:
+        # disk ?
+        CMP $G0 01
+        JMP 04 :SYST_DEV_TRANSMIT_NODRIVER
+        # ram ?
+        CMP $G0 02
+        JMP 04 :SYST_DEV_TRANSMIT_NODRIVER
+        # keyboard ?
+        CMP $G0 03
+        JMP 04 :SYST_DEV_TRANSMIT_KEYBOARD
+        # screen ?
+        CMP $G0 04
+        JMP 04 :SYST_DEV_TRANSMIT_NODRIVER
+
+    SYST_DEV_TRANSMIT_NODRIVER:
+        MOV $E 08
+        JMP $F :SYST_FCT_EPILOGUE
+    SYST_DEV_TRANSMIT_INC_A:
+        ADD $A $A 01
+        JMP $F $J1 $J2
+    SYST_DEV_TRANSMIT_KEYBOARD:
+        CMP $G1 01
+        JMP 04 :SYST_DEV_TRANSMIT_KEYBOARD_SET_KEY
+        CMP $G1 02
+        JMP 04 :SYST_DEV_TRANSMIT_KEYBOARD_GET_CTRL
+        CMP $G1 03
+        JMP 04 :SYST_DEV_TRANSMIT_KEYBOARD_SET_CTRL
+        # default case (00)
+        JMP $F :SYST_DEV_TRANSMIT_KEYBOARD_GET_KEY
+
+        SYST_DEV_TRANSMIT_KEYBOARD_GET_KEY:
+            GET $D $A $B
+            JMP $F :SYST_FCT_EPILOGUE
+        SYST_DEV_TRANSMIT_KEYBOARD_SET_KEY:
+            SET $D $A $B
+            JMP $F :SYST_FCT_EPILOGUE
+        SYST_DEV_TRANSMIT_KEYBOARD_GET_CTRL:
+            CMP $B FF
+            AND $F $F 0E
+            JMP 04 :SYST_DEV_TRANSMIT_INC_A
+            ADD $B $B 01
+            GET $D $A $B
+            JMP $F :SYST_FCT_EPILOGUE
+        SYST_DEV_TRANSMIT_KEYBOARD_SET_CTRL:
+            CMP $B FF
+            AND $F $F 0E
+            JMP 04 :SYST_DEV_TRANSMIT_INC_A
+            ADD $B $B 01
+            SET $D $A $B
+            JMP $F :SYST_FCT_EPILOGUE
+
+
+# PUSH GENERAL REGISTER #
+# param  : $G0-5 reg to push
+# return : none
+# use    : $ABCDEF
+SYST_PUSH_GENERAL:
+    MOV $F 00
+    MOV $A $J1
+    MOV $B $J2
+    JMP $F :SYST_FCT_PROLOGUE
+
+    GET $A 80 08
+    GET $B 80 09
+    GET $C 80 04
+    GET $D 80 05
+    JMP $F :SYST_16_SUB
+    CMP $B 06
+    AND $F $F FE
+    JMP 08 :SYST_PUSH_GENERAL_ERROR
+
+    MOV $A $G0
+    JMP $F :SYST_STACK_PUSH
+    MOV $A $G1
+    JMP $F :SYST_STACK_PUSH
+    MOV $A $G2
+    JMP $F :SYST_STACK_PUSH
+    MOV $A $G3
+    JMP $F :SYST_STACK_PUSH
+    MOV $A $G4
+    JMP $F :SYST_STACK_PUSH
+    MOV $A $G5
+    JMP $F :SYST_STACK_PUSH
+    JMP $F :SYST_FCT_EPILOGUE
+
+    SYST_PUSH_GENERAL_ERROR:
+        MOV $E 05
+        JMP $F :SYST_FCT_EPILOGUE
+
+
+# PUSH GENERAL REGISTER #
+# param  : none
+# return : $G0-5 reg to push
+# use    : $ABCDEF
+SYST_POP_GENERAL:
+    MOV $F 00
+    SET $A 80 12
+    SET $B 80 13
+    SET $C 80 14
+    SET $D 80 15
+    MOV $A $J1
+    MOV $B $J2
+    JMP $F :SYST_FCT_PROLOGUE
+
+    GET $A 80 04
+    GET $B 80 05
+    GET $C 80 06
+    GET $D 80 07
+    JMP $F :SYST_16_SUB
+    CMP $B 06
+    AND $F $F FE
+    JMP 08 :SYST_POP_GENERAL_ERROR
+
+    JMP $F :SYST_STACK_POP
+    MOV $G5 $A
+    JMP $F :SYST_STACK_POP
+    MOV $G4 $A
+    JMP $F :SYST_STACK_POP
+    MOV $G3 $A
+    JMP $F :SYST_STACK_POP
+    MOV $G2 $A
+    JMP $F :SYST_STACK_POP
+    MOV $G1 $A
+    JMP $F :SYST_STACK_POP
+    MOV $G0 $A
+    JMP $F :SYST_REG_LOAD
+    JMP $F :SYST_FCT_EPILOGUE
+
+    SYST_POP_GENERAL_ERROR:
+        MOV $E 06
+        JMP $F :SYST_REG_LOAD
+        JMP $F :SYST_FCT_EPILOGUE
+
+
+# DRAW A PIXEL TO THE SCREEN #
+# param  : $AB screen adr, $CD xy coordonate, $E color, $G0 param
+# return : none
+# use    : $A-F, $G0-5
+SYST_DEV_SCREEN_DRAW_PIXEL:
+    # save param in general registers
+    MOV $F 00
+    MOV $G5 $G0
+    MOV $G0 $A
+    MOV $G1 $B
+    AND $G2 $C 7F
+    AND $G3 $D 7F
+    AND $G4 $E 0F
+    # prologue
+    MOV $A $J1
+    MOV $B $J2
+    JMP $F :SYST_FCT_PROLOGUE
+
+    #y
+    MOV $A 00
+    MOV $B $G3
+    
+    #y<<6
+    MOV $C 06
+    MOV $D 00
+    JMP $F :SYST_16_SHIFT
+
+    #adr += y<<6
+    MOV $C $A
+    MOV $D $B
+    MOV $A $G0
+    MOV $B $G1
+    JMP $F :SYST_16_ADD
+
+
+    #adr += x/2;
+    MOV $C 00
+    DIV $D $G2 02
+    JMP $F :SYST_16_ADD
+    #filter = f0
+    MOV $C F0
+    #if(x%2==0)
+    MOD $D $G2 02
+    CMP $D 00
+    JMP 02 :SYST_DEV_SCREEN_DRAW_PIXEL_SEND
+    #{
+        #filter = 0f
+        MOV $C 0F
+        #color << 4
+        MUL $G4 $G4 10
+    #}
+    SYST_DEV_SCREEN_DRAW_PIXEL_SEND:
+    #pix = get adr
+    GET $D $A $B
+    #pix & filter
+    AND $D $D $C
+    #pix += color
+    ADD $D $D $G4
+    #set pix adr
+    SET $D $A $B
+    #error = 0
+    MOV $E 00
+
+    JMP $F :SYST_FCT_EPILOGUE
+
+
+
+#param  : $A char
+#return : none
+#use    : $A-F, $G0-5
+#ram    : char_x, char_y, adr1, adr2, color, $R1
+SYST_GRAPHICS_DRAW_CHAR:
+
+    SYST_GRAPHICS_DRAW_CHAR_START:
+        #prologue
+        MOV $F 00
+        MOV $G4 $A
+        MOV $A $J1
+        MOV $B $J2
+        JMP $F :SYST_FCT_PROLOGUE
+
+        #get color
+        GET $G5 80 46#color
+
+        #get char_adr
+        MOV $B $G4
+        MOV $A 00
+        MOV $C 00
+        MOV $D $B
+        JMP $F :SYST_16_ADD
+        JMP $F :SYST_16_ADD
+
+        MOV $C $D :FONT
+        JMP $F :SYST_16_ADD
+        MOV $G2 $A
+        MOV $G3 $B
+
+        #CMP $G4 0D
+        #JMP 04 :SYST_GRAPHICS_DRAW_CHAR_ENTER
+        CMP $G4 08
+        JMP 04 :SYST_GRAPHICS_DRAW_CHAR_DEC
+        SET 00 80 18
+        JMP $F :SYST_GRAPHICS_DRAW_CHAR_PRINT
+
+    SYST_GRAPHICS_DRAW_CHAR_PRINT:
+        #get pos
+        GET $G0 80 44#adr1
+        GET $G1 80 45#adr2
+
+        MOV $A 00
+        SYST_GRAPHICS_DRAW_CHAR_FOR_Y:
+        CMP $A 06
+        JMP 04 :SYST_GRAPHICS_DRAW_CHAR_FOR_Y_DONE
+                #if(y%2)
+                MOD $B $A 02
+                CMP $B 00
+                JMP 04 :SYST_GRAPHICS_DRAW_CHAR_GET_CHAR
+                MOV $B 00
+                JMP $F :SYST_GRAPHICS_DRAW_CHAR_FOR_X
+                SYST_GRAPHICS_DRAW_CHAR_GET_CHAR:
+                    GET $G4 $G2 $G3
+                    CMP $G3 FF
+                    AND $F $F 0E
+                    JMP 04 :SYST_GRAPHICS_DRAW_CHAR_INC_G2
+                    ADD $G3 $G3 01
+
+            #for
+            MOV $B 00
+            SYST_GRAPHICS_DRAW_CHAR_FOR_X:
+            CMP $B 02
+            JMP 04 :SYST_GRAPHICS_DRAW_CHAR_FOR_X_DONE
+                #set pix
+                AND $C $G4 80
+                CMP $C 00
+                JMP 04 :SYST_GRAPHICS_DRAW_CHAR_COLOR_BACK
+                JMP 02 :SYST_GRAPHICS_DRAW_CHAR_COLOR_FRONT
+                MUL $G4 $G4 02
+
+                AND $C $G4 80
+                CMP $C 00
+                JMP 04 :SYST_GRAPHICS_DRAW_CHAR_COLOR_BACK
+                JMP 02 :SYST_GRAPHICS_DRAW_CHAR_COLOR_FRONT
+                MUL $G4 $G4 02
+
+                SET $D $G0 $G1
+
+                #inc adr
+                CMP $G1 FF
+                AND $F $F 0E
+                JMP 04 :SYST_GRAPHICS_DRAW_CHAR_INC_G0
+                ADD $G1 $G1 01
+
+            ADD $B $B 01
+            JMP $F :SYST_GRAPHICS_DRAW_CHAR_FOR_X
+            SYST_GRAPHICS_DRAW_CHAR_FOR_X_DONE:
+
+            #inc adr+
+            MOV $E $A
+            MOV $A $G0
+            MOV $B $G1
+            MOV $C 00
+            MOV $D 3E
+            JMP $F :SYST_16_ADD
+            MOV $G0 $A
+            MOV $G1 $B
+            MOV $A $E
+
+        ADD $A $A 01
+        JMP $F :SYST_GRAPHICS_DRAW_CHAR_FOR_Y
+        SYST_GRAPHICS_DRAW_CHAR_FOR_Y_DONE:
+        GET $A 80 18
+        CMP $A 01
+        JMP 04 :SYST_GRAPHICS_DRAW_CHAR_END
+
+    SYST_GRAPHICS_DRAW_CHAR_INC:
+        GET $A 80 42
+        GET $B 80 43
+        GET $C 80 44
+        GET $D 80 45
+        CMP $A 1F
+        JMP 04 :SYST_GRAPHICS_DRAW_CHAR_VERIF_INC_Y
+        JMP $F :SYST_GRAPHICS_DRAW_CHAR_INC_X
+
+
+        SYST_GRAPHICS_DRAW_CHAR_INC_X:
+            ADD $A $A 01
+            SET $A 80 42
+
+            MOV $A 00
+            MOV $B 02
+            JMP $F :SYST_16_ADD
+            SET $A 80 44
+            SET $B 80 45
+            JMP $F :SYST_GRAPHICS_DRAW_CHAR_END
+
+        SYST_GRAPHICS_DRAW_CHAR_VERIF_INC_Y:
+            CMP $B 14
+            JMP 04 :SYST_GRAPHICS_DRAW_CHAR_END
+            ADD $B $B 01
+            SET $B 80 43
+            SET 00 80 42
+
+            MOV $A 01
+            MOV $B 42
+            JMP $F :SYST_16_ADD
+            SET $A 80 44
+            SET $B 80 45
+            JMP $F :SYST_GRAPHICS_DRAW_CHAR_END
+
+    SYST_GRAPHICS_DRAW_CHAR_DEC:
+        SET 01 80 18
+        GET $A 80 42
+        GET $B 80 43
+        GET $C 80 44
+        GET $D 80 45
+        CMP $A 00
+        JMP 04 :SYST_GRAPHICS_DRAW_CHAR_VERIF_DEC_Y
+        JMP $F :SYST_GRAPHICS_DRAW_CHAR_DEC_X
+
+
+        SYST_GRAPHICS_DRAW_CHAR_DEC_X:
+            SUB $A $A 01
+            SET $A 80 42
+
+            MOV $A FF
+            MOV $B FE
+            JMP $F :SYST_16_ADD
+            SET $A 80 44
+            SET $B 80 45
+            JMP $F :SYST_GRAPHICS_DRAW_CHAR_PRINT
+
+        SYST_GRAPHICS_DRAW_CHAR_VERIF_DEC_Y:
+            CMP $B 00
+            JMP 04 :SYST_GRAPHICS_DRAW_CHAR_PRINT
+            SUB $B $B 01
+            SET $B 80 43
+            SET 1F 80 42
+
+            MOV $A FE
+            MOV $B BE
+            JMP $F :SYST_16_ADD
+            SET $A 80 44
+            SET $B 80 45
+            JMP $F :SYST_GRAPHICS_DRAW_CHAR_PRINT
+
+    SYST_GRAPHICS_DRAW_CHAR_END:
+        #funky mod
+        #SET $R 80 46
+
+        #epilogue
+        MOV $E 00
+        JMP $F :SYST_FCT_EPILOGUE
+
+
+    SYST_GRAPHICS_DRAW_CHAR_INC_G0:
+        ADD $G0 $G0 01
+        JMP $F $J1 $J2
+    SYST_GRAPHICS_DRAW_CHAR_INC_G2:
+        ADD $G2 $G2 01
+        JMP $F $J1 $J2
+    SYST_GRAPHICS_DRAW_CHAR_COLOR_BACK:
+        AND $E $G5 0F
+        MUL $D $D 10
+        ADD $D $D $E
+        JMP $F $J1 $J2
+    SYST_GRAPHICS_DRAW_CHAR_COLOR_FRONT:
+        AND $E $G5 F0
+        DIV $E $E 10
+        MUL $D $D 10
+        ADD $D $D $E
+        JMP $F $J1 $J2
