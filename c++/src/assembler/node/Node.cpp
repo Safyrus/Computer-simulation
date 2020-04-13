@@ -8,6 +8,7 @@ const std::string Node::NODE_MOV = "NODE_MOV";
 const std::string Node::NODE_MOV2 = "NODE_MOV2";
 const std::string Node::NODE_MOVL = "NODE_MOVL";
 const std::string Node::NODE_TRI = "NODE_TRI";
+const std::string Node::NODE_MOV2L = "NODE_MOV2L";
 
 Node::Node()
 {

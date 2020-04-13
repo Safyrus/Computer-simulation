@@ -66,12 +66,14 @@ std::string Interpreter::interprete()
                 }
                 if (sameLabel)
                 {
-                    std::cout << "[ASSEMBLER ERROR]: same label\n";
+                    std::cout << "[ASSEMBLER ERROR]: same label in file " << t.getPos().getFileName() << " at " << t.getPos().getLine() << ":" << t.getPos().getCol() << "\n";
                 }
                 else
                 {
                     labels.push_back(nodes[i]);
                     labels_adr.push_back(index);
+                    if(print_debug)
+                        std::cout << "label " << nodes[i]->getToken(0).getValue() << ":" << index << "\n";
                 }
             }
             else if (t.getType().compare(Token::CMD) == 0)
@@ -86,6 +88,35 @@ std::string Interpreter::interprete()
             {
                 index += 1;
             }
+            else if (t.getType().compare(Token::IMPORT) == 0)
+            {
+                std::string impName = t.getValue();
+                for (unsigned int i = 0; i < importName.size(); i++)
+                {
+                    if (importName[i].compare(impName) == 0)
+                    {
+                        std::cout << "[ASSEMBLER ERROR]: cannot import already imported file " << impName << " in " << t.getPos().getFileName() << " at " << t.getPos().getLine() << ":" << t.getPos().getCol() << "\n";
+                        return "FFFFFFFF ";
+                    }
+                }
+                std::vector<Node *> importNodes = import(impName);
+                for (unsigned int i = 0; i < importNodes.size(); i++)
+                {
+                    if (importNodes[i]->getType() == Node::NODE)
+                    {
+                        for (unsigned int i = 0; i < importNodes.size(); i++)
+                        {
+                            delete importNodes[i];
+                        }
+                        return "FFFFFFFF ";
+                    }
+                }
+                nodes.insert(nodes.begin() + i + 1, importNodes.begin(), importNodes.end());
+            }
+        }
+        else if(nodes[i]->getType() == Node::NODE_MOV2L)
+        {
+            index += 8;
         }
         else
         {
@@ -121,6 +152,10 @@ std::string Interpreter::interprete()
         {
             res += nodeMovL(nodes[i]);
         }
+        else if (nodes[i]->getType() == Node::NODE_MOV2L)
+        {
+            res += nodeMov2L(nodes[i]);
+        }
         else if (nodes[i]->getType() == Node::NODE_TRI)
         {
             res += nodeTri(nodes[i]);
@@ -138,7 +173,7 @@ std::string Interpreter::nodeUni(Node *n)
     res << std::hex;
     Token t = n->getToken(0);
     if (t.getType().compare(Token::IMPORT) == 0)
-    {
+    { /*
         std::string impName = t.getValue();
         for (unsigned int i = 0; i < importName.size(); i++)
         {
@@ -148,7 +183,7 @@ std::string Interpreter::nodeUni(Node *n)
                 return "FFFFFFFF ";
             }
         }
-        res << import(impName);
+        res << import(impName);*/
     }
     else if (t.getType().compare(Token::COMMENT) == 0 || t.getType().compare(Token::LABEL_DECLARE) == 0)
     {
@@ -181,7 +216,7 @@ std::string Interpreter::nodeUni(Node *n)
         }
         if (!find)
         {
-            std::cout << "[ASSEMBLER ERROR]: can't find label\n";
+            std::cout << "[ASSEMBLER ERROR]: can't find label in file " << t.getPos().getFileName() << " at " << t.getPos().getLine() << ":" << t.getPos().getCol() << "\n";
             return "FFFFFFFF ";
         }
     }
@@ -353,7 +388,7 @@ std::string Interpreter::nodeBinL(Node *n)
     }
     if (!find)
     {
-        std::cout << "[ASSEMBLER ERROR]: can't find label\n";
+        std::cout << "[ASSEMBLER ERROR]: can't find label in file " << label.getPos().getFileName() << " at " << label.getPos().getLine() << ":" << label.getPos().getCol() << "\n";
         return "FFFFFFFF ";
     }
 
@@ -405,9 +440,72 @@ std::string Interpreter::nodeMovL(Node *n)
     }
     if (!find)
     {
-        std::cout << "[ASSEMBLER ERROR]: can't find label\n";
+        std::cout << "[ASSEMBLER ERROR]: can't find label in file " << label.getPos().getFileName() << " at " << label.getPos().getLine() << ":" << label.getPos().getCol() << "\n";
         return "FFFFFFFF ";
     }
+
+    return res.str();
+}
+
+std::string Interpreter::nodeMov2L(Node *n)
+{
+    if (print_debug)
+        std::cout << "find mov2l node\n";
+    std::stringstream res;
+    res << std::hex;
+    Token cmd = n->getToken(0);
+    Token reg1 = n->getToken(1);
+    Token reg2 = n->getToken(2);
+    Token label = n->getToken(3);
+
+    //find cmd code
+    int cmdCode = -1;
+    for (unsigned int i = 0; i < CMDS_NAME.size(); i++)
+    {
+        if (CMDS_NAME[i].compare(cmd.getValue()) == 0)
+        {
+            cmdCode = i;
+            break;
+        }
+    }
+    cmdCode = CMDS_CODE[cmdCode][1];
+
+    //find reg code
+    int regCode1 = getRegCode(reg1);
+    if (regCode1 == -1)
+    {
+        return "FFFFFFFF ";
+    }
+    int regCode2 = getRegCode(reg2);
+    if (regCode2 == -1)
+    {
+        return "FFFFFFFF ";
+    }
+
+    //find label code
+    bool find = false;
+    int label_adr = -1;
+    for (unsigned int i = 0; i < labels.size(); i++)
+    {
+        if (label.getValue().compare(labels[i]->getToken(0).getValue()) == 0)
+        {
+            label_adr = labels_adr[i];
+            find = true;
+            break;
+        }
+    }
+    if (!find)
+    {
+        std::cout << "[ASSEMBLER ERROR]: can't find label in file " << label.getPos().getFileName() << " at " << label.getPos().getLine() << ":" << label.getPos().getCol() << "\n";
+        return "FFFFFFFF ";
+    }
+
+    res << std::uppercase << std::setfill('0') << std::setw(2) << cmdCode << " ";
+    res << std::uppercase << std::setfill('0') << std::setw(2) << regCode1 << " ";
+    res << std::uppercase << std::setfill('0') << std::setw(2) << (label_adr / 256) << " 00 ";
+    res << std::uppercase << std::setfill('0') << std::setw(2) << cmdCode << " ";
+    res << std::uppercase << std::setfill('0') << std::setw(2) << regCode2 << " ";
+    res << std::uppercase << std::setfill('0') << std::setw(2) << (label_adr % 256) << " 00 ";
 
     return res.str();
 }
@@ -470,7 +568,7 @@ int Interpreter::getRegCode(Token reg)
     }
     else
     {
-        std::cout << "[ASSEMBLER ERROR] can't find reg code\n";
+        std::cout << "[ASSEMBLER ERROR] can't find reg code in file " << reg.getPos().getFileName() << " at " << reg.getPos().getLine() << ":" << reg.getPos().getCol() << "\n";
         return -1;
     }
 }
@@ -500,10 +598,12 @@ int Interpreter::getValCode(Token val)
     return valCode;
 }
 
-std::string Interpreter::import(std::string fileName)
+std::vector<Node *> Interpreter::import(std::string fileName)
 {
+    importName.push_back(fileName);
     bool error = false;
-    std::string fileOut = "";
+    std::vector<Node *> nodesError = {new Node()};
+
     //lexing
     std::string file = "";
     try
@@ -513,7 +613,7 @@ std::string Interpreter::import(std::string fileName)
     catch (std::string e)
     {
         std::cout << e;
-        return "FFFFFFFF ";
+        return nodes;
     }
     Lexer lexer(file, fileName);
     std::vector<Token> tokens = lexer.makeToken();
@@ -537,19 +637,19 @@ std::string Interpreter::import(std::string fileName)
     {
         std::cout << "Error during Lexing in file " + fileName + ", cannot continue\n"
                   << std::flush;
-        return "FFFFFFFF ";
+        return nodesError;
     }
 
     //parsing
     Parser parser(tokens);
-    std::vector<Node *> nodes = parser.parse();
+    std::vector<Node *> parseNodes = parser.parse();
 
     //print parsing
-    for (unsigned int i = 0; i < nodes.size(); i++)
+    for (unsigned int i = 0; i < parseNodes.size(); i++)
     {
         if (print_debug)
-            nodes[i]->print();
-        if (nodes[i]->getToken(0).getType().compare(Token::ERROR) == 0)
+            parseNodes[i]->print();
+        if (parseNodes[i]->getToken(0).getType().compare(Token::ERROR) == 0)
         {
             error = true;
         }
@@ -562,14 +662,16 @@ std::string Interpreter::import(std::string fileName)
     {
         std::cout << "Error during Parsing in file " + fileName + ", cannot continue\n"
                   << std::flush;
-        for (unsigned int i = 0; i < nodes.size(); i++)
+        for (unsigned int i = 0; i < parseNodes.size(); i++)
         {
-            delete nodes[i];
+            delete parseNodes[i];
         }
-        return "FFFFFFFF ";
+        return nodesError;
     }
+    return parseNodes;
 
     //interpreting
+    /*
     Interpreter interpreter(nodes, fileName);
     fileOut = interpreter.interprete();
 
@@ -585,5 +687,5 @@ std::string Interpreter::import(std::string fileName)
         delete nodes[i];
     }
 
-    return fileOut;
+    return fileOut;*/
 }

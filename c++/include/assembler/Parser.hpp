@@ -7,6 +7,7 @@
 #include "assembler/node/NodeMov2.hpp"
 #include "assembler/node/NodeMovL.hpp"
 #include "assembler/node/NodeTri.hpp"
+#include "assembler/node/NodeMov2L.hpp"
 #include <vector>
 
 class Parser
@@ -20,6 +21,7 @@ private:
     static const std::vector<std::string> CMDS_MOV2;
     static const std::vector<std::string> CMDS_MOVL;
     static const std::vector<std::string> CMDS_TRI;
+    static const std::vector<std::string> CMDS_MOV2L;
     static const std::vector<std::string> CMDS_BINL;
     static const std::vector<std::string> CMDS_DOUBLE;
 
@@ -32,6 +34,7 @@ private:
     NodeBinL* makeCmdNodeBinL(bool print);
     NodeMovL* makeCmdNodeMovL(bool print);
     NodeTri* makeCmdNodeTri(bool print);
+    NodeMov2L* makeCmdNodeMov2L(bool print);
 public:
     Parser(std::vector<Token> tokens);
     ~Parser();

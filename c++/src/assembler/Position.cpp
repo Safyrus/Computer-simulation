@@ -6,13 +6,15 @@ Position::Position()
     this->index = -1;
     this->col = 0;
     this->line = 1;
+    this->fileName = "";
 }
 
-Position::Position(int line, int col, int index)
+Position::Position(int line, int col, int index, std::string fileName)
 {
     this->index = index;
     this->col = col;
     this->line = line;
+    this->fileName = fileName;
 }
 
 Position::~Position()
@@ -46,7 +48,12 @@ int Position::getIndex()
     return index;
 }
 
+std::string Position::getFileName()
+{
+    return fileName;
+}
+
 Position Position::copy()
 {
-    return Position(line, col, index);
+    return Position(line, col, index, fileName);
 }

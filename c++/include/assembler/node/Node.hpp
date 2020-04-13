@@ -19,6 +19,7 @@ public:
     static const std::string NODE_BINL;
     static const std::string NODE_MOV;
     static const std::string NODE_MOV2;
+    static const std::string NODE_MOV2L;
     static const std::string NODE_MOVL;
     static const std::string NODE_TRI;
 };

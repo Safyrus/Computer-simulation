@@ -8,7 +8,7 @@ Lexer::Lexer(std::string text, std::string fileName)
 {
     this->fileName = fileName;
     this->text = text;
-    this->pos = Position(1, 0, -1);
+    this->pos = Position(1, 0, -1, fileName);
     this->current_char = '\0';
     this->next();
 
@@ -33,7 +33,7 @@ void Lexer::next()
 
 std::vector<Token> Lexer::makeToken()
 {
-    this->pos = Position(1, 0, -1);
+    this->pos = Position(1, 0, -1, fileName);
     this->current_char = '\0';
     this->next();
     std::vector<Token> tokens;

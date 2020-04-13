@@ -23,10 +23,11 @@ private:
     std::string nodeBinL(Node* n);
     std::string nodeMovL(Node*n);
     std::string nodeTri(Node* n);
+    std::string nodeMov2L(Node* n);
 
     int getRegCode(Token reg);
     int getValCode(Token val);
-    std::string import(std::string fileName);
+    std::vector<Node*> import(std::string fileName);
 public:
     Interpreter(std::vector<Node*> nodes, std::string fileName);
     ~Interpreter();
