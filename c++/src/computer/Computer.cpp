@@ -37,9 +37,9 @@ void Computer::halfCycle()
 {
     if (!pause)
     {
-        //bool clkActive = cpu->getClk();
-        cycle();
-        while (cpu->getClk() && cpu->getStep() != 0)
+
+        bool clkBefore = cpu->getClk();
+        while (cpu->getClk() == clkBefore)
         {
             cycle();
         }

@@ -31,7 +31,8 @@ void run(Computer *com)
 {
     std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
     std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
-    std::chrono::nanoseconds timePercycle(1000000000 / com->getHz());
+    unsigned int hertz = com->getHz()*2;
+    std::chrono::nanoseconds timePercycle(1000000000 / hertz);
     std::chrono::nanoseconds waiting(100000000);
     std::chrono::duration<long, std::nano> time_span;
 
@@ -41,15 +42,16 @@ void run(Computer *com)
         {
             t2 = std::chrono::steady_clock::now();
             time_span = std::chrono::duration_cast<std::chrono::duration<long, std::nano>>(t2 - t1);
+            hertz = com->getHz()*2;
             if (time_span >= timePercycle)
             {
                 t1 = std::chrono::steady_clock::now();
-                timePercycle = (std::chrono::nanoseconds)(1000000000 / com->getHz());
+                timePercycle = (std::chrono::nanoseconds)(1000000000 / hertz);
                 com->halfCycle();
             }
             else
             {
-                std::this_thread::sleep_for(timePercycle / 4);
+                std::this_thread::sleep_for(timePercycle / hertz);
             }
         }
         else
