@@ -3,13 +3,13 @@
 # setup registers
 MOV $A 3E
 MOV $C 00
-MOV $F 10
 
 WAIT:
-GET $B FF 00    # get current ms
+GET $B DF FD    # get current ms
 CMP $A $B       # while current ms < A
-JMP 19 :STEP     #   wait
-JMP $F :WAIT     # overwise step
+AND $F $F 0E
+JMP 02 :WAIT     #   wait
+JMP $F :STEP     # overwise step
 
 STEP:
 ADD $C $C 01    # inc C
