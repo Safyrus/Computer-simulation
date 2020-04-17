@@ -80,3 +80,15 @@ tools version history:
                             ~ Renamed "function one call" by "subroutine"
                             ~ move subroutine in a separated file
                             ~ Replaced FCT1 by FCT in some subroutine name
+
+
+    - 0.1.0.1 [2020/04/17]:
+                            + Added a test(timer)
+                            - Removed a draw pixel function
+                            ~ Organised code in files
+                            ~ Fixed devices adresses in INIT
+                            ~ Fixed some tests
+                            ~ Optimised the draw pixel subroutine
+                            ~ Modified some comments
+                            ~ Fixed import
+                            ~ Modified screen test

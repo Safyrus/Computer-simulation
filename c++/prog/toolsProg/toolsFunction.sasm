@@ -1,0 +1,98 @@
+###############
+#  SUBROUTINE #
+###############
+
+# FUNCTION PROLOGUE #
+# param  : $AB = call adress
+# return : none
+SYST_FCT_PROLOGUE:
+    MOV $F 00
+    SET $J1 80 10
+    SET $J2 80 11
+
+    GET $C 80 00
+    GET $D 80 01
+
+    # check if end of stack part 1
+    GET $E 80 02
+    CMP $C $E
+    AND $F $F FE
+    JMP 08 :SYST_FCT_PROLOGUE_NEXT
+
+    # check if end of stack part 2
+    GET $E 80 03
+    CMP $D $E
+    AND $F $F FE
+    JMP 08 :SYST_FCT_PROLOGUE_NEXT
+    JMP $F :SYST_FCT_PROLOGUE_ERROR
+
+    SYST_FCT_PROLOGUE_NEXT:
+        # reset error reg
+        MOV $E 00
+
+        # save first part of the adress in stack
+        SET $A $C $D
+        CMP $D FF
+        AND $F $F FE
+        JMP 04 :SYST_FCT_PROLOGUE_ADD
+        ADD $D $D 01
+
+        # save last part of the adress in stack
+        SET $B $C $D
+        CMP $D FF
+        AND $F $F FE
+        JMP 04 :SYST_FCT_PROLOGUE_ADD
+        ADD $D $D 01
+
+        # refresh stack pointer
+        SET $C 80 00
+        SET $D 80 01
+        JMP $F :SYST_FCT_END
+    SYST_FCT_PROLOGUE_ADD:
+            ADD $C $C 01
+            JMP $F :SYST_FCT_END
+    SYST_FCT_PROLOGUE_ERROR:
+            MOV $E 01
+            JMP $F :SYST_FCT_EPILOGUE
+
+
+# FUNCTION EPILOGUE #
+# param  : none
+# return : none
+SYST_FCT_EPILOGUE:
+    MOV $F 00
+    JMP $F :SYST_REG_SAVE
+    GET $A 80 00
+    GET $B 80 01
+    CMP $B 00
+    JMP 04 :SYST_FCT_EPILOGUE_SUB
+    SUB $B $B 01
+
+    GET $C $A $B
+    CMP $B 00
+    JMP 04 :SYST_FCT_EPILOGUE_SUB
+    SUB $B $B 01
+    GET $D $A $B
+
+    SET $A 80 00
+    SET $B 80 01
+    SET $D 80 10
+    SET $C 80 11
+    JMP $F :SYST_REG_LOAD
+    GET $J1 80 10
+    GET $J2 80 11
+    JMP $F $J1 $J2
+
+    SYST_FCT_EPILOGUE_SUB:
+            SUB $A $A 01
+            JMP $F $J1 $J2
+
+
+# SUBROUTINE CALLBACK #
+# param  : none
+# return : none
+# use    : none
+SYST_FCT_END:
+    GET $J1 80 10
+    GET $J2 80 11
+    JMP $F $J1 $J2

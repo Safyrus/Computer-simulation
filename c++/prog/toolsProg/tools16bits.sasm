@@ -1,0 +1,110 @@
+###############
+#  SUBROUTINE #
+###############
+
+# 16 BIT INTERGER COMPARE #
+# param  : $AB = 1st number, $CD = 2nd number
+# return : $A = compare result
+SYST_16_CMP:
+    MOV $F 00
+    SET $J1 80 10
+    SET $J2 80 11
+
+    CMP $A $C
+    AND $F $F FE
+    JMP 02 :SYST_16_CMP_GREATER
+    JMP 08 :SYST_16_CMP_LESSER
+    CMP $B $D
+    AND $F $F FE
+    JMP 02 :SYST_16_CMP_GREATER
+    JMP 08 :SYST_16_CMP_LESSER
+
+    SYST_16_CMP_EQUAL:
+            MOV $A 00
+            JMP $F :SYST_FCT_END
+    SYST_16_CMP_LESSER:
+            MOV $A FF
+            JMP $F :SYST_FCT_END
+    SYST_16_CMP_GREATER:
+            MOV $A 01
+            JMP $F :SYST_FCT_END
+
+
+# 16 BIT INTERGER ADDITION #
+# param  : $AB = 1st number, $CD = 2nd number
+# return : $AB = addition result
+SYST_16_ADD:
+    MOV $F 00
+    SET $J1 80 10
+    SET $J2 80 11
+
+    SYST_16_ADD_STP1:
+        CMP $B $D
+        AND $F $F F1
+        JMP 01 :SYST_16_ADD_CARRY
+        JMP $F :SYST_16_ADD_STP2
+    SYST_16_ADD_CARRY:
+        ADD $A $A 01
+    SYST_16_ADD_STP2:
+        ADD $B $B $D
+        ADD $A $A $C
+        JMP $F :SYST_FCT_END
+
+
+# 16 BIT INTERGER SHIFT #
+# param  : $AB = number, $C = number of shift, $D = direction
+# return : $AB = result
+SYST_16_SHIFT:
+    MOV $F 00
+    SET $J1 80 10
+    SET $J2 80 11
+
+    CMP $D 00
+    JMP 04 :SYST_16_SHIFT_LEFT
+    SYST_16_SHIFT_RIGHT:
+        CMP $C 00
+        JMP 04 :SYST_FCT_END
+        SUB $C $C 01
+
+        DIV $B $B 02
+        AND $D $A 01
+        MUL $D $D 80
+        ADD $B $B $D
+
+        DIV $A $A 02
+
+        JMP $F :SYST_16_SHIFT_RIGHT
+    SYST_16_SHIFT_LEFT:
+        CMP $C 00
+        JMP 04 :SYST_FCT_END
+        SUB $C $C 01
+
+        MUL $A $A 02
+        AND $D $B 80
+        DIV $D $D 80
+        ADD $A $A $D
+
+        MUL $B $B 02
+
+        JMP $F :SYST_16_SHIFT_LEFT
+
+
+# 16 BIT INTERGER SUBSTRACTION #
+# param  : $AB = 1st number, $CD = 2nd number
+# return : $AB = substraction result
+SYST_16_SUB:
+    MOV $F 00
+    SET $J1 80 10
+    SET $J2 80 11
+
+    SYST_16_SUB_STP1:
+        CMP $B $D
+        AND $F $F FE
+        JMP 08 :SYST_16_SUB_BORROW
+        JMP $F :SYST_16_SUB_STP2
+    SYST_16_SUB_BORROW:
+        SUB $A $A 01
+    SYST_16_SUB_STP2:
+        SUB $B $B $D
+        SUB $A $A $C
+        JMP $F :SYST_FCT_END

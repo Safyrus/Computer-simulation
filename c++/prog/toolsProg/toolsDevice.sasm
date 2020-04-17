@@ -1,0 +1,189 @@
+###############
+#  FUNCTIONS  #
+###############
+
+# GET ADRESS OF A DEVICE #
+# param  : $A = device Code
+# return : $AB = device adress
+# use    : $A-F, $G0
+SYST_DEV_GET_ADR:
+    MOV $F 00
+    MOV $G0 $A
+    MOV $A $J1
+    MOV $B $J2
+    JMP $F :SYST_FCT_PROLOGUE
+    MOV $A $G0
+
+    # check if any device is connected
+    # if search device is 00
+    CMP $A 00
+    JMP 04 :SYST_DEV_GET_ADR_ERR_NOTFIND
+    # if devices number is 00
+    GET $B 80 20
+
+    # while not find
+    MOV $C 00
+    SYST_DEV_GET_ADR_WHILE:
+        CMP $B $C
+        JMP 04 :SYST_DEV_GET_ADR_ERR_NOTFIND
+        
+        MOV $D $C
+        MUL $D $D 03
+        ADD $D $D 22
+
+        GET $E 80 $D
+        CMP $E $A
+        JMP 04 :SYST_DEV_GET_ADR_FIND
+
+        ADD $C $C 01
+        JMP $F :SYST_DEV_GET_ADR_WHILE
+
+
+    SYST_DEV_GET_ADR_FIND:
+        MOV $E 00
+        ADD $D $D 01
+        GET $A 80 $D
+        ADD $D $D 01
+        GET $B 80 $D
+        JMP $F :SYST_FCT_EPILOGUE
+    SYST_DEV_GET_ADR_ERR_NOTFIND:
+        MOV $E 07
+        JMP $F :SYST_FCT_EPILOGUE
+
+
+# GET LENGTH OF A DEVICE #
+# param  : $A = device Code
+# return : $AB = device length
+# use    : $A-F, $G0
+SYST_DEV_GET_LENGTH:
+    MOV $F 00
+    MOV $G0 $A
+    MOV $A $J1
+    MOV $B $J2
+    JMP $F :SYST_FCT_PROLOGUE
+    MOV $A $G0
+
+    # check if any device is connected
+    # if search device is 00
+    CMP $A 00
+    JMP 04 :SYST_DEV_GET_LENGTH_ERR_NOTFIND
+    # if devices number is 00
+    GET $B 80 20
+
+    # while not find
+    MOV $C 00
+    SYST_DEV_GET_LENGTH_WHILE:
+        CMP $B $C
+        JMP 04 :SYST_DEV_GET_LENGTH_ERR_NOTFIND
+        
+        MOV $D $C
+        MUL $D $D 03
+        ADD $D $D 22
+
+        GET $E 80 $D
+        CMP $E $A
+        JMP 04 :SYST_DEV_GET_LENGTH_FIND
+
+        ADD $C $C 01
+        JMP $F :SYST_DEV_GET_LENGTH_WHILE
+
+
+    SYST_DEV_GET_LENGTH_FIND:
+        MOV $E $D
+
+        ADD $E $E 01
+        GET $C 80 $E
+        ADD $E $E 01
+        GET $D 80 $E
+        ADD $E $E 02
+        GET $A 80 $E
+        ADD $E $E 01
+        GET $B 80 $E
+
+        MOV $E 00
+        JMP $F :SYST_16_SUB
+
+        JMP $F :SYST_FCT_EPILOGUE
+    SYST_DEV_GET_LENGTH_ERR_NOTFIND:
+        MOV $E 02
+        JMP $F :SYST_FCT_EPILOGUE
+
+
+# TRANSMIT DATA TO A DEVICE #
+# param  : $A = device Code, $BC = operation, $DE = data or array(with first 2 bytes for array size)
+# return : $DE = data array(with first 2 bytes for array size)
+# use    : $A-F, $G0-4
+SYST_DEV_TRANSMIT:
+    # save param in general registers
+    MOV $F 00
+    MOV $G0 $A
+    MOV $G1 $B
+    MOV $G2 $C
+    MOV $G3 $D
+    MOV $G4 $E
+    # prologue
+    MOV $A $J1
+    MOV $B $J2
+    JMP $F :SYST_FCT_PROLOGUE
+
+    # check if device exist
+    MOV $A $G0
+    JMP $F :SYST_DEV_GET_ADR
+    CMP $E 00
+    JMP 04 :SYST_DEV_TRANSMIT_SWITCH
+    JMP $F :SYST_FCT_EPILOGUE
+
+    # find the driver
+    SYST_DEV_TRANSMIT_SWITCH:
+        # disk ?
+        CMP $G0 01
+        JMP 04 :SYST_DEV_TRANSMIT_NODRIVER
+        # ram ?
+        CMP $G0 02
+        JMP 04 :SYST_DEV_TRANSMIT_NODRIVER
+        # keyboard ?
+        CMP $G0 03
+        JMP 04 :SYST_DEV_TRANSMIT_KEYBOARD
+        # screen ?
+        CMP $G0 04
+        JMP 04 :SYST_DEV_TRANSMIT_NODRIVER
+        # timer ?
+        CMP $G0 05
+        JMP 04 :SYST_DEV_TRANSMIT_NODRIVER
+
+    SYST_DEV_TRANSMIT_NODRIVER:
+        MOV $E 08
+        JMP $F :SYST_FCT_EPILOGUE
+    SYST_DEV_TRANSMIT_INC_A:
+        ADD $A $A 01
+        JMP $F $J1 $J2
+    SYST_DEV_TRANSMIT_KEYBOARD:
+        CMP $G1 01
+        JMP 04 :SYST_DEV_TRANSMIT_KEYBOARD_SET_KEY
+        CMP $G1 02
+        JMP 04 :SYST_DEV_TRANSMIT_KEYBOARD_GET_CTRL
+        CMP $G1 03
+        JMP 04 :SYST_DEV_TRANSMIT_KEYBOARD_SET_CTRL
+        # default case (00)
+        JMP $F :SYST_DEV_TRANSMIT_KEYBOARD_GET_KEY
+
+        SYST_DEV_TRANSMIT_KEYBOARD_GET_KEY:
+            GET $D $A $B
+            JMP $F :SYST_FCT_EPILOGUE
+        SYST_DEV_TRANSMIT_KEYBOARD_SET_KEY:
+            SET $D $A $B
+            JMP $F :SYST_FCT_EPILOGUE
+        SYST_DEV_TRANSMIT_KEYBOARD_GET_CTRL:
+            CMP $B FF
+            AND $F $F 0E
+            JMP 04 :SYST_DEV_TRANSMIT_INC_A
+            ADD $B $B 01
+            GET $D $A $B
+            JMP $F :SYST_FCT_EPILOGUE
+        SYST_DEV_TRANSMIT_KEYBOARD_SET_CTRL:
+            CMP $B FF
+            AND $F $F 0E
+            JMP 04 :SYST_DEV_TRANSMIT_INC_A
+            ADD $B $B 01
+            SET $D $A $B
+            JMP $F :SYST_FCT_EPILOGUE

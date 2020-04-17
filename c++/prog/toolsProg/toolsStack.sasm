@@ -1,0 +1,177 @@
+###############
+#  FUNCTIONS  #
+###############
+
+# PUSH GENERAL REGISTER #
+# param  : $G0-5 reg to push
+# return : none
+# use    : $ABCDEF
+SYST_PUSH_GENERAL:
+    MOV $F 00
+    MOV $A $J1
+    MOV $B $J2
+    JMP $F :SYST_FCT_PROLOGUE
+
+    GET $A 80 08
+    GET $B 80 09
+    GET $C 80 04
+    GET $D 80 05
+    JMP $F :SYST_16_SUB
+    CMP $B 06
+    AND $F $F FE
+    JMP 08 :SYST_PUSH_GENERAL_ERROR
+
+    MOV $A $G0
+    JMP $F :SYST_STACK_PUSH
+    MOV $A $G1
+    JMP $F :SYST_STACK_PUSH
+    MOV $A $G2
+    JMP $F :SYST_STACK_PUSH
+    MOV $A $G3
+    JMP $F :SYST_STACK_PUSH
+    MOV $A $G4
+    JMP $F :SYST_STACK_PUSH
+    MOV $A $G5
+    JMP $F :SYST_STACK_PUSH
+    MOV $E 00
+    JMP $F :SYST_FCT_EPILOGUE
+
+    SYST_PUSH_GENERAL_ERROR:
+        MOV $E 05
+        JMP $F :SYST_FCT_EPILOGUE
+
+
+# PUSH GENERAL REGISTER #
+# param  : none
+# return : $G0-5 reg to push
+# use    : $ABCDEF
+SYST_POP_GENERAL:
+    MOV $F 00
+    SET $A 80 12
+    SET $B 80 13
+    SET $C 80 14
+    SET $D 80 15
+    MOV $A $J1
+    MOV $B $J2
+    JMP $F :SYST_FCT_PROLOGUE
+
+    GET $A 80 04
+    GET $B 80 05
+    GET $C 80 06
+    GET $D 80 07
+    JMP $F :SYST_16_SUB
+    CMP $B 06
+    AND $F $F FE
+    JMP 08 :SYST_POP_GENERAL_ERROR
+
+    JMP $F :SYST_STACK_POP
+    MOV $G5 $A
+    JMP $F :SYST_STACK_POP
+    MOV $G4 $A
+    JMP $F :SYST_STACK_POP
+    MOV $G3 $A
+    JMP $F :SYST_STACK_POP
+    MOV $G2 $A
+    JMP $F :SYST_STACK_POP
+    MOV $G1 $A
+    JMP $F :SYST_STACK_POP
+    MOV $G0 $A
+    JMP $F :SYST_REG_LOAD
+    MOV $E 00
+    JMP $F :SYST_FCT_EPILOGUE
+
+    SYST_POP_GENERAL_ERROR:
+        JMP $F :SYST_REG_LOAD
+        MOV $E 06
+        JMP $F :SYST_FCT_EPILOGUE
+
+
+###############
+#  SUBROUTINE #
+###############
+
+# SUBROUTINE STACK PUSH #
+# param  : $A val to push
+# return : none
+# use    : $ABCDFE
+SYST_STACK_PUSH:
+    MOV $F 00
+    SET $J1 80 10
+    SET $J2 80 11
+
+    #compare first part
+    GET $B 80 04
+    GET $C 80 05
+    GET $D 80 08
+    CMP $B $D
+    AND $F $F FE
+    JMP 08 :SYST_STACK_PUSH_ADD
+
+    #compare second part
+    GET $D 80 09
+    CMP $C $D
+    AND $F $F FE
+    JMP 08 :SYST_STACK_PUSH_ADD
+    JMP $F :SYST_STACK_PUSH_FULL
+
+    SYST_STACK_PUSH_ADD:
+        SET $A $B $C
+        #increment stack
+        CMP $C FF
+        AND $F $F FE
+        JMP 04 :SYST_STACK_PUSH_ADD_INC
+        SYST_STACK_PUSH_ADD_END:
+        ADD $C $C 01
+        SET $C 80 05
+        JMP $F :SYST_FCT_END
+        SYST_STACK_PUSH_ADD_INC:
+            ADD $B $B 01
+            SET $B 80 04
+            JMP $F :SYST_STACK_PUSH_ADD_END
+    SYST_STACK_PUSH_FULL:
+        MOV $E 03
+        JMP $F :SYST_FCT_END
+
+
+# SUBROUTINE STACK POP #
+# param  : none
+# return : $A val to pop
+# use    : $ABCDFE
+SYST_STACK_POP:
+    MOV $F 00
+    SET $J1 80 10
+    SET $J2 80 11
+
+    #compare first part
+    GET $B 80 04
+    GET $C 80 05
+    GET $D 80 06
+    CMP $B $D
+    AND $F $F FE
+    JMP 02 :SYST_STACK_POP_SUB
+
+    #compare second part
+    GET $D 80 07
+    CMP $C $D
+    AND $F $F FE
+    JMP 02 :SYST_STACK_POP_SUB
+    JMP $F :SYST_STACK_POP_EMPTY
+
+    SYST_STACK_POP_SUB:
+
+        #decrement stack
+        CMP $C 00
+        AND $F $F FE
+        JMP 04 :SYST_STACK_POP_SUB_DEC
+        SYST_STACK_POP_SUB_END:
+        SUB $C $C 01
+        SET $C 80 05
+        GET $A $B $C
+        JMP $F :SYST_FCT_END
+        SYST_STACK_POP_SUB_DEC:
+            SUB $B $B 01
+            SET $B 80 04
+            JMP $F :SYST_STACK_POP_SUB_END
+    SYST_STACK_POP_EMPTY:
+        MOV $E 04
+        JMP $F :SYST_FCT_END

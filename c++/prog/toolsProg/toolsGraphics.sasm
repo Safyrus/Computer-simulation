@@ -1,0 +1,289 @@
+###############
+#  FUNCTIONS  #
+###############
+
+#param  : $A char
+#return : none
+#use    : $A-F, $G0-5
+#ram    : char_x, char_y, adr1, adr2, color, $R1
+SYST_GRAPHICS_DRAW_CHAR:
+
+    SYST_GRAPHICS_DRAW_CHAR_START:
+        #prologue
+        MOV $F 00
+        MOV $G4 $A
+        MOV $A $J1
+        MOV $B $J2
+        JMP $F :SYST_FCT_PROLOGUE
+
+        #get color
+        GET $G5 80 46#color
+
+        #get char_adr
+        MOV $B $G4
+        MOV $A 00
+        MOV $C 00
+        MOV $D $B
+        JMP $F :SYST_16_ADD
+        JMP $F :SYST_16_ADD
+
+        MOV $C $D :FONT
+        JMP $F :SYST_16_ADD
+        MOV $G2 $A
+        MOV $G3 $B
+
+        #CMP $G4 0D
+        #JMP 04 :SYST_GRAPHICS_DRAW_CHAR_ENTER
+        CMP $G4 08
+        JMP 04 :SYST_GRAPHICS_DRAW_CHAR_DEC
+        SET 00 80 18
+        JMP $F :SYST_GRAPHICS_DRAW_CHAR_PRINT
+
+    SYST_GRAPHICS_DRAW_CHAR_PRINT:
+        #get pos
+        GET $G0 80 44#adr1
+        GET $G1 80 45#adr2
+
+        MOV $A 00
+        SYST_GRAPHICS_DRAW_CHAR_FOR_Y:
+        CMP $A 06
+        JMP 04 :SYST_GRAPHICS_DRAW_CHAR_FOR_Y_DONE
+                #if(y%2)
+                MOD $B $A 02
+                CMP $B 00
+                JMP 04 :SYST_GRAPHICS_DRAW_CHAR_GET_CHAR
+                MOV $B 00
+                JMP $F :SYST_GRAPHICS_DRAW_CHAR_FOR_X
+                SYST_GRAPHICS_DRAW_CHAR_GET_CHAR:
+                    GET $G4 $G2 $G3
+                    CMP $G3 FF
+                    AND $F $F 0E
+                    JMP 04 :SYST_GRAPHICS_DRAW_CHAR_INC_G2
+                    ADD $G3 $G3 01
+
+            #for
+            MOV $B 00
+            SYST_GRAPHICS_DRAW_CHAR_FOR_X:
+            CMP $B 02
+            JMP 04 :SYST_GRAPHICS_DRAW_CHAR_FOR_X_DONE
+                #set pix
+                AND $C $G4 80
+                CMP $C 00
+                JMP 04 :SYST_GRAPHICS_DRAW_CHAR_COLOR_BACK
+                JMP 02 :SYST_GRAPHICS_DRAW_CHAR_COLOR_FRONT
+                MUL $G4 $G4 02
+
+                AND $C $G4 80
+                CMP $C 00
+                JMP 04 :SYST_GRAPHICS_DRAW_CHAR_COLOR_BACK
+                JMP 02 :SYST_GRAPHICS_DRAW_CHAR_COLOR_FRONT
+                MUL $G4 $G4 02
+
+                SET $D $G0 $G1
+
+                #inc adr
+                CMP $G1 FF
+                AND $F $F 0E
+                JMP 04 :SYST_GRAPHICS_DRAW_CHAR_INC_G0
+                ADD $G1 $G1 01
+
+            ADD $B $B 01
+            JMP $F :SYST_GRAPHICS_DRAW_CHAR_FOR_X
+            SYST_GRAPHICS_DRAW_CHAR_FOR_X_DONE:
+
+            #inc adr+
+            MOV $E $A
+            MOV $A $G0
+            MOV $B $G1
+            MOV $C 00
+            MOV $D 3E
+            JMP $F :SYST_16_ADD
+            MOV $G0 $A
+            MOV $G1 $B
+            MOV $A $E
+
+        ADD $A $A 01
+        JMP $F :SYST_GRAPHICS_DRAW_CHAR_FOR_Y
+        SYST_GRAPHICS_DRAW_CHAR_FOR_Y_DONE:
+        GET $A 80 18
+        CMP $A 01
+        JMP 04 :SYST_GRAPHICS_DRAW_CHAR_END
+
+    SYST_GRAPHICS_DRAW_CHAR_INC:
+        GET $A 80 42
+        GET $B 80 43
+        GET $C 80 44
+        GET $D 80 45
+        CMP $A 1F
+        JMP 04 :SYST_GRAPHICS_DRAW_CHAR_VERIF_INC_Y
+        JMP $F :SYST_GRAPHICS_DRAW_CHAR_INC_X
+
+
+        SYST_GRAPHICS_DRAW_CHAR_INC_X:
+            ADD $A $A 01
+            SET $A 80 42
+
+            MOV $A 00
+            MOV $B 02
+            JMP $F :SYST_16_ADD
+            SET $A 80 44
+            SET $B 80 45
+            JMP $F :SYST_GRAPHICS_DRAW_CHAR_END
+
+        SYST_GRAPHICS_DRAW_CHAR_VERIF_INC_Y:
+            CMP $B 14
+            JMP 04 :SYST_GRAPHICS_DRAW_CHAR_END
+            ADD $B $B 01
+            SET $B 80 43
+            SET 00 80 42
+
+            MOV $A 01
+            MOV $B 42
+            JMP $F :SYST_16_ADD
+            SET $A 80 44
+            SET $B 80 45
+            JMP $F :SYST_GRAPHICS_DRAW_CHAR_END
+
+    SYST_GRAPHICS_DRAW_CHAR_DEC:
+        SET 01 80 18
+        GET $A 80 42
+        GET $B 80 43
+        GET $C 80 44
+        GET $D 80 45
+        CMP $A 00
+        JMP 04 :SYST_GRAPHICS_DRAW_CHAR_VERIF_DEC_Y
+        JMP $F :SYST_GRAPHICS_DRAW_CHAR_DEC_X
+
+
+        SYST_GRAPHICS_DRAW_CHAR_DEC_X:
+            SUB $A $A 01
+            SET $A 80 42
+
+            MOV $A FF
+            MOV $B FE
+            JMP $F :SYST_16_ADD
+            SET $A 80 44
+            SET $B 80 45
+            JMP $F :SYST_GRAPHICS_DRAW_CHAR_PRINT
+
+        SYST_GRAPHICS_DRAW_CHAR_VERIF_DEC_Y:
+            CMP $B 00
+            JMP 04 :SYST_GRAPHICS_DRAW_CHAR_PRINT
+            SUB $B $B 01
+            SET $B 80 43
+            SET 1F 80 42
+
+            MOV $A FE
+            MOV $B BE
+            JMP $F :SYST_16_ADD
+            SET $A 80 44
+            SET $B 80 45
+            JMP $F :SYST_GRAPHICS_DRAW_CHAR_PRINT
+
+    SYST_GRAPHICS_DRAW_CHAR_END:
+        #funky mod
+        #SET $R 80 46
+
+        #epilogue
+        MOV $E 00
+        JMP $F :SYST_FCT_EPILOGUE
+
+
+    SYST_GRAPHICS_DRAW_CHAR_INC_G0:
+        ADD $G0 $G0 01
+        JMP $F $J1 $J2
+    SYST_GRAPHICS_DRAW_CHAR_INC_G2:
+        ADD $G2 $G2 01
+        JMP $F $J1 $J2
+    SYST_GRAPHICS_DRAW_CHAR_COLOR_BACK:
+        AND $E $G5 0F
+        MUL $D $D 10
+        ADD $D $D $E
+        JMP $F $J1 $J2
+    SYST_GRAPHICS_DRAW_CHAR_COLOR_FRONT:
+        AND $E $G5 F0
+        DIV $E $E 10
+        MUL $D $D 10
+        ADD $D $D $E
+        JMP $F $J1 $J2
+
+
+###############
+#  SUBROUTINE #
+###############
+
+# param : $AB pos, $C color
+SYST_GRAPHICS_DRAW_PIX:
+
+    # adr = y*64+x
+    # adr += adr_screen
+    # if x%2==0
+    # {
+    #   set left pix
+    # }else
+    # {
+    #   set right pix
+    # }
+
+
+    MOV $F 00
+    SET $J1 80 10
+    SET $J2 80 11
+
+    SET $A 80 18
+    SET $B 80 19
+    AND $C $C 0F
+    SET $C 80 1A
+
+    # adr = y * 40
+    MOV $D $B
+    MUL $B $B 40
+    DIV $D $D 04
+
+    # adr += x/2
+    DIV $A $A 02
+        CMP $B $A
+        AND $F $F F1
+        JMP 01 :SYST_GRAPHICS_DRAW_PIX_ADD_CARRY
+        JMP $F :SYST_GRAPHICS_DRAW_PIX_ADD
+    SYST_GRAPHICS_DRAW_PIX_ADD_CARRY:
+        ADD $D $D 01
+    SYST_GRAPHICS_DRAW_PIX_ADD:
+        ADD $B $B $A
+    
+
+    MOV $A $D
+    GET $C 80 40
+    GET $D 80 41
+    # adr += adr_screen
+        CMP $B $D
+        AND $F $F F1
+        JMP 01 :SYST_GRAPHICS_DRAW_PIX_ADD_CARRY_2
+        JMP $F :SYST_GRAPHICS_DRAW_PIX_ADD_2
+    SYST_GRAPHICS_DRAW_PIX_ADD_CARRY_2:
+        ADD $A $A 01
+    SYST_GRAPHICS_DRAW_PIX_ADD_2:
+        ADD $B $B $D
+        ADD $A $A $C
+
+    GET $C 80 1A
+    # if x % 2 == 0
+    GET $D 80 18
+    MOD $D $D 02
+    CMP $D 00
+    JMP 04 :SYST_GRAPHICS_DRAW_PIX_LEFT
+
+    # draw right
+    GET $D $A $B
+    AND $D $D F0
+    ADD $D $D $C
+    SET $D $A $B
+    JMP $F :SYST_FCT_END
+
+    SYST_GRAPHICS_DRAW_PIX_LEFT:
+        GET $D $A $B
+        AND $D $D 0F
+        MUL $C $C 10
+        ADD $D $D $C
+        SET $D $A $B
+        JMP $F :SYST_FCT_END
