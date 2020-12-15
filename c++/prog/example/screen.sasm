@@ -1,0 +1,13 @@
+
+MOV $A 00
+MOV $B E0
+SCREEN_FILL:
+    SET $R $B $A
+    ADD $A $A 01
+    CMP $A 00
+    JMP 02 :SCREEN_FILL
+    ADD $B $B 01
+    CMP $B 00
+    JMP 02 :SCREEN_FILL
+    MOV $B E0
+    JMP $F :SCREEN_FILL
