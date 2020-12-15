@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include "computer/Device.hpp"
+#include "computer_old/Device.hpp"
 
 class DISK : public Device
 {

@@ -3,7 +3,7 @@
 
 #include <SFML/Graphics.hpp>
 
-#include "computer/Device.hpp"
+#include "computer_old/Device.hpp"
 
 class ScreenSimple : public Device
 {

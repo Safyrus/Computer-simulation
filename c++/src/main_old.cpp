@@ -1,3 +1,4 @@
+/*
 #include <iostream>
 #include <iomanip>
 #include <chrono>
@@ -12,15 +13,15 @@
 #include "assembler/Interpreter.hpp"
 #include "assembler/Parser.hpp"
 #include "assembler/Lexer.hpp"
-#include "computer_old/Computer.hpp"
-#include "computer_old/DISK.hpp"
+#include "computer/Computer.hpp"
+#include "computer/DISK.hpp"
 #include "global.hpp"
 #include "console.hpp"
-#include "computer_old/RAM.hpp"
-#include "computer_old/Keyboard.hpp"
-#include "computer_old/Screen.hpp"
-#include "computer_old/ScreenSimple.hpp"
-#include "computer_old/Timer.hpp"
+#include "computer/RAM.hpp"
+#include "computer/Keyboard.hpp"
+#include "computer/Screen.hpp"
+#include "computer/ScreenSimple.hpp"
+#include "computer/Timer.hpp"
 
 bool print_debug = false;
 sf::Font baseFont;
@@ -129,10 +130,6 @@ int main(int argc, char const *argv[])
     {
         if (strcmp(argv[1], "true")==0 || strcmp(argv[1], "1")==0)
             print_debug = true;
-    }else
-    {
-        std::cout << "arg: main [debug][file][hz]\n";
-        return 0;
     }
     if (!baseFont.loadFromFile("test.ttf"))
     {
@@ -147,11 +144,14 @@ int main(int argc, char const *argv[])
     AssemblerCompiler *compiler;
     Computer *com;
     DISK *disk1;
+    DISK *disk2;
     RAM *ram;
     Keyboard *key;
+    Screen *scr;
     ScreenSimple *screen;
     Timer *timer;
     std::thread comThread;
+    int8_t c;
 
     //Assembler
     Lexer *lexer;
@@ -173,108 +173,11 @@ int main(int argc, char const *argv[])
     sf::RenderWindow window(sf::VideoMode(640, 360), "S257-01");
     window.setFramerateLimit(fps);
 
-    std::cout << "--- What do you want to test ? ---\n1 - Assembler\n2 - Computer(dynarec)\n3 - Old assembler(don't use)\n4 - Old computer(interpreter)(don't use)" << std::endl;
+    std::cout << "--- What do you want to test ? ---\n0 - Old assembler(don't use)\n1 - test CPU\n2 - test Input\n3 - test Screen\n4 - test Computer\n5 - SFML\n6 - Assembler" << std::endl;
     std::cin >> choice;
     switch (choice)
     {
-    case 1:
-        std::cout << "--- Enter file name to assemble ---" << std::endl;
-        std::cin >> file;
-        try
-        {
-            content = openFile(file);
-        }
-        catch (std::string e)
-        {
-            std::cout << e;
-            break;
-        }
-
-        //lexing
-        lexer = new Lexer(content, file);
-        tokens = lexer->makeToken();
-        delete lexer;
-
-        //verif lexing
-        for (unsigned int i = 0; i < tokens.size(); i++)
-        {
-            if (tokens[i].getType() == Token::ERROR)
-            {
-                error = true;
-            }
-            if (print_debug)
-            {
-                tokens[i].print();
-                std::cout << ", ";
-            }
-        }
-        if (print_debug)
-            std::cout << "\n\n";
-        if (error)
-        {
-            std::cout << "Error during Lexing, cannot continue\n"
-                      << std::flush;
-            break;
-        }
-
-        //parsing
-        parser = new Parser(tokens);
-        nodes = parser->parse();
-        delete parser;
-
-        //print parsing
-        for (unsigned int i = 0; i < nodes.size(); i++)
-        {
-            if (print_debug)
-                nodes[i]->print();
-            if (nodes[i]->getToken(0).getType().compare(Token::ERROR) == 0)
-            {
-                error = true;
-            }
-            if (print_debug)
-                std::cout << ", ";
-        }
-        if (print_debug)
-            std::cout << "\n\n";
-        if (error)
-        {
-            std::cout << "Error during Parsing, cannot continue\n"
-                      << std::flush;
-            for (unsigned int i = 0; i < nodes.size(); i++)
-            {
-                delete nodes[i];
-            }
-            break;
-        }
-
-        //interpreting
-        interpreter = new Interpreter(nodes, file);
-        fileOut = interpreter->interprete();
-        delete interpreter;
-
-        //verif interpreting
-        std::cout << "\n\n"
-                  << std::flush;
-        if (print_debug)
-            std::cout << fileOut;
-
-        for (unsigned int i = 0; i < nodes.size(); i++)
-        {
-            delete nodes[i];
-        }
-        error = fileOut.find("FFFFFFFF") != std::string::npos;
-        if (error)
-        {
-            std::cout << "Error during Interpreting, cannot continue\n";
-            break;
-        }
-        writeFile(fileOut, file.substr(0, file.find_last_of('.')));
-
-        break;
-    case 2:
-        std::cout << "TODO" << std::endl;
-        break;
-    case 3:
+    case 0:
         compiler = new AssemblerCompiler();
 
         std::cout << "-=#[ Test for assemblerCompiler(loadAssembly) ]#=-" << std::endl;
@@ -291,7 +194,112 @@ int main(int argc, char const *argv[])
         compiler->saveBinary(file.c_str());
         delete compiler;
         break;
+    case 1:
+        std::cout << std::hex;
+
+        com = new Computer();
+        disk1 = new DISK(0x100);
+        disk2 = new DISK(0x7F00);
+        disk1->load("prog/test1");
+        disk2->load("prog/test2");
+        com->addDevice(disk1, 0, 0xFF);
+        com->addDevice(disk2, 0x100, 0x7FFF);
+
+        com->setPwr();
+        if (print_debug)
+            std::cout << "Computer ON" << std::endl;
+
+        while (com->getPwr())
+        {
+            com->cycle();
+            if (!print_debug)
+                com->print(10, 5);
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
+        if (print_debug)
+            std::cout << "Computer OFF" << std::endl;
+        com->removeDevice(disk1);
+        com->removeDevice(disk2);
+
+        delete com;
+        delete disk1;
+        delete disk2;
+        break;
+    case 2:
+        rawConsole(true);
+        key = new Keyboard(8);
+        c = 0;
+        while (c != 27)
+        {
+            key->getKey();
+            c = key->getData();
+            std::cout << (char)c << std::flush;
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
+        delete key;
+        rawConsole(false);
+        break;
+    case 3:
+        std::cout << "\x1b[1;1H\x1b[2J";
+        scr = new Screen(); //(0x103);
+        scr->setAdr(0);
+        scr->setData(16);
+        scr->setAdr(1);
+        scr->setData(8);
+        scr->setAdr(2);
+        scr->setData(0);
+        for (int i = 3; i < scr->getLen(); i++)
+        {
+            scr->setAdr(i);
+            scr->setData(rand() % 2);
+        }
+        scr->print(0, 0);
+
+        delete scr;
+        break;
     case 4:
+        rawConsole(true);
+        std::cout << std::hex;
+        std::cout << "\x1b[1;1H\x1b[2J";
+        com = new Computer();
+        disk1 = new DISK(0x8000);
+        ram = new RAM(0x1000);
+        key = new Keyboard(8);
+        scr = new Screen(); //(0x103);
+
+        disk1->load("prog/test_com_io");
+
+        com->addDevice(disk1, 0x0000, 0x7FFF);
+        com->addDevice(ram, 0x8000, 0x8FFF);
+        com->addDevice(key, 0x9000, 0x90FF);
+        com->addDevice(scr, 0x9100, 0x9203);
+
+        com->setPwr();
+        if (print_debug)
+            std::cout << "Computer ON" << std::endl;
+
+        while (com->getPwr())
+        {
+            com->cycle();
+            if (!print_debug)
+            {
+                com->print(17, 1);
+                key->getKey();
+                key->print(17, 10);
+                if (com->getCycle() % com->getHz() >= com->getHz() / 4)
+                {
+                    scr->print(1, 1);
+                }
+            }
+            std::this_thread::sleep_for(std::chrono::nanoseconds(1000000000 / com->getHz()));
+        }
+        if (print_debug)
+            std::cout << "Computer OFF" << std::endl;
+
+        delete com;
+        rawConsole(false);
+        break;
+    case 5:
         rawConsole(true);
         std::cout << std::hex;
         std::cout << "\x1b[1;1H\x1b[2J";
@@ -415,6 +423,100 @@ int main(int argc, char const *argv[])
         delete com;
         rawConsole(false);
         break;
+    case 6:
+        std::cout << "--- Enter file name to assemble ---" << std::endl;
+        std::cin >> file;
+        try
+        {
+            content = openFile(file);
+        }
+        catch (std::string e)
+        {
+            std::cout << e;
+            break;
+        }
+
+        //lexing
+        lexer = new Lexer(content, file);
+        tokens = lexer->makeToken();
+        delete lexer;
+
+        //verif lexing
+        for (unsigned int i = 0; i < tokens.size(); i++)
+        {
+            if (tokens[i].getType() == Token::ERROR)
+            {
+                error = true;
+            }
+            if (print_debug)
+            {
+                tokens[i].print();
+                std::cout << ", ";
+            }
+        }
+        if (print_debug)
+            std::cout << "\n\n";
+        if (error)
+        {
+            std::cout << "Error during Lexing, cannot continue\n"
+                      << std::flush;
+            break;
+        }
+
+        //parsing
+        parser = new Parser(tokens);
+        nodes = parser->parse();
+        delete parser;
+
+        //print parsing
+        for (unsigned int i = 0; i < nodes.size(); i++)
+        {
+            if (print_debug)
+                nodes[i]->print();
+            if (nodes[i]->getToken(0).getType().compare(Token::ERROR) == 0)
+            {
+                error = true;
+            }
+            if (print_debug)
+                std::cout << ", ";
+        }
+        if (print_debug)
+            std::cout << "\n\n";
+        if (error)
+        {
+            std::cout << "Error during Parsing, cannot continue\n"
+                      << std::flush;
+            for (unsigned int i = 0; i < nodes.size(); i++)
+            {
+                delete nodes[i];
+            }
+            break;
+        }
+
+        //interpreting
+        interpreter = new Interpreter(nodes, file);
+        fileOut = interpreter->interprete();
+        delete interpreter;
+
+        //verif interpreting
+        std::cout << "\n\n"
+                  << std::flush;
+        if (print_debug)
+            std::cout << fileOut;
+
+        for (unsigned int i = 0; i < nodes.size(); i++)
+        {
+            delete nodes[i];
+        }
+        error = fileOut.find("FFFFFFFF") != std::string::npos;
+        if (error)
+        {
+            std::cout << "Error during Interpreting, cannot continue\n";
+            break;
+        }
+        writeFile(fileOut, file.substr(0, file.find_last_of('.')));
+
+        break;
     default:
         break;
     }
@@ -426,3 +528,4 @@ int main(int argc, char const *argv[])
     std::cout << "\x1b[1;1H\x1b[2J";
     restoreConsole();
 }
+*/

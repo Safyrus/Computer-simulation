@@ -13,7 +13,7 @@
 #include <termios.h>
 #include <time.h>
 #endif // _WIN32
-#include "computer/Keyboard.hpp"
+#include "computer_old/Keyboard.hpp"
 #include "global.hpp"
 
 Keyboard::Keyboard(int l) : Device(l)

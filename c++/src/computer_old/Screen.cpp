@@ -3,7 +3,7 @@
 
 #include <SFML/Graphics.hpp>
 
-#include "computer/Screen.hpp"
+#include "computer_old/Screen.hpp"
 #include "global.hpp"
 
 Screen::Screen()

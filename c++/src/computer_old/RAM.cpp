@@ -2,7 +2,7 @@
 #include <sstream>
 #include <iomanip>
 #include <stdio.h>
-#include "computer/RAM.hpp"
+#include "computer_old/RAM.hpp"
 #include "global.hpp"
 
 RAM::RAM(int l) : Device(l)

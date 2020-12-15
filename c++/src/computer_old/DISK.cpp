@@ -2,7 +2,7 @@
 #include <iomanip>
 #include <iostream>
 #include <SFML/Graphics.hpp>
-#include "computer/DISK.hpp"
+#include "computer_old/DISK.hpp"
 #include "global.hpp"
 
 DISK::DISK(int l) : Device(l)

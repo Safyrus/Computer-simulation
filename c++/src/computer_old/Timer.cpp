@@ -1,7 +1,7 @@
 #include <chrono>
 #include <iostream>
 #include "global.hpp"
-#include "computer/Timer.hpp"
+#include "computer_old/Timer.hpp"
 
 Timer::Timer()
 {
