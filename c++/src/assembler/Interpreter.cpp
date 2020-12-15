@@ -6,6 +6,7 @@
 #include <sstream>
 #include <iostream>
 #include "global.hpp"
+#include "utils/fileFunction.hpp"
 
 std::vector<std::string> Interpreter::importName;
 

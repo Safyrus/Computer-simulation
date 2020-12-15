@@ -34,3 +34,7 @@
 # C++ folders
 *.vscode/
 *bin/
+*SFML/
+
+# Other files
+.markdownlint.json

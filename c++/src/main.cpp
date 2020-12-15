@@ -3,8 +3,8 @@
 #include <chrono>
 #include <thread>
 #include <atomic>
-#include <fstream>
 #include <string.h>
+#include <thread>
 
 #include <SFML/Graphics.hpp>
 
@@ -12,15 +12,22 @@
 #include "assembler/Interpreter.hpp"
 #include "assembler/Parser.hpp"
 #include "assembler/Lexer.hpp"
-#include "computer_old/Computer.hpp"
-#include "computer_old/DISK.hpp"
+
 #include "global.hpp"
 #include "console.hpp"
+
+#include "computer_old/Computer.hpp"
+#include "computer_old/DISK.hpp"
 #include "computer_old/RAM.hpp"
 #include "computer_old/Keyboard.hpp"
 #include "computer_old/Screen.hpp"
 #include "computer_old/ScreenSimple.hpp"
 #include "computer_old/Timer.hpp"
+
+#include "dynarecs/testDynarecs.hpp"
+
+#include "utils/hexTxtToBin.hpp"
+#include "utils/fileFunction.hpp"
 
 bool print_debug = false;
 sf::Font baseFont;
@@ -31,7 +38,7 @@ void run(Computer *com)
 {
     std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
     std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
-    unsigned int hertz = com->getHz()*2;
+    unsigned int hertz = com->getHz() * 2;
     std::chrono::nanoseconds timePercycle(1000000000 / hertz);
     std::chrono::nanoseconds waiting(100000000);
     std::chrono::duration<long, std::nano> time_span;
@@ -42,7 +49,7 @@ void run(Computer *com)
         {
             t2 = std::chrono::steady_clock::now();
             time_span = std::chrono::duration_cast<std::chrono::duration<long, std::nano>>(t2 - t1);
-            hertz = com->getHz()*2;
+            hertz = com->getHz() * 2;
             if (time_span >= timePercycle)
             {
                 t1 = std::chrono::steady_clock::now();
@@ -61,75 +68,14 @@ void run(Computer *com)
     }
 }
 
-std::string openFile(std::string f)
-{
-    //open file
-    std::string fileName = f;
-    std::ifstream file;
-    file.open(f);
-    if (!file.is_open())
-    {
-        std::string e = "Unable to open file " + fileName + "\n";
-        throw e;
-    }
-    else
-    {
-        if (print_debug)
-            std::cout << "file " + fileName + " open \n";
-    }
-
-    // get file content
-    if (print_debug)
-        std::cout << "read file " + fileName + " ...";
-    std::string str = "";
-    std::string line = "";
-    while (getline(file, line))
-    {
-        str += line + '\n';
-    }
-    if (print_debug)
-        std::cout << "done\n";
-
-    //close file
-    file.close();
-    if (print_debug)
-        std::cout << "file " + fileName + " close\n";
-
-    return str;
-}
-
-void writeFile(std::string content, std::string fileName)
-{
-    std::ofstream file;
-    file.open(fileName);
-    int spaceCount = 0;
-    for (unsigned int i = 0; i < content.size(); i++)
-    {
-        file << content[i];
-        if (content[i] == ' ')
-        {
-            spaceCount++;
-            if (spaceCount >= 16)
-            {
-                file << '\n';
-                spaceCount = 0;
-            }
-            else if (spaceCount % 4 == 0)
-            {
-                file << ' ';
-            }
-        }
-    }
-    file.close();
-}
-
 int main(int argc, char const *argv[])
 {
     if (argc > 1)
     {
-        if (strcmp(argv[1], "true")==0 || strcmp(argv[1], "1")==0)
+        if (strcmp(argv[1], "true") == 0 || strcmp(argv[1], "1") == 0)
             print_debug = true;
-    }else
+    }
+    else
     {
         std::cout << "arg: main [debug][file][hz]\n";
         return 0;
@@ -272,7 +218,13 @@ int main(int argc, char const *argv[])
 
         break;
     case 2:
-        std::cout << "TODO" << std::endl;
+        testBuffer();
+        std::cout << "\n###########################\n";
+        testEmitter();
+        std::cout << "\n###########################\n";
+        testTranslater();
+        std::cout << "\n###########################\n";
+        testTranslater2();
         break;
     case 3:
         compiler = new AssemblerCompiler();
@@ -305,11 +257,12 @@ int main(int argc, char const *argv[])
         if (argc > 2)
         {
             file = argv[2];
-        }else
+        }
+        else
         {
             file = "prog/test_com_io";
         }
-        
+
         disk1->load(file.c_str());
 
         com->addDevice(disk1, 0x0000, 0x7FFF);
@@ -356,14 +309,14 @@ int main(int argc, char const *argv[])
                     }
                     if (event.key.code == sf::Keyboard::F3)
                     {
-                        hz = (int)(hz/2.0);
-                        if(hz == 0)
+                        hz = (int)(hz / 2.0);
+                        if (hz == 0)
                             hz = 1;
                         com->setHz(hz);
                     }
                     if (event.key.code == sf::Keyboard::F4)
                     {
-                        hz = (int)(hz*2.0);
+                        hz = (int)(hz * 2.0);
                         com->setHz(hz);
                     }
                     if (event.key.code == sf::Keyboard::LControl)

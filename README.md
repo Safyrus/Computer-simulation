@@ -1,14 +1,17 @@
 # Computer-simulation
+
 Trying to make a computer emulator of my own cpu architecture
 
 Note: This is a personal project and, as I'm not the most organized person, there may be bugs and other .
 
 ## Compile
 
-### On Windows:
+### On Windows
+
     TODO
 
-### On Linux:
+### On Linux
+
     just run `make` in a terminal in the c++ folder and it will create a executable file in c++/bin
 
     The compilation won't work if there is no bin folder
