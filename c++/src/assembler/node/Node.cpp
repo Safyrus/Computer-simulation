@@ -25,7 +25,7 @@ void Node::print()
 
 Token Node::getToken(int index)
 {
-    return Token(Token::ERROR, "no token " + index, Position());
+    return Token(Token::ERR, "no token " + index, Position());
 }
 
 std::string Node::getType()

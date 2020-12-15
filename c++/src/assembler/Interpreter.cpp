@@ -6,7 +6,6 @@
 #include <sstream>
 #include <iostream>
 #include "global.hpp"
-#include "utils/fileFunction.hpp"
 
 std::vector<std::string> Interpreter::importName;
 
@@ -622,7 +621,7 @@ std::vector<Node *> Interpreter::import(std::string fileName)
     //verif lexing
     for (unsigned int i = 0; i < tokens.size(); i++)
     {
-        if (tokens[i].getType() == Token::ERROR)
+        if (tokens[i].getType() == Token::ERR)
         {
             error = true;
         }
@@ -650,7 +649,7 @@ std::vector<Node *> Interpreter::import(std::string fileName)
     {
         if (print_debug)
             parseNodes[i]->print();
-        if (parseNodes[i]->getToken(0).getType().compare(Token::ERROR) == 0)
+        if (parseNodes[i]->getToken(0).getType().compare(Token::ERR) == 0)
         {
             error = true;
         }

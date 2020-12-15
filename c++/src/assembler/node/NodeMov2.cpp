@@ -46,5 +46,5 @@ Token NodeMov2::getToken(int index)
     {
         return val2;
     }
-    return Token(Token::ERROR, "no token " + index, Position());
+    return Token(Token::ERR, "no token " + index, Position());
 }

@@ -39,5 +39,5 @@ Token NodeBinL::getToken(int index)
     {
         return label;
     }
-    return Token(Token::ERROR, "no token " + index, Position());
+    return Token(Token::ERR, "no token " + index, Position());
 }

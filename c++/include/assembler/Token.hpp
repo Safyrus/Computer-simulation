@@ -21,7 +21,7 @@ public:
     static const std::string LABEL_DECLARE;
     static const std::string COMMENT;
     static const std::string IMPORT;
-    static const std::string ERROR;
+    static const std::string ERR;
 
     void print();
 

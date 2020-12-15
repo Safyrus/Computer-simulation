@@ -46,5 +46,5 @@ Token NodeTri::getToken(int index)
     {
         return val3;
     }
-    return Token(Token::ERROR, "no token " + index, Position());
+    return Token(Token::ERR, "no token " + index, Position());
 }

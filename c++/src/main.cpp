@@ -1,10 +1,17 @@
+
 #include <iostream>
 #include <iomanip>
 #include <chrono>
 #include <thread>
 #include <atomic>
 #include <string.h>
+
+#ifndef _WIN32
 #include <thread>
+#else
+#include <windows.h>
+#include <time.h>
+#endif
 
 #include <SFML/Graphics.hpp>
 
@@ -27,13 +34,13 @@
 #include "dynarecs/testDynarecs.hpp"
 
 #include "utils/hexTxtToBin.hpp"
-#include "utils/fileFunction.hpp"
 
 bool print_debug = false;
 sf::Font baseFont;
 
 std::atomic<bool> stop = false;
 
+#ifndef _WIN32
 void run(Computer *com)
 {
     std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
@@ -67,6 +74,136 @@ void run(Computer *com)
         }
     }
 }
+#else
+
+BOOLEAN nanosleepWin(LONGLONG ns){
+	/* Declarations */
+	HANDLE timer;	/* Timer handle */
+	LARGE_INTEGER li;	/* Time defintion */
+	/* Create timer */
+	if(!(timer = CreateWaitableTimer(NULL, TRUE, NULL)))
+		return FALSE;
+	/* Set timer properties */
+	li.QuadPart = -ns;
+	if(!SetWaitableTimer(timer, &li, 0, NULL, NULL, FALSE)){
+		CloseHandle(timer);
+		return FALSE;
+	}
+	/* Start & wait for timer */
+	WaitForSingleObject(timer, INFINITE);
+	/* Clean resources */
+	CloseHandle(timer);
+	/* Slept without problems */
+	return TRUE;
+}
+
+DWORD WINAPI run(LPVOID lpParameter)
+{
+    Computer *com = (Computer*)lpParameter;
+    unsigned int hertz = 10000000;
+    if(com != NULL)
+    {
+        hertz = com->getHz() * 2;
+    }
+
+    std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
+    std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
+    std::chrono::nanoseconds timePercycle(1000000000 / hertz);
+    std::chrono::nanoseconds waiting(100000000);
+    std::chrono::duration<long, std::nano> time_span;
+
+    while (!stop)
+    {
+        if (com != NULL && com->getPwr())
+        {
+            t2 = std::chrono::steady_clock::now();
+            time_span = std::chrono::duration_cast<std::chrono::duration<long, std::nano>>(t2 - t1);
+            hertz = com->getHz() * 2;
+            if (time_span >= timePercycle)
+            {
+                for (int i = 0; i < time_span / timePercycle; i++)
+                {
+                    com->halfCycle();
+                }
+                t1 = std::chrono::steady_clock::now();
+                timePercycle = (std::chrono::nanoseconds)(1000000000 / hertz);
+            }
+            else
+            {
+                nanosleepWin((timePercycle.count()/10) / hertz);
+            }
+        }
+        else
+        {
+            nanosleepWin(waiting.count()/10);
+        }
+    }
+    return 0;
+}
+#endif
+
+
+std::string openFile(std::string f)
+{
+    //open file
+    std::string fileName = f;
+    std::ifstream file;
+    file.open(f);
+    if (!file.is_open())
+    {
+        std::string e = "Unable to open file " + fileName + "\n";
+        throw e;
+    }
+    else
+    {
+        if (print_debug)
+            std::cout << "file " + fileName + " open \n";
+    }
+
+    // get file content
+    if (print_debug)
+        std::cout << "read file " + fileName + " ...";
+    std::string str = "";
+    std::string line = "";
+    while (getline(file, line))
+    {
+        str += line + '\n';
+    }
+    if (print_debug)
+        std::cout << "done\n";
+
+    //close file
+    file.close();
+    if (print_debug)
+        std::cout << "file " + fileName + " close\n";
+
+    return str;
+}
+
+void writeFile(std::string content, std::string fileName)
+{
+    std::ofstream file;
+    file.open(fileName);
+    int spaceCount = 0;
+    for (unsigned int i = 0; i < content.size(); i++)
+    {
+        file << content[i];
+        if (content[i] == ' ')
+        {
+            spaceCount++;
+            if (spaceCount >= 16)
+            {
+                file << '\n';
+                spaceCount = 0;
+            }
+            else if (spaceCount % 4 == 0)
+            {
+                file << ' ';
+            }
+        }
+    }
+    file.close();
+}
 
 int main(int argc, char const *argv[])
 {
@@ -97,7 +234,12 @@ int main(int argc, char const *argv[])
     Keyboard *key;
     ScreenSimple *screen;
     Timer *timer;
+
+#ifndef _WIN32
     std::thread comThread;
+#else
+    HANDLE comThread;
+#endif
 
     //Assembler
     Lexer *lexer;
@@ -144,7 +286,7 @@ int main(int argc, char const *argv[])
         //verif lexing
         for (unsigned int i = 0; i < tokens.size(); i++)
         {
-            if (tokens[i].getType() == Token::ERROR)
+            if (tokens[i].getType() == Token::ERR)
             {
                 error = true;
             }
@@ -173,7 +315,7 @@ int main(int argc, char const *argv[])
         {
             if (print_debug)
                 nodes[i]->print();
-            if (nodes[i]->getToken(0).getType().compare(Token::ERROR) == 0)
+            if (nodes[i]->getToken(0).getType().compare(Token::ERR) == 0)
             {
                 error = true;
             }
@@ -272,7 +414,23 @@ int main(int argc, char const *argv[])
         com->addDevice(screen, 0xE000, 0xFFFF);
 
         window.setFramerateLimit(fps);
+
+#ifndef _WIN32
         comThread = std::thread(run, com);
+#else
+        comThread = CreateThread(
+            NULL,  // Thread attributes
+            0,     // Stack size (0 = use default)
+            run,   // Thread start address
+            com,  // Parameter to pass to the thread
+            0,     // Creation flags
+            NULL); // Thread id
+        if (comThread == NULL)
+        {
+            std::cout << "ERROR\n";
+            return 1;
+        }
+#endif
 
         while (window.isOpen())
         {
@@ -363,7 +521,13 @@ int main(int argc, char const *argv[])
             window.display();
         }
         stop = true;
+
+#ifndef _WIN32
         comThread.join();
+#else
+        WaitForSingleObject(comThread, INFINITE);
+        CloseHandle(comThread);
+#endif
 
         delete com;
         rawConsole(false);

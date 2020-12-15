@@ -143,7 +143,7 @@ Token Lexer::findToken()
 
     std::string error = "[ASSEMBLER ERROR]: Undefined word " + word + " in file " + fileName + " at " + std::to_string(newPos.getLine()) + ":" + std::to_string(newPos.getCol()) + "\n";
     std::cout << error;
-    return Token(Token::ERROR, word, newPos);
+    return Token(Token::ERR, word, newPos);
 }
 
 std::string Lexer::findWord()

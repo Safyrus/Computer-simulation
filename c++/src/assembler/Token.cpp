@@ -10,7 +10,7 @@ const std::string Token::LABEL = "LABEL";
 const std::string Token::LABEL_DECLARE = "LABEL_DECLARE";
 const std::string Token::COMMENT = "COMMENT";
 const std::string Token::IMPORT = "IMPORT";
-const std::string Token::ERROR = "ERROR";
+const std::string Token::ERR = "ERROR";
 
 
 Token::Token()
