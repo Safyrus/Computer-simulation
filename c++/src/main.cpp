@@ -217,7 +217,7 @@ int main(int argc, char const *argv[])
         std::cout << "arg: main [debug][file][hz]\n";
         return 0;
     }
-    if (!baseFont.loadFromFile("test.ttf"))
+    if (!baseFont.loadFromFile("pix46.ttf"))
     {
         std::cout << "ERROR: could not load font";
     }
