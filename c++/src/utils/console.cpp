@@ -2,7 +2,7 @@
 #define LINEARNODE_H
 
 #include <stdio.h>
-#include "console.hpp"
+#include "utils/console.hpp"
 
 #ifdef _WIN32
 #include <windows.h>
