@@ -1,5 +1,5 @@
 CXX		  := g++
-CXX_FLAGS := -Wall -Wextra -std=c++17 -ggdb -pthread
+CXX_FLAGS := -Wall -Wextra -std=c++17 -ggdb -pthread -fpermissive
 
 BIN		:= bin
 SRC		:= src
