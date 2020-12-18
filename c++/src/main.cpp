@@ -70,8 +70,11 @@ std::string openFile(std::string f)
 
 void writeFile(std::string content, std::string fileName)
 {
+    // open file
     std::ofstream file;
     file.open(fileName);
+
+    // write strings of hex numbers in the file
     int spaceCount = 0;
     for (unsigned int i = 0; i < content.size(); i++)
     {
@@ -90,6 +93,8 @@ void writeFile(std::string content, std::string fileName)
             }
         }
     }
+
+    // close file
     file.close();
 }
 
@@ -153,17 +158,21 @@ int main(int argc, char const *argv[])
     case 3: // old sasm compiler
         compiler = new AssemblerCompiler();
 
+        // wait for the user input
         std::cout << "-=#[ Test for assemblerCompiler(loadAssembly) ]#=-" << std::endl;
         std::cout << "--- Enter file name to open ---" << std::endl;
         std::cin >> filePath;
 
+        // compile 
         compiler->loadAssembler(filePath.c_str());
         std::cin.ignore();
 
+        // wait for the user input
         std::cout << "\n\n-=#[ Test for assemblerCompiler(saveBinary) ]#=-" << std::endl;
         std::cout << "--- Enter file name to save ---" << std::endl;
         std::cin >> filePath;
 
+        // save
         compiler->saveBinary(filePath.c_str());
         delete compiler;
         break;
