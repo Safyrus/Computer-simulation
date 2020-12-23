@@ -1,10 +1,20 @@
 CXX		  := g++
-CXX_FLAGS := -Wall -Wextra -std=c++17 -ggdb -pthread -fpermissive
+CXX_FLAGS := -Wall -Wextra -std=c++17 -ggdb -pthread
+
+ifeq ($(OS), Windows_NT)
+	CXX_FLAGS += -D _WIN32_WINNT=0x0A00
+else
+	CXX_FLAGS += -z execstack -fpermissive -m32
+endif
 
 BIN		:= bin
 SRC		:= src
 INCLUDE	:= include
-LIB		:= lib
+ifeq ($(OS), Windows_NT)
+LIB		:= lib/win
+else
+LIB		:= lib/linux
+endif
 
 LIBRARIES	:= -lsfml-graphics -lsfml-audio -lsfml-window -lsfml-system
 EXECUTABLE	:= main
