@@ -1,0 +1,5 @@
+MOV $B 12
+JMP $B $A $B
+MOV $A 34
+NOP
+OFF
