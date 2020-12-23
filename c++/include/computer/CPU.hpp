@@ -3,23 +3,31 @@
 
 #include <vector>
 
+#include "computer/Bus.hpp"
+
 typedef unsigned char uint8_t;
 typedef unsigned short uint16_t;
+typedef unsigned int uint32_t;
 
 namespace computer
 {
-    class CPU
+    class CPU : public computer::Device, public std::enable_shared_from_this<CPU>
     {
     private:
-        uint8_t bus[1024 * 64];
+        uint8_t rawBus[1024 * 64];
+        std::shared_ptr<computer::Bus> bus;
 
     public:
-        unsigned int cycle;
+        uint32_t cycle;
         uint16_t pc;
         uint8_t reg[16];
 
-        CPU();
+        CPU(std::shared_ptr<computer::Bus> bus);
         ~CPU();
+
+        void run();
+        uint8_t get(uint16_t adr);
+        void set(uint16_t adr, uint8_t data);
 
         void reset();
         uint8_t getBusData(uint16_t adr);

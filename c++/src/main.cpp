@@ -4,6 +4,7 @@
 #include <chrono>
 #include <thread>
 #include <string.h>
+#include <fstream>
 
 #ifndef _WIN32
 #include <thread>
@@ -154,6 +155,8 @@ int main(int argc, char const *argv[])
         testTranslater();
         std::cout << "\n###########################\n";
         testTranslater2();
+        std::cout << "\n###########################\n";
+        testDeviceThread();
         break;
     case 3: // old sasm compiler
         compiler = new AssemblerCompiler();
@@ -163,7 +166,7 @@ int main(int argc, char const *argv[])
         std::cout << "--- Enter file name to open ---" << std::endl;
         std::cin >> filePath;
 
-        // compile 
+        // compile
         compiler->loadAssembler(filePath.c_str());
         std::cin.ignore();
 

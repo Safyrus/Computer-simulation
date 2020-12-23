@@ -5,11 +5,12 @@
 #include <iostream>
 #include <iomanip>
 
-dynarec::Translater::Translater(std::shared_ptr<computer::CPU> cpu)
+dynarec::Translater::Translater(std::shared_ptr<computer::CPU> cpu, bool rawBus)
 {
     this->cpu = cpu;
+    this->rawBus = rawBus;
     running = false;
-    for (int i = 0; i < 1024*64; i++)
+    for (int i = 0; i < 1024 * 64; i++)
     {
         blocks.push_back(nullptr);
     }
@@ -17,7 +18,7 @@ dynarec::Translater::Translater(std::shared_ptr<computer::CPU> cpu)
 
 dynarec::Translater::~Translater()
 {
-    
+
     for (unsigned int i = 0; i < blocks.size(); i++)
     {
         if (blocks[i] != nullptr)
@@ -30,7 +31,7 @@ dynarec::Translater::~Translater()
 dynarec::Emitter *dynarec::Translater::handlerEndBlock(int ret)
 {
     std::cout << "| handler end block" << std::endl;
-    uint16_t adrJmp = ((ret & 0xffff00)>>8);
+    uint16_t adrJmp = ((ret & 0xffff00) >> 8);
     uint8_t code = (ret & 0xff);
     switch (code)
     {
@@ -62,13 +63,14 @@ int dynarec::Translater::run(uint16_t pc)
     while (running)
     {
         std::cout << "| run adr " << std::hex << std::setfill('0') << std::setw(4) << cpu->pc << " ..." << std::endl;
-        if(e != nullptr)
+        if (e != nullptr)
         {
             std::cout << "|     Execute block adr " << std::hex << std::setfill('0') << std::setw(4) << e->getStartAdr() << " with " << e->getInsCount() << " ins" << std::endl;
             res = e->execute();
-            cpu->pc += (e->getInsCount())*4;
+            cpu->pc += (e->getInsCount()) * 4;
             cpu->cycle += e->getInsCount();
-        }else 
+        }
+        else
         {
             std::cout << "| /!\\ ERROR: Emitter null" << std::endl;
             res = CODE_ERR;
@@ -100,10 +102,24 @@ void dynarec::Translater::recompile(uint16_t pc)
     bool recompile = true;
     while (recompile)
     {
-        uint8_t ins = cpu->getBusData(pc);
-        uint8_t dst = cpu->getBusData(pc + 1);
-        uint8_t src = cpu->getBusData(pc + 2);
-        uint8_t val = cpu->getBusData(pc + 3);
+        uint8_t ins = 0;
+        uint8_t dst = 0;
+        uint8_t src = 0;
+        uint8_t val = 0;
+        if (rawBus)
+        {
+            ins = cpu->getBusData(pc);
+            dst = cpu->getBusData(pc + 1);
+            src = cpu->getBusData(pc + 2);
+            val = cpu->getBusData(pc + 3);
+        }
+        else
+        {
+            ins = cpu->get(pc);
+            dst = cpu->get(pc + 1);
+            src = cpu->get(pc + 2);
+            val = cpu->get(pc + 3);
+        }
         switch (ins)
         {
         case NOP:
@@ -127,7 +143,7 @@ void dynarec::Translater::recompile(uint16_t pc)
         default:
             std::cout << "| /!\\ ERROR: no instruction with the opcode " << std::hex << ins << std::endl;
             break;
-        // TODO
+            // TODO
         }
         pc += 4;
     }

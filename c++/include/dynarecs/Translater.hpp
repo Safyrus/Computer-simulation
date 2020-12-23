@@ -14,6 +14,7 @@ namespace dynarec
         std::vector<dynarec::Emitter *> blocks;
         std::shared_ptr<computer::CPU> cpu;
         bool running;
+        bool rawBus;
 
         dynarec::Emitter *handlerEndBlock(int ret);
         dynarec::Emitter *getBlock(uint16_t pc);
@@ -25,7 +26,7 @@ namespace dynarec
         static const uint8_t CODE_NXT = 3;
         static const uint8_t CODE_ERR = 4;
 
-        Translater(std::shared_ptr<computer::CPU> cpu);
+        Translater(std::shared_ptr<computer::CPU> cpu, bool rawBus);
         ~Translater();
 
         int run(uint16_t pc);
