@@ -32,10 +32,13 @@
 *.app
 
 # C++ folders
-*.vscode/
 *bin/
 *lib/
 *SFML/
+
+#VSCode
+*.vscode/
+.vscodeignore
 
 # Other files
 .markdownlint.json
