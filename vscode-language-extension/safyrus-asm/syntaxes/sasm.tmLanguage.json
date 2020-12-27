@@ -1,0 +1,63 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "sASM",
+	"patterns": [
+		{
+			"include": "#keywords"
+		},
+		{
+			"include": "#constants"
+		},
+		{
+			"include": "#storage"
+		},
+		{
+			"include": "#entities"
+		},
+		{
+			"include": "#comments"
+		}
+	],
+	"repository": {
+		"keywords": {
+			"patterns": [{
+				"name": "keyword.operator.sasm",
+				"match": "\\b(NOP|RST|OFF|MOV|CMP|ADD|ADC|SUB|SBB|MUL|DIV|MOD|AND|OR|XOR|JMP|GET|SET)\\b"
+			}]
+		},
+		"constants": {
+			"patterns": [{
+				"name": "constant.numeric.hexa.sasm",
+				"match": "\\b([0-9A-Fa-f]+)\\b"
+			},{
+				"name": "constant.numeric.decimal.sasm",
+				"match": "\\%[0-9]+"
+			},{
+				"name": "constant.language.register.sasm",
+				"match": "\\$([A-F]|J1|J2|G[0-5]|O|R)"
+			}]
+		},
+		"storage": {
+		},
+		"comments": {
+			"patterns": [{
+				"begin": "\\#",
+				"end": "\\n",
+				"name": "comment.line.number-sign.sasm"
+			}]
+		},
+		"entities": {
+			"patterns": [{
+				"name": "entity.name.function.declare.sasm",
+				"match": "(\\w)+\\:"
+			},{
+				"name": "entity.name.function.reference.sasm",
+				"match": "\\:(\\w)+"
+			},{
+				"name": "entity.name.tag.import.sasm",
+				"match": "\\@(.)+"
+			}]
+		}
+	},
+	"scopeName": "source.sasm"
+}
