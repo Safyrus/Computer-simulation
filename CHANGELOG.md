@@ -27,7 +27,7 @@ This project try to follow the [Semantic Versioning](https://semver.org/spec/v2.
 
 -----------------
 
-## **[0.5.5]** - _2020-12-23_
+## **[0.5.5]** - _2020-12-27_
 
 ### **Added**
 
