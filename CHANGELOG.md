@@ -4,19 +4,55 @@ The format of this CHANGELOG is based on [Keep a Changelog](https://keepachangel
 
 This project try to follow the [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-_Note: the changelog content from 2020-01-12 to 2020-04-17 was made during 2020-12-17 and 2020-12-18 and may not be precisely accurate of what happen back then._
+> _Note: the changelog content from 2020-01-12 to 2020-04-17 was made during 2020-12-17 and 2020-12-18 and may not be precisely accurate of what happen back then._
 
 -----------------
 
-## *[CURRENT UPDATE]*
+## *[Unreleased]*
 
 ### **Added**
+
+- a verifCPU program to check if instructions of the CPU work
+- more emitter function (source and target)
 
 ### **Changed**
 
 ### **Fixed**
 
 ### **Removed**
+
+### **Work on**
+
+- The target functions of the Emitter on linux to run in 64bits
+
+-----------------
+
+## **[0.5.5]** - _2020-12-23_
+
+### **Added**
+
+- an extension for vscode to highlight the sasm language
+
+### **Changed**
+
+- README
+- gitignore
+
+-----------------
+
+## **[0.5.4]** - _2020-12-23_
+
+### **Added**
+
+- Devices
+- testDynarec
+
+### **Changed**
+
+- functions
+- Makefile
+- README
+- gitignore
 
 -----------------
 
