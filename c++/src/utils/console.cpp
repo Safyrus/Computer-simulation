@@ -113,3 +113,11 @@ void SetWindow(int Width, int Height)
 #endif
 
 #endif
+
+std::string ansi(ANSI_CODE code)
+{
+    std::string ret = "\x1b[";
+    ret += std::to_string(code);
+    ret += "m";
+    return ret;
+}
