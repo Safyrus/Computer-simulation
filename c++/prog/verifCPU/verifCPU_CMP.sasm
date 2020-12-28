@@ -1,0 +1,60 @@
+##############################
+#
+# author: Safyrus
+#
+# part of the verifCPU program that test CMP instructions
+# it does not test CMP REG VAL because it is needed for tests to work
+#
+##############################
+
+
+##############################
+# TODO
+# - test each flag for each instructions
+##############################
+
+##############################
+# test CMP REG REG
+##############################
+    MOV $F 00
+    MOV $A 88
+    MOV $B 88
+    CMP $A $B
+    AND $F $F FE
+    JMP $D :CMP_1_YES
+    JMP $F :CMP_1_NOP
+
+CMP_1_NOP:
+    MOV $E 05
+    JMP $F :CMP_1_NOP
+
+CMP_1_YES:
+##############################
+# test CMP VAL REG
+##############################
+    MOV $F 00
+    MOV $B 88
+    CMP 88 $B
+    AND $F $F FE
+    JMP $D :CMP_2_YES
+    JMP $F :CMP_2_NOP
+
+CMP_2_NOP:
+    MOV $E 06
+    JMP $F :CMP_2_NOP
+
+CMP_2_YES:
+##############################
+# test CMP VAL VAL
+##############################
+    MOV $F 00
+    CMP 88 88
+    AND $F $F FE
+    JMP $D :CMP_3_YES
+    JMP $F :CMP_3_NOP
+
+CMP_3_NOP:
+MOV $E 08
+JMP $F :CMP_3_NOP
+
+CMP_3_YES:

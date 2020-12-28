@@ -1,0 +1,46 @@
+##############################
+#
+# author: Safyrus
+#
+# this program test if all instructions work correctly
+# the only one that need to work befor is:
+# - MOV REG VAL
+# - CMP REG VAL
+# - JMP REG ADR
+# - AND REG VAL
+# those who cannot be tested are: NOP, RST and OFF
+##############################
+
+##############################
+# TODO
+# - test 10 flag
+# - reformat doc
+# - update comments
+# - check every test
+# - reduce nessecary instructions
+##############################
+
+
+INIT:
+    NOP
+    MOV $D 04
+
+@prog/verifCPU/verifCPU_MOV.sasm
+@prog/verifCPU/verifCPU_CMP.sasm
+@prog/verifCPU/verifCPU_ADD.sasm
+@prog/verifCPU/verifCPU_ADC.sasm
+#@prog/verifCPU/verifCPU_SUB.sasm
+#@prog/verifCPU/verifCPU_SBB.sasm
+#@prog/verifCPU/verifCPU_MUL.sasm
+#@prog/verifCPU/verifCPU_DIV.sasm
+#@prog/verifCPU/verifCPU_MOD.sasm
+#@prog/verifCPU/verifCPU_AND.sasm
+#@prog/verifCPU/verifCPU_OR.sasm
+#@prog/verifCPU/verifCPU_XOR.sasm
+#@prog/verifCPU/verifCPU_JMP.sasm
+#@prog/verifCPU/verifCPU_GET.sasm
+#@prog/verifCPU/verifCPU_SET.sasm
+
+
+END:
+    OFF

@@ -1,0 +1,89 @@
+##############################
+#
+# author: Safyrus
+#
+# part of the verifCPU program that test ADD instructions
+#
+##############################
+
+
+##############################
+# TODO
+# - unsigned flag
+##############################
+
+##############################
+# test ADD REG REG REG
+##############################
+# reset
+MOV $F 00
+MOV $C 00
+
+MOV $A 11
+MOV $B 22
+ADD $C $A $B
+CMP $C 33
+JMP $D :ADD_1_YES
+JMP $F :ADD_1_NOP
+
+ADD_1_NOP:
+MOV $E 10
+JMP $F :ADD_1_NOP
+
+ADD_1_YES:
+
+##############################
+# test ADD REG VAL REG
+##############################
+# reset
+MOV $F 00
+MOV $C 00
+
+MOV $A 11
+ADD $C 22 $A
+CMP $C 33
+JMP $D :ADD_2_YES
+JMP $F :ADD_2_NOP
+
+ADD_2_NOP:
+MOV $E 20
+JMP $F :ADD_2_NOP
+
+ADD_2_YES:
+
+##############################
+# test ADD REG REG VAL
+##############################
+# reset
+MOV $F 00
+MOV $C 00
+
+MOV $A 11
+ADD $C $A 22
+CMP $C 33
+JMP $D :ADD_3_YES
+JMP $F :ADD_3_NOP
+
+ADD_3_NOP:
+MOV $E 30
+JMP $F :ADD_3_NOP
+
+ADD_3_YES:
+
+##############################
+# test ADD REG VAL VAL
+##############################
+# reset
+MOV $F 00
+MOV $C 00
+
+ADD $C 11 22
+CMP $C 33
+JMP $D :ADD_4_YES
+JMP $F :ADD_4_NOP
+
+ADD_4_NOP:
+MOV $E 40
+JMP $F :ADD_4_NOP
+
+ADD_4_YES:
