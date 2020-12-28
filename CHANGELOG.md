@@ -12,9 +12,6 @@ This project try to follow the [Semantic Versioning](https://semver.org/spec/v2.
 
 ### **Added**
 
-- a verifCPU program to check if instructions of the CPU work
-- more emitter function (source and target)
-
 ### **Changed**
 
 ### **Fixed**
@@ -23,7 +20,33 @@ This project try to follow the [Semantic Versioning](https://semver.org/spec/v2.
 
 ### **Work on**
 
-- The target functions of the Emitter on linux to run in 64bits
+- The target functions of the Emitter on linux to run in 64bits.
+- more instructions for dynarec
+- more verif in the verifCPU program
+
+-----------------
+
+## **[0.5.6]** - _2020-12-28_
+
+### **Added**
+
+- a verifCPU program to check if instructions of the CPU work. It can check for now:
+  - 1 type of MOV
+  - 1 type of CMP
+  - 4 type of ADD
+  - 4 type of ADC
+- more emitter function (source and target).
+- a processing sketch FontImgToBin to transform a black and white image into a binary string.
+- some images to test the sketch.
+- more instructions to the translater and the emitter.
+- more x86 instructions to the emitter.
+- a function to use simple ansi escape code (mainly to change text color).
+
+### **Changed**
+
+- the font in the tools program to be the pix46 font.
+- main and translater to use ansi escape code.
+- testDynarec to use a file given by parameter.
 
 -----------------
 
@@ -31,12 +54,12 @@ This project try to follow the [Semantic Versioning](https://semver.org/spec/v2.
 
 ### **Added**
 
-- an extension for vscode to highlight the sasm language
+- an extension for vscode to highlight the sasm language.
 
 ### **Changed**
 
-- README
-- gitignore
+- README.
+- gitignore.
 
 -----------------
 
@@ -44,15 +67,21 @@ This project try to follow the [Semantic Versioning](https://semver.org/spec/v2.
 
 ### **Added**
 
-- Devices
-- testDynarec
+- devices that are part of the computer. These devices are:
+  - the abstract Device class
+  - the CPU: was already there but is now a device.
+  - the RAM: store temporary data.
+  - the BUS: connect devices.
+  - the RunnableDevice class: create a thread to run the device.
+- a testDynarec program and function to test the dynamic recompiler.
 
 ### **Changed**
 
-- functions
-- Makefile
-- README
-- gitignore
+- function locations from hpp to cpp files.
+- some files (mainly translater and CPU) to use the new devices.
+- Makefile.
+- README.
+- gitignore.
 
 -----------------
 
