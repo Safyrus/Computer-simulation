@@ -20,12 +20,21 @@ namespace dynarec
         void x86MOV_RtR(x86REG from, x86REG to, bool mode8 = true);
         void x86MOV_Rimm(x86REG reg, uint32_t val);
 
-        void x86ADD(x86REG dst, x86REG src, bool mode8 = true);
-        void x86AND_Rimm(x86REG reg, uint32_t val);
-        void x86CMP(x86REG r1, x86REG r2, bool mode8 = true);
+        void x86ADD_RtR(x86REG dst, x86REG src, bool mode8 = true);
+        void x86ADC_RtR(x86REG dst, x86REG src, bool mode8 = true);
+        void x86SUB_RtR(x86REG dst, x86REG src, bool mode8 = true);
+        void x86SBB_RtR(x86REG dst, x86REG src, bool mode8 = true);
+        void x86MUL_R(x86REG src);
+        void x86DIV_R(x86REG src);
+
         void x86SHL(x86REG reg, uint8_t val, bool mode8 = true);
         void x86OR_Rimm(x86REG reg, uint32_t val);
         void x86OR_RtR(x86REG dst, x86REG src, bool mode8 = true);
+        void x86AND_Rimm(x86REG reg, uint32_t val);
+        void x86AND_RtR(x86REG dst, x86REG src, bool mode8 = true);
+        void x86XOR_RtR(x86REG dst, x86REG src, bool mode8 = true);
+
+        void x86CMP(x86REG r1, x86REG r2, bool mode8 = true);
 
         void x86JE(uint8_t rel);
         void x86JG(uint8_t rel);

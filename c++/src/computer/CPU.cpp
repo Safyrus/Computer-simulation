@@ -26,7 +26,7 @@ computer::CPU::~CPU()
 void computer::CPU::run()
 {
     dynarec::Translater t(shared_from_this(), false);
-    t.run(0x0004);
+    t.run(pc);
 }
 
 uint8_t computer::CPU::get(uint16_t adr)

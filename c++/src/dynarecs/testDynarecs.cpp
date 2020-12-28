@@ -167,7 +167,7 @@ void testTranslater2()
     printCPU(cpu);
 }
 
-void testDeviceThread()
+void testDeviceThread(std::string filePath)
 {
     std::cout << "\nCreate BUS" << std::endl;
     std::shared_ptr<computer::Bus> bus = std::make_shared<computer::Bus>();
@@ -177,13 +177,13 @@ void testDeviceThread()
     computer::RunnableDevice runCPU(cpu);
 
     std::cout << "Create RAM thread" << std::endl;
-    std::shared_ptr<computer::RAM> ram = std::make_shared<computer::RAM>(0x0400, 1000000);
+    std::shared_ptr<computer::RAM> ram = std::make_shared<computer::RAM>(0x0800, 1000000);
     computer::RunnableDevice runRAM(ram);
     std::cout << "load to RAM" << std::endl;
-    ram->load("prog/test/testDynarec");
+    ram->load(filePath);
 
     std::cout << "Connect CPU and RAM" << std::endl;
-    bus->addDevice(ram, 0x0010, 0x040F);
+    bus->addDevice(ram, 0x0000, 0x0800);
 
     std::cout << "run RAM thread" << std::endl;
     runRAM.run();

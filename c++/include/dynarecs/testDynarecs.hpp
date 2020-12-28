@@ -1,6 +1,8 @@
 #ifndef TESTDYNARECS_HPP
 #define TESTDYNARECS_HPP
 
+#include <string>
+
 #include "computer/CPU.hpp"
 
 void printCPU(std::shared_ptr<computer::CPU> cpu);
@@ -15,6 +17,6 @@ void testTranslater();
 
 void testTranslater2();
 
-void testDeviceThread();
+void testDeviceThread(std::string filePath);
 
 #endif // TESTDYNARECS_HPP

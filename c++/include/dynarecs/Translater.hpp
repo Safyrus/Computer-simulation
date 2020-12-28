@@ -30,6 +30,7 @@ namespace dynarec
         ~Translater();
 
         int run(uint16_t pc);
+        void printCPUState();
     };
 } // namespace dynarec
 

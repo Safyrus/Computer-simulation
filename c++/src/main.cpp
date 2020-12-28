@@ -139,7 +139,12 @@ int main(int argc, char const *argv[])
     std::cout << "\x1b[1;1H\x1b[2J";
 
     // wait for input
-    std::cout << "--- What do you want to test ? ---\n1 - Assembler\n2 - Computer(dynarec)\n3 - Old assembler(don't use)\n4 - Old computer(interpreter)(don't use)" << std::endl;
+    std::cout << "--- What do you want to test ? ---\n"
+              << ansi(DEFAULT_FG) << "1 - " << ansi(GREEN_FG) << "Assembler\n"
+              << ansi(DEFAULT_FG) << "2 - " << ansi(YELLOW_FG) << "Computer(dynarec)(not done)\n"
+              << ansi(DEFAULT_FG) << "3 - " << ansi(RED_FG) << "Old assembler(don't use)\n"
+              << ansi(DEFAULT_FG) << "4 - " << ansi(GREEN_FG) << "Old computer(interpreter)" << ansi(YELLOW_FG) << "(may be bugged)\n"
+              << ansi(RESET);
     std::cin >> choice;
 
     switch (choice)
@@ -156,7 +161,7 @@ int main(int argc, char const *argv[])
         std::cout << "\n###########################\n";
         testTranslater2();
         std::cout << "\n###########################\n";
-        testDeviceThread();
+        testDeviceThread(filePath);
         break;
     case 3: // old sasm compiler
         compiler = new AssemblerCompiler();

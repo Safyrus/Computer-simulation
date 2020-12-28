@@ -25,6 +25,10 @@ int dynarec::Emitter::execute()
     return buf.execute();
 }
 
+
+/**************************************************/
+
+
 void dynarec::Emitter::NOP()
 {
     buf.write8(0x90);
@@ -43,6 +47,10 @@ void dynarec::Emitter::OFF()
     x86RET();
     buf.incInsCount();
 }
+
+
+/**************************************************/
+
 
 void dynarec::Emitter::MOV(REG dst, uint8_t src)
 {
@@ -94,24 +102,46 @@ void dynarec::Emitter::CMP(uint8_t src, uint8_t val)
     buf.incInsCount();
 }
 
+
+/**************************************************/
+
+
 void dynarec::Emitter::ADD(REG dst, REG src, REG val)
 {
     x86MOV_MtR((uint32_t)&cpu->reg[src], EAX);
     x86MOV_MtR((uint32_t)&cpu->reg[val], ECX);
-    x86ADD(EAX, ECX);
+    x86ADD_RtR(EAX, ECX);
     x86MOV_RtM(EAX, (uint32_t)&cpu->reg[dst]);
     buf.incInsCount();
 }
-/*
+
 void dynarec::Emitter::ADC(REG dst, REG src, REG val)
 {
+    x86MOV_MtR((uint32_t)&cpu->reg[src], EAX);
+    x86MOV_MtR((uint32_t)&cpu->reg[val], ECX);
+    x86ADC_RtR(EAX, ECX);
+    x86MOV_RtM(EAX, (uint32_t)&cpu->reg[dst]);
+    buf.incInsCount();
 }
+
 void dynarec::Emitter::SUB(REG dst, REG src, REG val)
 {
+    x86MOV_MtR((uint32_t)&cpu->reg[src], EAX);
+    x86MOV_MtR((uint32_t)&cpu->reg[val], ECX);
+    x86SUB_RtR(EAX, ECX);
+    x86MOV_RtM(EAX, (uint32_t)&cpu->reg[dst]);
+    buf.incInsCount();
 }
 void dynarec::Emitter::SBB(REG dst, REG src, REG val)
 {
+    x86MOV_MtR((uint32_t)&cpu->reg[src], EAX);
+    x86MOV_MtR((uint32_t)&cpu->reg[val], ECX);
+    x86SBB_RtR(EAX, ECX);
+    x86MOV_RtM(EAX, (uint32_t)&cpu->reg[dst]);
+    buf.incInsCount();
 }
+
+/*
 void dynarec::Emitter::MUL(REG dst, REG src, REG val)
 {
 }
@@ -121,28 +151,76 @@ void dynarec::Emitter::DIV(REG dst, REG src, REG val)
 void dynarec::Emitter::MOD(REG dst, REG src, REG val)
 {
 }
+*/
+
 void dynarec::Emitter::AND(REG dst, REG src, REG val)
 {
+    x86MOV_MtR((uint32_t)&cpu->reg[src], EAX);
+    x86MOV_MtR((uint32_t)&cpu->reg[val], ECX);
+    x86AND_RtR(EAX, ECX);
+    x86MOV_RtM(EAX, (uint32_t)&cpu->reg[dst]);
+    buf.incInsCount();
 }
+
 void dynarec::Emitter::OR(REG dst, REG src, REG val)
 {
+    x86MOV_MtR((uint32_t)&cpu->reg[src], EAX);
+    x86MOV_MtR((uint32_t)&cpu->reg[val], ECX);
+    x86OR_RtR(EAX, ECX);
+    x86MOV_RtM(EAX, (uint32_t)&cpu->reg[dst]);
+    buf.incInsCount();
 }
+
 void dynarec::Emitter::XOR(REG dst, REG src, REG val)
 {
+    x86MOV_MtR((uint32_t)&cpu->reg[src], EAX);
+    x86MOV_MtR((uint32_t)&cpu->reg[val], ECX);
+    x86XOR_RtR(EAX, ECX);
+    x86MOV_RtM(EAX, (uint32_t)&cpu->reg[dst]);
+    buf.incInsCount();
 }
+
+
+/**************************************************/
+
 
 void dynarec::Emitter::ADD(REG dst, uint8_t src, REG val)
 {
+    x86MOV_Rimm(EAX, src);
+    x86MOV_MtR((uint32_t)&cpu->reg[val], ECX);
+    x86ADD_RtR(EAX, ECX);
+    x86MOV_RtM(EAX, (uint32_t)&cpu->reg[dst]);
+    buf.incInsCount();
 }
+
 void dynarec::Emitter::ADC(REG dst, uint8_t src, REG val)
 {
+    x86MOV_Rimm(EAX, src);
+    x86MOV_MtR((uint32_t)&cpu->reg[val], ECX);
+    x86ADC_RtR(EAX, ECX);
+    x86MOV_RtM(EAX, (uint32_t)&cpu->reg[dst]);
+    buf.incInsCount();
 }
+
 void dynarec::Emitter::SUB(REG dst, uint8_t src, REG val)
 {
+    x86MOV_Rimm(EAX, src);
+    x86MOV_MtR((uint32_t)&cpu->reg[val], ECX);
+    x86SUB_RtR(EAX, ECX);
+    x86MOV_RtM(EAX, (uint32_t)&cpu->reg[dst]);
+    buf.incInsCount();
 }
+
 void dynarec::Emitter::SBB(REG dst, uint8_t src, REG val)
 {
+    x86MOV_Rimm(EAX, src);
+    x86MOV_MtR((uint32_t)&cpu->reg[val], ECX);
+    x86SBB_RtR(EAX, ECX);
+    x86MOV_RtM(EAX, (uint32_t)&cpu->reg[dst]);
+    buf.incInsCount();
 }
+
+/*
 void dynarec::Emitter::MUL(REG dst, uint8_t src, REG val)
 {
 }
@@ -152,28 +230,75 @@ void dynarec::Emitter::DIV(REG dst, uint8_t src, REG val)
 void dynarec::Emitter::MOD(REG dst, uint8_t src, REG val)
 {
 }
+*/
+
 void dynarec::Emitter::AND(REG dst, uint8_t src, REG val)
 {
+    x86MOV_Rimm(EAX, src);
+    x86MOV_MtR((uint32_t)&cpu->reg[val], ECX);
+    x86AND_RtR(EAX, ECX);
+    x86MOV_RtM(EAX, (uint32_t)&cpu->reg[dst]);
+    buf.incInsCount();
 }
+
 void dynarec::Emitter::OR(REG dst, uint8_t src, REG val)
 {
+    x86MOV_Rimm(EAX, src);
+    x86MOV_MtR((uint32_t)&cpu->reg[val], ECX);
+    x86OR_RtR(EAX, ECX);
+    x86MOV_RtM(EAX, (uint32_t)&cpu->reg[dst]);
+    buf.incInsCount();
 }
+
 void dynarec::Emitter::XOR(REG dst, uint8_t src, REG val)
 {
+    x86MOV_Rimm(EAX, src);
+    x86MOV_MtR((uint32_t)&cpu->reg[val], ECX);
+    x86XOR_RtR(EAX, ECX);
+    x86MOV_RtM(EAX, (uint32_t)&cpu->reg[dst]);
+    buf.incInsCount();
 }
+
+
+/**************************************************/
+
 
 void dynarec::Emitter::ADD(REG dst, REG src, uint8_t val)
 {
+    x86MOV_MtR((uint32_t)&cpu->reg[src], EAX);
+    x86MOV_Rimm(ECX, val);
+    x86ADD_RtR(EAX, ECX);
+    x86MOV_RtM(EAX, (uint32_t)&cpu->reg[dst]);
+    buf.incInsCount();
 }
+
 void dynarec::Emitter::ADC(REG dst, REG src, uint8_t val)
 {
+    x86MOV_MtR((uint32_t)&cpu->reg[src], EAX);
+    x86MOV_Rimm(ECX, val);
+    x86ADC_RtR(EAX, ECX);
+    x86MOV_RtM(EAX, (uint32_t)&cpu->reg[dst]);
+    buf.incInsCount();
 }
+
 void dynarec::Emitter::SUB(REG dst, REG src, uint8_t val)
 {
+    x86MOV_MtR((uint32_t)&cpu->reg[src], EAX);
+    x86MOV_Rimm(ECX, val);
+    x86SUB_RtR(EAX, ECX);
+    x86MOV_RtM(EAX, (uint32_t)&cpu->reg[dst]);
+    buf.incInsCount();
 }
+
 void dynarec::Emitter::SBB(REG dst, REG src, uint8_t val)
 {
+    x86MOV_MtR((uint32_t)&cpu->reg[src], EAX);
+    x86MOV_Rimm(ECX, val);
+    x86SBB_RtR(EAX, ECX);
+    x86MOV_RtM(EAX, (uint32_t)&cpu->reg[dst]);
+    buf.incInsCount();
 }
+/*
 void dynarec::Emitter::MUL(REG dst, REG src, uint8_t val)
 {
 }
@@ -183,28 +308,75 @@ void dynarec::Emitter::DIV(REG dst, REG src, uint8_t val)
 void dynarec::Emitter::MOD(REG dst, REG src, uint8_t val)
 {
 }
+*/
+
 void dynarec::Emitter::AND(REG dst, REG src, uint8_t val)
 {
+    x86MOV_MtR((uint32_t)&cpu->reg[src], EAX);
+    x86MOV_Rimm(ECX, val);
+    x86AND_RtR(EAX, ECX);
+    x86MOV_RtM(EAX, (uint32_t)&cpu->reg[dst]);
+    buf.incInsCount();
 }
+
 void dynarec::Emitter::OR(REG dst, REG src, uint8_t val)
 {
+    x86MOV_MtR((uint32_t)&cpu->reg[src], EAX);
+    x86MOV_Rimm(ECX, val);
+    x86OR_RtR(EAX, ECX);
+    x86MOV_RtM(EAX, (uint32_t)&cpu->reg[dst]);
+    buf.incInsCount();
 }
+
 void dynarec::Emitter::XOR(REG dst, REG src, uint8_t val)
 {
+    x86MOV_MtR((uint32_t)&cpu->reg[src], EAX);
+    x86MOV_Rimm(ECX, val);
+    x86XOR_RtR(EAX, ECX);
+    x86MOV_RtM(EAX, (uint32_t)&cpu->reg[dst]);
+    buf.incInsCount();
 }
+
+
+/**************************************************/
+
 
 void dynarec::Emitter::ADD(REG dst, uint8_t src, uint8_t val)
 {
+    x86MOV_Rimm(EAX, src);
+    x86MOV_Rimm(ECX, val);
+    x86ADD_RtR(EAX, ECX);
+    x86MOV_RtM(EAX, (uint32_t)&cpu->reg[dst]);
+    buf.incInsCount();
 }
+
 void dynarec::Emitter::ADC(REG dst, uint8_t src, uint8_t val)
 {
+    x86MOV_Rimm(EAX, src);
+    x86MOV_Rimm(ECX, val);
+    x86ADC_RtR(EAX, ECX);
+    x86MOV_RtM(EAX, (uint32_t)&cpu->reg[dst]);
+    buf.incInsCount();
 }
+
 void dynarec::Emitter::SUB(REG dst, uint8_t src, uint8_t val)
 {
+    x86MOV_Rimm(EAX, src);
+    x86MOV_Rimm(ECX, val);
+    x86SUB_RtR(EAX, ECX);
+    x86MOV_RtM(EAX, (uint32_t)&cpu->reg[dst]);
+    buf.incInsCount();
 }
+
 void dynarec::Emitter::SBB(REG dst, uint8_t src, uint8_t val)
 {
+    x86MOV_Rimm(EAX, src);
+    x86MOV_Rimm(ECX, val);
+    x86SBB_RtR(EAX, ECX);
+    x86MOV_RtM(EAX, (uint32_t)&cpu->reg[dst]);
+    buf.incInsCount();
 }
+/*
 void dynarec::Emitter::MUL(REG dst, uint8_t src, uint8_t val)
 {
 }
@@ -214,16 +386,38 @@ void dynarec::Emitter::DIV(REG dst, uint8_t src, uint8_t val)
 void dynarec::Emitter::MOD(REG dst, uint8_t src, uint8_t val)
 {
 }
+*/
+
 void dynarec::Emitter::AND(REG dst, uint8_t src, uint8_t val)
 {
+    x86MOV_Rimm(EAX, src);
+    x86MOV_Rimm(ECX, val);
+    x86AND_RtR(EAX, ECX);
+    x86MOV_RtM(EAX, (uint32_t)&cpu->reg[dst]);
+    buf.incInsCount();
 }
+
 void dynarec::Emitter::OR(REG dst, uint8_t src, uint8_t val)
 {
+    x86MOV_Rimm(EAX, src);
+    x86MOV_Rimm(ECX, val);
+    x86OR_RtR(EAX, ECX);
+    x86MOV_RtM(EAX, (uint32_t)&cpu->reg[dst]);
+    buf.incInsCount();
 }
+
 void dynarec::Emitter::XOR(REG dst, uint8_t src, uint8_t val)
 {
+    x86MOV_Rimm(EAX, src);
+    x86MOV_Rimm(ECX, val);
+    x86XOR_RtR(EAX, ECX);
+    x86MOV_RtM(EAX, (uint32_t)&cpu->reg[dst]);
+    buf.incInsCount();
 }
-*/
+
+
+/**************************************************/
+
 
 void dynarec::Emitter::JMP(REG dst, REG src, REG val)
 {
@@ -251,9 +445,28 @@ void dynarec::Emitter::JMP(REG dst, uint8_t src, REG val)
 void dynarec::Emitter::JMP(REG dst, REG src, uint8_t val)
 {
 }
+*/
+
 void dynarec::Emitter::JMP(REG dst, uint8_t src, uint8_t val)
 {
+    x86MOV_MtR((uint32_t)&cpu->reg[dst], EAX);
+    x86MOV_MtR((uint32_t)&cpu->reg[F], ECX);
+    x86CMP(EAX, ECX);
+    x86JE(0x06);
+    x86MOV_Rimm(EAX, Translater::CODE_NXT);
+    x86RET();
+    x86MOV_Rimm(EDX, src);
+    x86MOV_Rimm(ECX, val);
+    x86MOV_RtR(EDX, EAX, false);
+    x86SHL(EAX, 8, false);
+    x86OR_RtR(EAX, ECX);
+    x86SHL(EAX, 8, false);
+    x86OR_Rimm(EAX, Translater::CODE_JMP);
+    x86RET();
+    buf.incInsCount();
 }
+
+/*
 void dynarec::Emitter::JMP(uint8_t dst, REG src, REG val)
 {
 }
