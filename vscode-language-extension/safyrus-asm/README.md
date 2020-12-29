@@ -6,7 +6,7 @@ This is a extension to highlight the SafyrusASM language (sasm for short)
 
 ## Features
 
-![example\](images/example.png)
+![example](images/example.png)
 
 ----------------------------
 
