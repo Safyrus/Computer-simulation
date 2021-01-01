@@ -36,16 +36,19 @@ computer::RAM::~RAM()
 
 void computer::RAM::run()
 {
-    std::chrono::nanoseconds timePercycle(1000000000 / hz);
     while (running)
     {
-        for (unsigned int i = 0; i < adrBuf.size(); i++)
+        if (hz > 0)
         {
-            this->data[adrBuf[i]] = dataBuf[i];
+            std::chrono::nanoseconds timePercycle(1000000000 / hz);
+            for (unsigned int i = 0; i < adrBuf.size(); i++)
+            {
+                this->data[adrBuf[i]] = dataBuf[i];
+            }
+            adrBuf.clear();
+            dataBuf.clear();
+            std::this_thread::sleep_for(timePercycle);
         }
-        adrBuf.clear();
-        dataBuf.clear();
-        std::this_thread::sleep_for(timePercycle);
     }
 }
 
@@ -53,6 +56,10 @@ void computer::RAM::set(uint16_t adr, uint8_t data)
 {
     adrBuf.push_back(adr);
     dataBuf.push_back(data);
+    if (hz == 0)
+    {
+        this->data[adr] = data;
+    }
 }
 
 uint8_t computer::RAM::get(uint16_t adr)
