@@ -21,8 +21,37 @@ This project try to follow the [Semantic Versioning](https://semver.org/spec/v2.
 ### **Work on**
 
 - The target functions of the Emitter on linux to run in 64bits.
-- more instructions for dynarec
-- more verif in the verifCPU program
+
+-----------------
+
+## **[0.5.7]** - _2021-01-01_
+
+### **Added**
+
+- missing instructions for Emitter and Translater.
+- additional tests in verifCPU to test the instructions :
+  - SUB
+  - SBB
+  - MUL
+  - DIV
+  - MOD
+  - AND
+  - OR
+  - JMP
+  - SET
+  - GET
+- functions in the Emitter to generate a random value and jump if there is no carry.
+
+### **Changed**
+
+- the RAM to have an instant write speed if wanted.
+- the printCPUState() function in Translater to print more registers.
+
+### **Fixed**
+
+- registers R, J1 and J2.
+
+### **Removed**
 
 -----------------
 
