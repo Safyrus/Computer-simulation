@@ -1,0 +1,84 @@
+##############################
+#
+# author: Safyrus
+#
+# part of the verifCPU program that test XOR instructions
+#
+##############################
+
+
+##############################
+# test XOR REG REG REG
+##############################
+# reset
+MOV $F 00
+MOV $C 00
+
+MOV $A 2A
+MOV $B 17
+XOR $C $A $B
+CMP $C 3D
+JMP $D :XOR_1_YES
+JMP $F :XOR_1_NOP
+
+XOR_1_NOP:
+MOV $E 19
+JMP $F :XOR_1_NOP
+
+XOR_1_YES:
+
+##############################
+# test XOR REG VAL REG
+##############################
+# reset
+MOV $F 00
+MOV $C 00
+
+MOV $B 17
+XOR $C 2A $B
+CMP $C 3D
+JMP $D :XOR_2_YES
+JMP $F :XOR_2_NOP
+
+XOR_2_NOP:
+MOV $E 29
+JMP $F :XOR_2_NOP
+
+XOR_2_YES:
+
+##############################
+# test XOR REG REG VAL
+##############################
+# reset
+MOV $F 00
+MOV $C 00
+
+MOV $A 2A
+XOR $C $A 17
+CMP $C 3D
+JMP $D :XOR_3_YES
+JMP $F :XOR_3_NOP
+
+XOR_3_NOP:
+MOV $E 39
+JMP $F :XOR_3_NOP
+
+XOR_3_YES:
+
+##############################
+# test XOR REG VAL VAL
+##############################
+# reset
+MOV $F 00
+MOV $C 00
+
+XOR $C 2A 17
+CMP $C 3D
+JMP $D :XOR_4_YES
+JMP $F :XOR_4_NOP
+
+XOR_4_NOP:
+MOV $E 49
+JMP $F :XOR_4_NOP
+
+XOR_4_YES:

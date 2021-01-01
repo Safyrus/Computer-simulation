@@ -1,0 +1,84 @@
+##############################
+#
+# author: Safyrus
+#
+# part of the verifCPU program that test MOD instructions
+#
+##############################
+
+
+##############################
+# test MOD REG REG REG
+##############################
+# reset
+MOV $F 00
+MOV $C 00
+
+MOV $A A
+MOV $B 3
+MOD $C $A $B
+CMP $C 1
+JMP $D :MOD_1_YES
+JMP $F :MOD_1_NOP
+
+MOD_1_NOP:
+MOV $E 16
+JMP $F :MOD_1_NOP
+
+MOD_1_YES:
+
+##############################
+# test MOD REG VAL REG
+##############################
+# reset
+MOV $F 00
+MOV $C 00
+
+MOV $B 3
+MOD $C A $B
+CMP $C 1
+JMP $D :MOD_2_YES
+JMP $F :MOD_2_NOP
+
+MOD_2_NOP:
+MOV $E 26
+JMP $F :MOD_2_NOP
+
+MOD_2_YES:
+
+##############################
+# test MOD REG REG VAL
+##############################
+# reset
+MOV $F 00
+MOV $C 00
+
+MOV $A A
+MOD $C $A 3
+CMP $C 1
+JMP $D :MOD_3_YES
+JMP $F :MOD_3_NOP
+
+MOD_3_NOP:
+MOV $E 36
+JMP $F :MOD_3_NOP
+
+MOD_3_YES:
+
+##############################
+# test MOD REG VAL VAL
+##############################
+# reset
+MOV $F 00
+MOV $C 00
+
+MOD $C A 3
+CMP $C 1
+JMP $D :MOD_4_YES
+JMP $F :MOD_4_NOP
+
+MOD_4_NOP:
+MOV $E 46
+JMP $F :MOD_4_NOP
+
+MOD_4_YES:

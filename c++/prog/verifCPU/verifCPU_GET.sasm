@@ -1,0 +1,89 @@
+##############################
+#
+# author: Safyrus
+#
+# part of the verifCPU program that test GET instructions
+#
+# need data 1D at 0008
+#
+##############################
+
+
+##############################
+# test GET REG REG REG
+##############################
+    # reset
+    MOV $F 00
+    MOV $C 00
+
+    MOV $A 00
+    MOV $B 08
+    GET $C $A $B
+    CMP $C 1D
+    JMP $D :GET_1_YES
+    JMP $F :GET_1_NOP
+
+GET_1_NOP:
+    MOV $E 60
+    JMP $F :GET_1_NOP
+
+GET_1_YES:
+
+
+##############################
+# test GET REG VAL REG
+##############################
+    # reset
+    MOV $F 00
+    MOV $C 00
+
+    MOV $B 08
+    GET $C 00 $B
+    CMP $C 1D
+    JMP $D :GET_2_YES
+    JMP $F :GET_2_NOP
+
+GET_2_NOP:
+    MOV $E 61
+    JMP $F :GET_2_NOP
+
+GET_2_YES:
+
+
+##############################
+# test GET REG REG VAL
+##############################
+    # reset
+    MOV $F 00
+    MOV $C 00
+
+    MOV $A 00
+    GET $C $A 08
+    CMP $C 1D
+    JMP $D :GET_3_YES
+    JMP $F :GET_3_NOP
+
+GET_3_NOP:
+    MOV $E 62
+    JMP $F :GET_3_NOP
+
+GET_3_YES:
+
+
+##############################
+# test GET REG VAL VAL
+##############################
+    # reset
+    MOV $F 00
+    MOV $C 00
+
+    GET $C 00 08
+    CMP $C 1D
+    JMP $D :GET_4_YES
+    JMP $F :GET_4_NOP
+
+GET_4_NOP:
+    MOV $E 63
+    JMP $F :GET_4_NOP
+
+GET_4_YES:

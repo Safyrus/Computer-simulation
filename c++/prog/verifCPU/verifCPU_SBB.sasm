@@ -1,0 +1,84 @@
+##############################
+#
+# author: Safyrus
+#
+# part of the verifCPU program that test SBB instructions
+#
+##############################
+
+
+##############################
+# test SBB REG REG REG
+##############################
+# reset
+MOV $F 00
+MOV $C 00
+
+MOV $A 22
+MOV $B 10
+SBB $C $A $B
+CMP $C 11
+JMP $D :SBB_1_YES
+JMP $F :SBB_1_NOP
+
+SBB_1_NOP:
+MOV $E 13
+JMP $F :SBB_1_NOP
+
+SBB_1_YES:
+
+##############################
+# test SBB REG VAL REG
+##############################
+# reset
+MOV $F 00
+MOV $C 00
+
+MOV $B 10
+SBB $C 22 $B
+CMP $C 11
+JMP $D :SBB_2_YES
+JMP $F :SBB_2_NOP
+
+SBB_2_NOP:
+MOV $E 23
+JMP $F :SBB_2_NOP
+
+SBB_2_YES:
+
+##############################
+# test SBB REG REG VAL
+##############################
+# reset
+MOV $F 00
+MOV $C 00
+
+MOV $A 22
+SBB $C $A 10
+CMP $C 11
+JMP $D :SBB_3_YES
+JMP $F :SBB_3_NOP
+
+SBB_3_NOP:
+MOV $E 33
+JMP $F :SBB_3_NOP
+
+SBB_3_YES:
+
+##############################
+# test SBB REG VAL VAL
+##############################
+# reset
+MOV $F 00
+MOV $C 00
+
+SBB $C 22 10
+CMP $C 11
+JMP $D :SBB_4_YES
+JMP $F :SBB_4_NOP
+
+SBB_4_NOP:
+MOV $E 43
+JMP $F :SBB_4_NOP
+
+SBB_4_YES:

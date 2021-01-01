@@ -1,0 +1,84 @@
+##############################
+#
+# author: Safyrus
+#
+# part of the verifCPU program that test OR instructions
+#
+##############################
+
+
+##############################
+# test OR REG REG REG
+##############################
+# reset
+MOV $F 00
+MOV $C 00
+
+MOV $A 2A
+MOV $B 17
+OR $C $A $B
+CMP $C 3F
+JMP $D :OR_1_YES
+JMP $F :OR_1_NOP
+
+OR_1_NOP:
+MOV $E 18
+JMP $F :OR_1_NOP
+
+OR_1_YES:
+
+##############################
+# test OR REG VAL REG
+##############################
+# reset
+MOV $F 00
+MOV $C 00
+
+MOV $B 17
+OR $C 2A $B
+CMP $C 3F
+JMP $D :OR_2_YES
+JMP $F :OR_2_NOP
+
+OR_2_NOP:
+MOV $E 28
+JMP $F :OR_2_NOP
+
+OR_2_YES:
+
+##############################
+# test OR REG REG VAL
+##############################
+# reset
+MOV $F 00
+MOV $C 00
+
+MOV $A 2A
+OR $C $A 17
+CMP $C 3F
+JMP $D :OR_3_YES
+JMP $F :OR_3_NOP
+
+OR_3_NOP:
+MOV $E 38
+JMP $F :OR_3_NOP
+
+OR_3_YES:
+
+##############################
+# test OR REG VAL VAL
+##############################
+# reset
+MOV $F 00
+MOV $C 00
+
+OR $C 2A 17
+CMP $C 3F
+JMP $D :OR_4_YES
+JMP $F :OR_4_NOP
+
+OR_4_NOP:
+MOV $E 48
+JMP $F :OR_4_NOP
+
+OR_4_YES:

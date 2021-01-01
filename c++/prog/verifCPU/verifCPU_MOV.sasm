@@ -1,0 +1,33 @@
+##############################
+#
+# author: Safyrus
+#
+# part of the verifCPU program that test MOV instructions
+# it does not test MOV REG VAL because it is needed for tests to work
+#
+##############################
+
+
+##############################
+# TODO
+# -todo
+##############################
+
+
+##############################
+# test MOV REG REG
+##############################
+    MOV $F 00
+    MOV $A AA
+    MOV $B BB
+    MOV $A $B
+    CMP $A BB
+    AND $F $F FE
+    JMP $D :MOV_1_YES
+    JMP $F :MOV_1_NOP
+
+MOV_1_NOP:
+    MOV $E 03
+    JMP $F :MOV_1_NOP
+
+MOV_1_YES:

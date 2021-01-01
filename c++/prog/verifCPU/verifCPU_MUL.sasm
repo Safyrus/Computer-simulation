@@ -1,0 +1,84 @@
+##############################
+#
+# author: Safyrus
+#
+# part of the verifCPU program that test MUL instructions
+#
+##############################
+
+
+##############################
+# test MUL REG REG REG
+##############################
+# reset
+MOV $F 00
+MOV $C 00
+
+MOV $A 7
+MOV $B 6
+MUL $C $A $B
+CMP $C 2A
+JMP $D :MUL_1_YES
+JMP $F :MUL_1_NOP
+
+MUL_1_NOP:
+MOV $E 14
+JMP $F :MUL_1_NOP
+
+MUL_1_YES:
+
+##############################
+# test MUL REG VAL REG
+##############################
+# reset
+MOV $F 00
+MOV $C 00
+
+MOV $B 6
+MUL $C 7 $B
+CMP $C 2A
+JMP $D :MUL_2_YES
+JMP $F :MUL_2_NOP
+
+MUL_2_NOP:
+MOV $E 24
+JMP $F :MUL_2_NOP
+
+MUL_2_YES:
+
+##############################
+# test MUL REG REG VAL
+##############################
+# reset
+MOV $F 00
+MOV $C 00
+
+MOV $A 7
+MUL $C $A 6
+CMP $C 2A
+JMP $D :MUL_3_YES
+JMP $F :MUL_3_NOP
+
+MUL_3_NOP:
+MOV $E 34
+JMP $F :MUL_3_NOP
+
+MUL_3_YES:
+
+##############################
+# test MUL REG VAL VAL
+##############################
+# reset
+MOV $F 00
+MOV $C 00
+
+MUL $C 7 6
+CMP $C 2A
+JMP $D :MUL_4_YES
+JMP $F :MUL_4_NOP
+
+MUL_4_NOP:
+MOV $E 44
+JMP $F :MUL_4_NOP
+
+MUL_4_YES:

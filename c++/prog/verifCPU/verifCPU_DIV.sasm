@@ -1,0 +1,84 @@
+##############################
+#
+# author: Safyrus
+#
+# part of the verifCPU program that test DIV instructions
+#
+##############################
+
+
+##############################
+# test DIV REG REG REG
+##############################
+# reset
+MOV $F 00
+MOV $C 01
+
+MOV $A A
+MOV $B 3
+DIV $C $A $B
+CMP $C 3
+JMP $D :DIV_1_YES
+JMP $F :DIV_1_NOP
+
+DIV_1_NOP:
+MOV $E 15
+JMP $F :DIV_1_NOP
+
+DIV_1_YES:
+
+##############################
+# test DIV REG VAL REG
+##############################
+# reset
+MOV $F 00
+MOV $C 00
+
+MOV $B 3
+DIV $C A $B
+CMP $C 3
+JMP $D :DIV_2_YES
+JMP $F :DIV_2_NOP
+
+DIV_2_NOP:
+MOV $E 25
+JMP $F :DIV_2_NOP
+
+DIV_2_YES:
+
+##############################
+# test DIV REG REG VAL
+##############################
+# reset
+MOV $F 00
+MOV $C 00
+
+MOV $A A
+DIV $C $A 3
+CMP $C 3
+JMP $D :DIV_3_YES
+JMP $F :DIV_3_NOP
+
+DIV_3_NOP:
+MOV $E 35
+JMP $F :DIV_3_NOP
+
+DIV_3_YES:
+
+##############################
+# test DIV REG VAL VAL
+##############################
+# reset
+MOV $F 00
+MOV $C 00
+
+DIV $C A 3
+CMP $C 3
+JMP $D :DIV_4_YES
+JMP $F :DIV_4_NOP
+
+DIV_4_NOP:
+MOV $E 45
+JMP $F :DIV_4_NOP
+
+DIV_4_YES:

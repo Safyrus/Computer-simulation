@@ -1,0 +1,84 @@
+##############################
+#
+# author: Safyrus
+#
+# part of the verifCPU program that test AND instructions
+#
+##############################
+
+
+##############################
+# test AND REG REG REG
+##############################
+# reset
+MOV $F 00
+MOV $C 00
+
+MOV $A 2A
+MOV $B 17
+AND $C $A $B
+CMP $C 2
+JMP $D :AND_1_YES
+JMP $F :AND_1_NOP
+
+AND_1_NOP:
+MOV $E 17
+JMP $F :AND_1_NOP
+
+AND_1_YES:
+
+##############################
+# test AND REG VAL REG
+##############################
+# reset
+MOV $F 00
+MOV $C 00
+
+MOV $B 17
+AND $C 2A $B
+CMP $C 2
+JMP $D :AND_2_YES
+JMP $F :AND_2_NOP
+
+AND_2_NOP:
+MOV $E 27
+JMP $F :AND_2_NOP
+
+AND_2_YES:
+
+##############################
+# test AND REG REG VAL
+##############################
+# reset
+MOV $F 00
+MOV $C 00
+
+MOV $A 2A
+AND $C $A 17
+CMP $C 2
+JMP $D :AND_3_YES
+JMP $F :AND_3_NOP
+
+AND_3_NOP:
+MOV $E 37
+JMP $F :AND_3_NOP
+
+AND_3_YES:
+
+##############################
+# test AND REG VAL VAL
+##############################
+# reset
+MOV $F 00
+MOV $C 00
+
+AND $C 2A 17
+CMP $C 2
+JMP $D :AND_4_YES
+JMP $F :AND_4_NOP
+
+AND_4_NOP:
+MOV $E 47
+JMP $F :AND_4_NOP
+
+AND_4_YES:

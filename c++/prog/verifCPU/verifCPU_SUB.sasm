@@ -1,0 +1,84 @@
+##############################
+#
+# author: Safyrus
+#
+# part of the verifCPU program that test SUB instructions
+#
+##############################
+
+
+##############################
+# test SUB REG REG REG
+##############################
+# reset
+MOV $F 00
+MOV $C 00
+
+MOV $A 22
+MOV $B 10
+SUB $C $A $B
+CMP $C 12
+JMP $D :SUB_1_YES
+JMP $F :SUB_1_NOP
+
+SUB_1_NOP:
+MOV $E 12
+JMP $F :SUB_1_NOP
+
+SUB_1_YES:
+
+##############################
+# test SUB REG VAL REG
+##############################
+# reset
+MOV $F 00
+MOV $C 00
+
+MOV $B 10
+SUB $C 22 $B
+CMP $C 12
+JMP $D :SUB_2_YES
+JMP $F :SUB_2_NOP
+
+SUB_2_NOP:
+MOV $E 22
+JMP $F :SUB_2_NOP
+
+SUB_2_YES:
+
+##############################
+# test SUB REG REG VAL
+##############################
+# reset
+MOV $F 00
+MOV $C 00
+
+MOV $A 22
+SUB $C $A 10
+CMP $C 12
+JMP $D :SUB_3_YES
+JMP $F :SUB_3_NOP
+
+SUB_3_NOP:
+MOV $E 32
+JMP $F :SUB_3_NOP
+
+SUB_3_YES:
+
+##############################
+# test SUB REG VAL VAL
+##############################
+# reset
+MOV $F 00
+MOV $C 00
+
+SUB $C 22 10
+CMP $C 12
+JMP $D :SUB_4_YES
+JMP $F :SUB_4_NOP
+
+SUB_4_NOP:
+MOV $E 42
+JMP $F :SUB_4_NOP
+
+SUB_4_YES:

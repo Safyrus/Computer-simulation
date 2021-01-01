@@ -1,0 +1,157 @@
+##############################
+#
+# author: Safyrus
+#
+# part of the verifCPU program that test SET instructions
+#
+# need data space at 0008
+#
+##############################
+
+
+##############################
+# test SET REG REG REG
+##############################
+
+    MOV $A 00
+    MOV $B 08
+    MOV $C 64
+    SET $C $A $B
+    GET $A 00 08
+    CMP $A 64
+    JMP $D :SET_1_YES
+    JMP $F :SET_1_NOP
+
+SET_1_NOP:
+    MOV $E 64
+    JMP $F :SET_1_NOP
+
+SET_1_YES:
+
+
+##############################
+# test SET REG VAL REG
+##############################
+
+    MOV $B 08
+    MOV $C 65
+    SET $C 00 $B
+    GET $A 00 08
+    CMP $A 65
+    JMP $D :SET_2_YES
+    JMP $F :SET_2_NOP
+
+SET_2_NOP:
+    MOV $E 65
+    JMP $F :SET_2_NOP
+
+SET_2_YES:
+
+
+##############################
+# test SET REG REG VAL
+##############################
+
+    MOV $A 00
+    MOV $C 66
+    SET $C $A 08
+    GET $A 00 08
+    CMP $A 66
+    JMP $D :SET_3_YES
+    JMP $F :SET_3_NOP
+
+SET_3_NOP:
+    MOV $E 66
+    JMP $F :SET_3_NOP
+
+SET_3_YES:
+
+
+##############################
+# test SET REG VAL VAL
+##############################
+
+    MOV $C 67
+    SET $C 00 08
+    GET $A 00 08
+    CMP $A 67
+    JMP $D :SET_4_YES
+    JMP $F :SET_4_NOP
+
+SET_4_NOP:
+    MOV $E 67
+    JMP $F :SET_4_NOP
+
+SET_4_YES:
+
+
+##############################
+# test SET VAL REG REG
+##############################
+
+    MOV $A 00
+    MOV $B 08
+    SET 68 $A $B
+    GET $A 00 08
+    CMP $A 68
+    JMP $D :SET_5_YES
+    JMP $F :SET_5_NOP
+
+SET_5_NOP:
+    MOV $E 68
+    JMP $F :SET_5_NOP
+
+SET_5_YES:
+
+
+##############################
+# test SET VAL VAL REG
+##############################
+
+    MOV $B 08
+    SET 69 00 $B
+    GET $A 00 08
+    CMP $A 69
+    JMP $D :SET_6_YES
+    JMP $F :SET_6_NOP
+
+SET_6_NOP:
+    MOV $E 69
+    JMP $F :SET_6_NOP
+
+SET_6_YES:
+
+
+##############################
+# test SET VAL REG VAL
+##############################
+
+    MOV $A 00
+    SET 6A $A 08
+    GET $A 00 08
+    CMP $A 6A
+    JMP $D :SET_7_YES
+    JMP $F :SET_7_NOP
+
+SET_7_NOP:
+    MOV $E 6A
+    JMP $F :SET_7_NOP
+
+SET_7_YES:
+
+
+##############################
+# test SET VAL VAL VAL
+##############################
+
+    SET 6B 00 08
+    GET $A 00 08
+    CMP $A 6B
+    JMP $D :SET_8_YES
+    JMP $F :SET_8_NOP
+
+SET_8_NOP:
+    MOV $E 6B
+    JMP $F :SET_8_NOP
+
+SET_8_YES:

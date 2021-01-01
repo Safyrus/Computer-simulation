@@ -1,0 +1,226 @@
+##############################
+#
+# author: Safyrus
+#
+# part of the verifCPU program that test JMP instructions
+#
+# a JMP $J1 $J2 need to be at adr 0004
+#
+##############################
+
+
+##############################
+# test JMP REG REG REG
+##############################
+# reset
+    MOV $F 00
+    MOV $A AA
+    MOV $B BB
+
+    MOV $C 00
+    MOV $D 04
+    JMP $F $C $D
+    MOV $A $J1
+    MOV $B $J2
+    CMP $A 00
+    JMP $D :JMP_1_NXT
+    JMP $F :JMP_1_NOP
+JMP_1_NXT:
+    CMP $B 08
+    JMP $D :JMP_1_YES
+    JMP $F :JMP_1_NOP
+
+JMP_1_NOP:
+    MOV $E 50
+    JMP $F :JMP_1_NOP
+
+JMP_1_YES:
+
+
+##############################
+# test JMP REG VAL REG
+##############################
+# reset
+    MOV $F 00
+    MOV $A AA
+    MOV $B BB
+
+    MOV $D 04
+    JMP $F 00 $D
+    MOV $A $J1
+    MOV $B $J2
+    CMP $A 00
+    JMP $D :JMP_2_NXT
+    JMP $F :JMP_2_NOP
+JMP_2_NXT:
+    CMP $B 08
+    JMP $D :JMP_2_YES
+    JMP $F :JMP_2_NOP
+
+JMP_2_NOP:
+    MOV $E 51
+    JMP $F :JMP_2_NOP
+
+JMP_2_YES:
+
+
+##############################
+# test JMP REG REG VAL
+##############################
+# reset
+    MOV $F 00
+    MOV $A AA
+    MOV $B BB
+
+    MOV $C 00
+    JMP $F $C 04
+    MOV $A $J1
+    MOV $B $J2
+    CMP $A 00
+    JMP $D :JMP_3_NXT
+    JMP $F :JMP_3_NOP
+JMP_3_NXT:
+    CMP $B 08
+    JMP $D :JMP_3_YES
+    JMP $F :JMP_3_NOP
+
+JMP_3_NOP:
+    MOV $E 52
+    JMP $F :JMP_3_NOP
+
+JMP_3_YES:
+
+
+##############################
+# test JMP REG VAL VAL
+##############################
+# reset
+    MOV $F 00
+    MOV $A AA
+    MOV $B BB
+
+    JMP $F 00 04
+    MOV $A $J1
+    MOV $B $J2
+    CMP $A 00
+    JMP $D :JMP_4_NXT
+    JMP $F :JMP_4_NOP
+JMP_4_NXT:
+    CMP $B 08
+    JMP $D :JMP_4_YES
+    JMP $F :JMP_4_NOP
+
+JMP_4_NOP:
+    MOV $E 53
+    JMP $F :JMP_4_NOP
+
+JMP_4_YES:
+
+
+##############################
+# test JMP VAL REG REG
+##############################
+# reset
+    MOV $F 00
+    MOV $A AA
+    MOV $B BB
+
+    MOV $C 00
+    MOV $D 04
+    JMP 00 $C $D
+    MOV $A $J1
+    MOV $B $J2
+    CMP $A 00
+    JMP $D :JMP_5_NXT
+    JMP $F :JMP_5_NOP
+JMP_5_NXT:
+    CMP $B 08
+    JMP $D :JMP_5_YES
+    JMP $F :JMP_5_NOP
+
+JMP_5_NOP:
+    MOV $E 54
+    JMP $F :JMP_5_NOP
+
+JMP_5_YES:
+
+
+##############################
+# test JMP VAL VAL REG
+##############################
+# reset
+    MOV $F 00
+    MOV $A AA
+    MOV $B BB
+
+    MOV $D 04
+    JMP 00 00 $D
+    MOV $A $J1
+    MOV $B $J2
+    CMP $A 00
+    JMP $D :JMP_6_NXT
+    JMP $F :JMP_6_NOP
+JMP_6_NXT:
+    CMP $B 08
+    JMP $D :JMP_6_YES
+    JMP $F :JMP_6_NOP
+
+JMP_6_NOP:
+    MOV $E 55
+    JMP $F :JMP_6_NOP
+
+JMP_6_YES:
+
+
+##############################
+# test JMP VAL REG VAL
+##############################
+# reset
+    MOV $F 00
+    MOV $A AA
+    MOV $B BB
+
+    MOV $C 00
+    JMP 00 $C 04
+    MOV $A $J1
+    MOV $B $J2
+    CMP $A 00
+    JMP $D :JMP_7_NXT
+    JMP $F :JMP_7_NOP
+JMP_7_NXT:
+    CMP $B 08
+    JMP $D :JMP_7_YES
+    JMP $F :JMP_7_NOP
+
+JMP_7_NOP:
+    MOV $E 56
+    JMP $F :JMP_7_NOP
+
+JMP_7_YES:
+
+
+##############################
+# test JMP VAL VAL VAL
+##############################
+# reset
+    MOV $F 00
+    MOV $A AA
+    MOV $B BB
+
+    JMP 00 00 04
+    MOV $A $J1
+    MOV $B $J2
+    CMP $A 00
+    JMP $D :JMP_8_NXT
+    JMP $F :JMP_8_NOP
+JMP_8_NXT:
+    CMP $B 08
+    JMP $D :JMP_8_YES
+    JMP $F :JMP_8_NOP
+
+JMP_8_NOP:
+    MOV $E 57
+    JMP $F :JMP_8_NOP
+
+JMP_8_YES:
+
