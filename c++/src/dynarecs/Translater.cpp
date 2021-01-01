@@ -31,21 +31,32 @@ dynarec::Translater::~Translater()
 
 dynarec::Emitter *dynarec::Translater::handlerEndBlock(int ret)
 {
-    std::cout << ansi(YELLOW_FG) << "| handler end block" << ansi(RESET) << std::endl;
+    std::cout << ansi(YELLOW_FG) << "| handler end block" << std::endl;
+    uint8_t val = ((ret & 0xff000000) >> 24);
     uint16_t adrJmp = ((ret & 0xffff00) >> 8);
     uint8_t code = (ret & 0xff);
     switch (code)
     {
     case CODE_RET:
+        std::cout << "|     CODE_RET: stopping cpu" << ansi(RESET) << std::endl;
         running = false;
-        std::cout << "|     CODE_RET: stopping cpu" << std::endl;
         break;
     case CODE_JMP:
+        std::cout << "|     CODE_JMP: jump to " << std::hex << std::setfill('0') << std::setw(4) << cpu->pc << ansi(RESET) << std::endl;
+        cpu->reg[J1] = ((cpu->pc&0xff00)>>8);
+        cpu->reg[J2] = (cpu->pc&0xff);
         cpu->pc = adrJmp;
-        std::cout << "|     CODE_JMP: jump to " << std::hex << std::setfill('0') << std::setw(4) << cpu->pc << std::endl;
         return getBlock(cpu->pc);
     case CODE_NXT:
-        std::cout << "|     CODE_NXT: procede to next block at " << std::hex << std::setfill('0') << std::setw(4) << cpu->pc << std::endl;
+        std::cout << "|     CODE_NXT: procede to next block at " << std::hex << std::setfill('0') << std::setw(4) << cpu->pc << ansi(RESET) << std::endl;
+        return getBlock(cpu->pc);
+    case CODE_SET:
+        std::cout << "|     CODE_SET: set val at " << std::hex << std::setfill('0') << std::setw(4) << adrJmp << " to " << std::hex << std::setfill('0') << std::setw(2) << val << ansi(RESET) << std::endl;
+        cpu->set(adrJmp, val);
+        return getBlock(cpu->pc);
+    case CODE_GET:
+        std::cout << "|     CODE_GET: get val at " << std::hex << std::setfill('0') << std::setw(4) << adrJmp << " to reg[" << std::hex << (int)val << "]" << ansi(RESET) << std::endl;
+        cpu->reg[val] = cpu->get(adrJmp);
         return getBlock(cpu->pc);
     default:
         std::cout << ansi(RED_FG) << "| /!\\ ERROR: No Handler" << ansi(RESET) << std::endl;
@@ -221,6 +232,54 @@ void dynarec::Translater::recompile(uint16_t pc)
             std::cout << "|     Compile: SBB_VV " << std::endl;
             emitter->SBB((REG)dst, src, val);
             break;
+        case MUL_RR:
+            std::cout << "|     Compile: MUL_RR " << std::endl;
+            emitter->MUL((REG)dst, (REG)src, (REG)val);
+            break;
+        case MUL_VR:
+            std::cout << "|     Compile: MUL_VR " << std::endl;
+            emitter->MUL((REG)dst, src, (REG)val);
+            break;
+        case MUL_RV:
+            std::cout << "|     Compile: MUL_RV " << std::endl;
+            emitter->MUL((REG)dst, (REG)src, val);
+            break;
+        case MUL_VV:
+            std::cout << "|     Compile: MUL_VV " << std::endl;
+            emitter->MUL((REG)dst, src, val);
+            break;
+        case DIV_RR:
+            std::cout << "|     Compile: DIV_RR " << std::endl;
+            emitter->DIV((REG)dst, (REG)src, (REG)val);
+            break;
+        case DIV_VR:
+            std::cout << "|     Compile: DIV_VR " << std::endl;
+            emitter->DIV((REG)dst, src, (REG)val);
+            break;
+        case DIV_RV:
+            std::cout << "|     Compile: DIV_RV " << std::endl;
+            emitter->DIV((REG)dst, (REG)src, val);
+            break;
+        case DIV_VV:
+            std::cout << "|     Compile: DIV_VV " << std::endl;
+            emitter->DIV((REG)dst, src, val);
+            break;
+        case MOD_RR:
+            std::cout << "|     Compile: MOD_RR " << std::endl;
+            emitter->MOD((REG)dst, (REG)src, (REG)val);
+            break;
+        case MOD_VR:
+            std::cout << "|     Compile: MOD_VR " << std::endl;
+            emitter->MOD((REG)dst, src, (REG)val);
+            break;
+        case MOD_RV:
+            std::cout << "|     Compile: MOD_RV " << std::endl;
+            emitter->MOD((REG)dst, (REG)src, val);
+            break;
+        case MOD_VV:
+            std::cout << "|     Compile: MOD_VV " << std::endl;
+            emitter->MOD((REG)dst, src, val);
+            break;
         case AND_RR:
             std::cout << "|     Compile: AND_RR " << std::endl;
             emitter->AND((REG)dst, (REG)src, (REG)val);
@@ -274,10 +333,100 @@ void dynarec::Translater::recompile(uint16_t pc)
             recompile = false;
             emitter->JMP((REG)dst, (REG)src, (REG)val);
             break;
+        case JMP_RVR:
+            std::cout << "|     Compile: JMP_RVR " << std::endl;
+            recompile = false;
+            emitter->JMP((REG)dst, src, (REG)val);
+            break;
+        case JMP_RRV:
+            std::cout << "|     Compile: JMP_RRV " << std::endl;
+            recompile = false;
+            emitter->JMP((REG)dst, (REG)src, val);
+            break;
         case JMP_RVV:
             std::cout << "|     Compile: JMP_RVV " << std::endl;
             recompile = false;
             emitter->JMP((REG)dst, src, val);
+            break;
+        case JMP_VRR:
+            std::cout << "|     Compile: JMP_VRR " << std::endl;
+            recompile = false;
+            emitter->JMP(dst, (REG)src, (REG)val);
+            break;
+        case JMP_VVR:
+            std::cout << "|     Compile: JMP_VVR " << std::endl;
+            recompile = false;
+            emitter->JMP(dst, src, (REG)val);
+            break;
+        case JMP_VRV:
+            std::cout << "|     Compile: JMP_VRV " << std::endl;
+            recompile = false;
+            emitter->JMP(dst, (REG)src, val);
+            break;
+        case JMP_VVV:
+            std::cout << "|     Compile: JMP_VVV " << std::endl;
+            recompile = false;
+            emitter->JMP(dst, src, val);
+            break;
+        case GET_RR:
+            std::cout << "|     Compile: GET_RR " << std::endl;
+            recompile = false;
+            emitter->GET((REG)dst, (REG)src, (REG)val);
+            break;
+        case GET_VR:
+            std::cout << "|     Compile: GET_VR " << std::endl;
+            recompile = false;
+            emitter->GET((REG)dst, src, (REG)val);
+            break;
+        case GET_RV:
+            std::cout << "|     Compile: GET_RV " << std::endl;
+            recompile = false;
+            emitter->GET((REG)dst, (REG)src, val);
+            break;
+        case GET_VV:
+            std::cout << "|     Compile: GET_VV " << std::endl;
+            recompile = false;
+            emitter->GET((REG)dst, src, val);
+            break;
+        case SET_RRR:
+            std::cout << "|     Compile: SET_RRR " << std::endl;
+            recompile = false;
+            emitter->SET((REG)dst, (REG)src, (REG)val);
+            break;
+        case SET_RVR:
+            std::cout << "|     Compile: SET_RVR " << std::endl;
+            recompile = false;
+            emitter->SET((REG)dst, src, (REG)val);
+            break;
+        case SET_RRV:
+            std::cout << "|     Compile: SET_RRV " << std::endl;
+            recompile = false;
+            emitter->SET((REG)dst, (REG)src, val);
+            break;
+        case SET_RVV:
+            std::cout << "|     Compile: SET_RVV " << std::endl;
+            recompile = false;
+            emitter->SET((REG)dst, src, val);
+            break;
+        case SET_VRR:
+            std::cout << "|     Compile: SET_VRR " << std::endl;
+            recompile = false;
+            emitter->SET(dst, (REG)src, (REG)val);
+            break;
+        case SET_VVR:
+            std::cout << "|     Compile: SET_VVR " << std::endl;
+            recompile = false;
+            emitter->SET(dst, src, (REG)val);
+            break;
+        case SET_VRV:
+            std::cout << "|     Compile: SET_VRV " << std::endl;
+            recompile = false;
+            emitter->SET(dst, (REG)src, val);
+            break;
+        case SET_VVV:
+            std::cout << "|     Compile: SET_VVV " << std::endl;
+            recompile = false;
+            emitter->SET(dst, src, val);
             break;
         default:
             std::cout << ansi(RED_FG) << "| /!\\ ERROR: no instruction with the opcode " << std::hex << (int)ins << ansi(RESET) << std::endl;
@@ -293,11 +442,10 @@ void dynarec::Translater::recompile(uint16_t pc)
 void dynarec::Translater::printCPUState()
 {
     std::cout << ansi(CYAN_FG) << "| cpu:\n|   cycle=" << std::dec << std::setfill('0') << std::setw(8) << cpu->cycle << "  pc=" << std::hex << std::setfill('0') << std::setw(4) << cpu->pc << std::endl;
-    std::cout << "|   reg A   B   C   D   E   F\n|       ";
-    std::cout << std::hex << std::setfill('0') << std::setw(2) << (int)cpu->reg[A] << "  ";
-    std::cout << std::hex << std::setfill('0') << std::setw(2) << (int)cpu->reg[B] << "  ";
-    std::cout << std::hex << std::setfill('0') << std::setw(2) << (int)cpu->reg[C] << "  ";
-    std::cout << std::hex << std::setfill('0') << std::setw(2) << (int)cpu->reg[D] << "  ";
-    std::cout << std::hex << std::setfill('0') << std::setw(2) << (int)cpu->reg[E] << "  ";
-    std::cout << std::hex << std::setfill('0') << std::setw(2) << (int)cpu->reg[F] << ansi(RESET) << "\n";
+    std::cout << "|   reg O   A   B   C   D   E   F   R   J1  J2  G0  G1  G2  G3  G4  G5\n|       ";
+    for (unsigned int i = 0; i < 16; i++)
+    {
+        std::cout << std::hex << std::setfill('0') << std::setw(2) << (int)cpu->reg[i] << "  ";
+    }
+    std::cout<< ansi(RESET) << "\n";
 }

@@ -40,12 +40,14 @@ namespace dynarec
         void x86JG(uint8_t rel);
         void x86JL(uint8_t rel);
         void x86JC(uint8_t rel);
+        void x86JNC(uint8_t rel);
 
         void x86PushF();
         void x86PopF();
 
         uint8_t x86ModRM(uint8_t mode, x86REG reg, uint8_t rm);
         void x86RET();
+        void x86RAND();
 
         void cmpToF();
 

@@ -47,6 +47,7 @@ void computer::CPU::reset()
     {
         reg[i] = 0;
     }
+    reg[R] = rand();
 }
 
 uint8_t computer::CPU::getBusData(uint16_t adr)

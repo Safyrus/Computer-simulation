@@ -13,17 +13,17 @@
 #include "dynarecs/Translater.hpp"
 
 #include "utils/hexTxtToBin.hpp"
+#include "utils/console.hpp"
 
 void printCPU(std::shared_ptr<computer::CPU> cpu)
 {
-    std::cout << "\ncpu:\n  cycle=" << std::dec << std::setfill('0') << std::setw(8) << cpu->cycle << "  pc=" << std::hex << std::setfill('0') << std::setw(4) << cpu->pc << std::endl;
-    std::cout << "reg A   B   C   D   E   F\n    ";
-    std::cout << std::hex << std::setfill('0') << std::setw(2) << (int)cpu->reg[A] << "  ";
-    std::cout << std::hex << std::setfill('0') << std::setw(2) << (int)cpu->reg[B] << "  ";
-    std::cout << std::hex << std::setfill('0') << std::setw(2) << (int)cpu->reg[C] << "  ";
-    std::cout << std::hex << std::setfill('0') << std::setw(2) << (int)cpu->reg[D] << "  ";
-    std::cout << std::hex << std::setfill('0') << std::setw(2) << (int)cpu->reg[E] << "  ";
-    std::cout << std::hex << std::setfill('0') << std::setw(2) << (int)cpu->reg[F] << "\n";
+    std::cout << ansi(CYAN_FG) << "cpu:\n  cycle=" << std::dec << std::setfill('0') << std::setw(8) << cpu->cycle << "  pc=" << std::hex << std::setfill('0') << std::setw(4) << cpu->pc << std::endl;
+    std::cout << "  reg O   A   B   C   D   E   F   R   J1  J2  G0  G1  G2  G3  G4  G5\n      ";
+    for (unsigned int i = 0; i < 16; i++)
+    {
+        std::cout << std::hex << std::setfill('0') << std::setw(2) << (int)cpu->reg[i] << "  ";
+    }
+    std::cout<< ansi(RESET) << "\n";
 }
 
 void printTranslaterResultCode(int res)
@@ -177,13 +177,13 @@ void testDeviceThread(std::string filePath)
     computer::RunnableDevice runCPU(cpu);
 
     std::cout << "Create RAM thread" << std::endl;
-    std::shared_ptr<computer::RAM> ram = std::make_shared<computer::RAM>(0x0800, 1000000);
+    std::shared_ptr<computer::RAM> ram = std::make_shared<computer::RAM>(0x1000, 0);
     computer::RunnableDevice runRAM(ram);
     std::cout << "load to RAM" << std::endl;
     ram->load(filePath);
 
     std::cout << "Connect CPU and RAM" << std::endl;
-    bus->addDevice(ram, 0x0000, 0x0800);
+    bus->addDevice(ram, 0x0000, 0x1000);
 
     std::cout << "run RAM thread" << std::endl;
     runRAM.run();

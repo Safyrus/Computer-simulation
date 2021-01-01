@@ -25,6 +25,9 @@ namespace dynarec
         static const uint8_t CODE_JMP = 2;
         static const uint8_t CODE_NXT = 3;
         static const uint8_t CODE_ERR = 4;
+        static const uint8_t CODE_SET = 5;
+        static const uint8_t CODE_GET = 6;
+        static const uint8_t CODE_RST = 7;
 
         Translater(std::shared_ptr<computer::CPU> cpu, bool rawBus);
         ~Translater();
