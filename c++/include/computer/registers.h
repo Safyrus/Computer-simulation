@@ -26,7 +26,30 @@ enum x86REG
     EAX = 0,
     ECX = 1,
     EDX = 2,
-    EBX = 3
+    EBX = 3,
+    ESP = 4,
+    EBP = 5,
+    ESI = 6,
+    EDI = 7
 };
 
+enum x64REG
+{
+    RAX = 0,
+    RCX = 1,
+    RDX = 2,
+    RBX = 3,
+    RSP = 4,
+    RBP = 5,
+    RSI = 6,
+    RDI = 7,
+    R8 = 0,
+    R9 = 1,
+    R10 = 2,
+    R11 = 3,
+    R12 = 4,
+    R13 = 5,
+    R14 = 6,
+    R15 = 7
+};
 #endif // REGISTERS_H
