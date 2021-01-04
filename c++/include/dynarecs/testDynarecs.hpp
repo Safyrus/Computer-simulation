@@ -17,6 +17,6 @@ void testTranslater();
 
 void testTranslater2();
 
-void testDeviceThread(std::string filePath);
+void testDeviceThread(std::string filePath, uint32_t hz);
 
 #endif // TESTDYNARECS_HPP

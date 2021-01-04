@@ -161,7 +161,7 @@ int main(int argc, char const *argv[])
         std::cout << "\n###########################\n";
         testTranslater2();
         std::cout << "\n###########################\n";
-        testDeviceThread(filePath);
+        testDeviceThread(filePath, hz);
         break;
     case 3: // old sasm compiler
         compiler = new AssemblerCompiler();

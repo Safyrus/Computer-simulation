@@ -9,8 +9,12 @@
 #include "computer/RAM.hpp"
 
 #include "dynarecs/Buffer.hpp"
-#include "dynarecs/Emitter.hpp"
 #include "dynarecs/Translater.hpp"
+#ifndef _WIN32
+#include "dynarecs/Emitter64.hpp"
+#else
+#include "dynarecs/Emitter86.hpp"
+#endif
 
 #include "utils/hexTxtToBin.hpp"
 #include "utils/console.hpp"
@@ -96,8 +100,11 @@ void testEmitter()
 {
     std::cout << "\nCreate Emitter" << std::endl;
     std::shared_ptr<computer::CPU> cpu = std::make_shared<computer::CPU>(nullptr);
-    dynarec::Emitter e(cpu, 0x0000);
-
+#ifndef _WIN32
+    dynarec::Emitter64 e(cpu, 0x0000);
+#else
+    dynarec::Emitter86 e(cpu, 0x0000);
+#endif
     std::cout << "Emit code" << std::endl;
     e.MOV(B, 0x17);
     e.NOP();
@@ -167,13 +174,14 @@ void testTranslater2()
     printCPU(cpu);
 }
 
-void testDeviceThread(std::string filePath)
+void testDeviceThread(std::string filePath, uint32_t hz)
 {
     std::cout << "\nCreate BUS" << std::endl;
     std::shared_ptr<computer::Bus> bus = std::make_shared<computer::Bus>();
 
     std::cout << "Create CPU thread" << std::endl;
     std::shared_ptr<computer::CPU> cpu = std::make_shared<computer::CPU>(bus);
+    cpu->hz = hz;
     computer::RunnableDevice runCPU(cpu);
 
     std::cout << "Create RAM thread" << std::endl;
