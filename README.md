@@ -2,7 +2,7 @@
 
 Trying to make a computer emulator of my own cpu architecture.
 
-Note: This is a personal project and, as I'm not the most organized person, there may be bugs and other .
+Note: This is a personal project and, as I'm not the most organized person, there may be bugs and other.
 
 --------------------
 
@@ -38,12 +38,11 @@ to learn about the custom architecture of the S257 CPU go into the note folder a
 
 ## TODO
 
-- complete Emitter
-  - make x64 target instructions in emitter for linux
-  - make x86 source instructions in emitter
-- complete Translater
-- test CPU hz speed
-- update console file
+- more verif in verifCPU.
+- correct any grammar or spelling mistake in CHANGELOG and other files.
+- add comments
+- update console file.
+- timeline of previous "version" of this project.
 
 - Graphics 2.0 with multiple things:
   - menu
