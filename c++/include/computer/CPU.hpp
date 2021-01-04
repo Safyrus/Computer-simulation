@@ -8,6 +8,11 @@
 typedef unsigned char uint8_t;
 typedef unsigned short uint16_t;
 typedef unsigned int uint32_t;
+#ifndef _WIN32
+typedef unsigned long uint64_t;
+#else
+typedef unsigned long long uint64_t;
+#endif
 
 namespace computer
 {
@@ -18,9 +23,10 @@ namespace computer
         std::shared_ptr<computer::Bus> bus;
 
     public:
-        uint32_t cycle;
         uint16_t pc;
         uint8_t reg[16];
+        uint32_t hz;
+        uint64_t cycle;
 
         CPU(std::shared_ptr<computer::Bus> bus);
         ~CPU();

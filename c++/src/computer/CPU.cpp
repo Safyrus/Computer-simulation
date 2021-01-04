@@ -9,6 +9,7 @@ computer::CPU::CPU(std::shared_ptr<computer::Bus> bus) : Device()
     this->bus = bus;
     cycle = 0;
     pc = 0;
+    hz = 0;
     for (unsigned int i = 0; i < 16; i++)
     {
         reg[i] = 0;
