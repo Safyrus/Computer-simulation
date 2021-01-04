@@ -6,6 +6,11 @@
 typedef unsigned char uint8_t;
 typedef unsigned short uint16_t;
 typedef unsigned int uint32_t;
+#ifndef _WIN32
+typedef unsigned long uint64_t;
+#else
+typedef unsigned long long uint64_t;
+#endif
 
 namespace dynarec
 {
@@ -23,6 +28,7 @@ namespace dynarec
         int execute();
         void write8(uint8_t data);
         void write32(uint32_t data);
+        void write64(uint64_t data);
 
         uint8_t *getPtr(); // TODO find a more secure way
         uint32_t getSize();

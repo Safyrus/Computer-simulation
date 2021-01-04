@@ -37,6 +37,18 @@ void dynarec::Buffer::write32(uint32_t data)
     mem.push_back(data >> 24);
 }
 
+void dynarec::Buffer::write64(uint64_t data)
+{
+    mem.push_back(data);
+    mem.push_back(data >> 8);
+    mem.push_back(data >> 16);
+    mem.push_back(data >> 24);
+    mem.push_back(data >> 32);
+    mem.push_back(data >> 40);
+    mem.push_back(data >> 48);
+    mem.push_back(data >> 56);
+}
+
 int dynarec::Buffer::execute()
 {
     int (*func)(void) = (int (*)(void)) & mem[0];
