@@ -20,7 +20,35 @@ This project try to follow the [Semantic Versioning](https://semver.org/spec/v2.
 
 ### **Work on**
 
-- The target functions of the Emitter on linux to run in 64bits.
+- more verif in verifCPU.
+- spelling mistakes.
+
+-----------------
+
+## **[0.6.0]** - _2021-01-04_
+
+The "_Dynamic Recompiler_" update.
+
+### **Added**
+
+- an Emitter86 and Emitter64 class.
+- registers to the x86REG and x64REG enums.
+- a write64 function to the Buffer class.
+- Hz to the CPU.
+- a limit to the size of blocks in the Translater.
+
+### **Changed**
+
+- the Emitter class which became abstract.
+- testDynarec and Translater to use an Emitter class base on the OS.
+- the runS257Compiler and runS257Interpreter functions by defining them in cpp files.
+- the Translator to use the CPU hz frequency.
+- the TODO list in README.
+- MAKEFILE.
+
+### **Fixed**
+
+- the display of the Translater's address when jumping.
 
 -----------------
 
@@ -166,7 +194,7 @@ The "_Refactor_" update.
 
 ### **Added**
 
-- a basic dynamic recompiler (can only few isntruction for now). It is compose of 3 level:
+- a basic dynamic recompiler (can only do few instruction for now). It is compose of 3 level:
   - The Buffer: that store instruction in the target assembler.
   - The Emitter: that emite target instruction into the buffer with source instruction.
   - The translater: that read compile source assembler and tell emitters what instruction to emite. It is also running different "blocks" and handle any interrupt.
