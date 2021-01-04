@@ -1,10 +1,19 @@
 #include "dynarecs/Translater.hpp"
-#include "dynarecs/Emitter.hpp"
 #include "computer/instruction.h"
 #include "utils/console.hpp"
+#ifndef _WIN32
+#include "dynarecs/Emitter64.hpp"
+#else
+#include "dynarecs/Emitter86.hpp"
+#endif
 
 #include <iostream>
 #include <iomanip>
+#ifndef _WIN32
+#include <thread>
+#else
+#include "mingw.thread.h"
+#endif
 
 dynarec::Translater::Translater(std::shared_ptr<computer::CPU> cpu, bool rawBus)
 {
@@ -15,19 +24,27 @@ dynarec::Translater::Translater(std::shared_ptr<computer::CPU> cpu, bool rawBus)
     {
         blocks.push_back(nullptr);
     }
+    blockSize = MAX_BLOCK_SIZE;
 }
 
 dynarec::Translater::~Translater()
 {
+    deleteBlocks();
+}
 
+void dynarec::Translater::deleteBlocks()
+{
     for (unsigned int i = 0; i < blocks.size(); i++)
     {
         if (blocks[i] != nullptr)
         {
+            std::cout << "delete block " << i << std::endl;
             delete blocks[i];
+            blocks[i] = nullptr;
         }
     }
 }
+
 
 dynarec::Emitter *dynarec::Translater::handlerEndBlock(int ret)
 {
@@ -42,9 +59,9 @@ dynarec::Emitter *dynarec::Translater::handlerEndBlock(int ret)
         running = false;
         break;
     case CODE_JMP:
-        std::cout << "|     CODE_JMP: jump to " << std::hex << std::setfill('0') << std::setw(4) << cpu->pc << ansi(RESET) << std::endl;
-        cpu->reg[J1] = ((cpu->pc&0xff00)>>8);
-        cpu->reg[J2] = (cpu->pc&0xff);
+        std::cout << "|     CODE_JMP: jump to " << std::hex << std::setfill('0') << std::setw(4) << adrJmp << ansi(RESET) << std::endl;
+        cpu->reg[J1] = ((cpu->pc & 0xff00) >> 8);
+        cpu->reg[J2] = (cpu->pc & 0xff);
         cpu->pc = adrJmp;
         return getBlock(cpu->pc);
     case CODE_NXT:
@@ -72,8 +89,40 @@ int dynarec::Translater::run(uint16_t pc)
     Emitter *e = getBlock(cpu->pc);
     running = true;
     int res = 0;
+    startTime = std::chrono::steady_clock::now();
+    uint32_t lastHz = cpu->hz;
+    if (cpu->hz != 0)
+    {
+        blockSize = std::min((uint32_t)MAX_BLOCK_SIZE, std::max(cpu->hz/4, (unsigned)1));
+    }
     while (running)
     {
+        if (cpu->hz != 0)
+        {
+            if (lastHz != cpu->hz)
+            {
+                startTime = std::chrono::steady_clock::now();
+                cpu->cycle = 0;
+                std::cout << "reset time" << std::endl;
+                blockSize = std::min((uint32_t)MAX_BLOCK_SIZE, cpu->hz);
+                deleteBlocks();
+                e = getBlock(cpu->pc);
+            }
+            lastHz = cpu->hz;
+
+            std::chrono::steady_clock::time_point timeNow = std::chrono::steady_clock::now();
+            std::chrono::duration<long long, std::nano> timeSinceStart = std::chrono::duration_cast<std::chrono::duration<long long, std::nano>>(timeNow - startTime);
+            uint64_t nbInstTime = (timeSinceStart.count()) / (1000000000 / cpu->hz);
+
+            std::cout << "nbInstTime: " << std::dec << nbInstTime << "  cycle:" << cpu->cycle << std::endl;
+            if (cpu->cycle > nbInstTime)
+            {
+                std::chrono::nanoseconds waiting((cpu->cycle - nbInstTime) * (1000000000 / cpu->hz));
+                std::cout << "wait: " << waiting.count() << "ns" << std::endl;
+                std::this_thread::sleep_for(waiting);
+            }
+        }
+
         std::cout << "| run adr " << std::hex << std::setfill('0') << std::setw(4) << cpu->pc << " ..." << std::endl;
         if (e != nullptr)
         {
@@ -109,9 +158,12 @@ void dynarec::Translater::recompile(uint16_t pc)
     {
         delete blocks[pc];
     }
-    blocks[pc] = new Emitter(cpu, pc);
+#ifndef _WIN32
+    blocks[pc] = new Emitter64(cpu, pc);
+#else
+    blocks[pc] = new Emitter86(cpu, pc);
+#endif
     Emitter *emitter = blocks[pc];
-
     bool recompile = true;
     while (recompile)
     {
@@ -431,9 +483,14 @@ void dynarec::Translater::recompile(uint16_t pc)
         default:
             std::cout << ansi(RED_FG) << "| /!\\ ERROR: no instruction with the opcode " << std::hex << (int)ins << ansi(RESET) << std::endl;
             break;
-            // TODO
         }
         pc += 4;
+        if (emitter->getInsCount() >= blockSize)
+        {
+            std::cout << "|     Compile: block too big, stop " << std::endl;
+            emitter->NXT();
+            recompile = false;
+        }
     }
 
     std::cout << "| recompile done" << std::endl;
@@ -447,5 +504,5 @@ void dynarec::Translater::printCPUState()
     {
         std::cout << std::hex << std::setfill('0') << std::setw(2) << (int)cpu->reg[i] << "  ";
     }
-    std::cout<< ansi(RESET) << "\n";
+    std::cout << ansi(RESET) << "\n";
 }

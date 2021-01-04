@@ -5,6 +5,7 @@
 #include "dynarecs/Emitter.hpp"
 #include <memory>
 #include <vector>
+#include <chrono>
 
 namespace dynarec
 {
@@ -15,10 +16,15 @@ namespace dynarec
         std::shared_ptr<computer::CPU> cpu;
         bool running;
         bool rawBus;
+        std::chrono::steady_clock::time_point startTime;
 
         dynarec::Emitter *handlerEndBlock(int ret);
         dynarec::Emitter *getBlock(uint16_t pc);
         void recompile(uint16_t pc);
+        void deleteBlocks();
+
+        const uint16_t MAX_BLOCK_SIZE = 256;
+        uint16_t blockSize;
 
     public:
         static const uint8_t CODE_RET = 1;
