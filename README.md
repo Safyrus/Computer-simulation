@@ -42,7 +42,6 @@ to learn about the custom architecture of the S257 CPU go into the note folder a
 - correct any grammar or spelling mistake in CHANGELOG and other files.
 - add comments
 - update console file.
-- timeline of previous "version" of this project.
 
 - Graphics 2.0 with multiple things:
   - menu

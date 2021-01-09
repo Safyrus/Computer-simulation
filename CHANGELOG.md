@@ -25,6 +25,17 @@ This project try to follow the [Semantic Versioning](https://semver.org/spec/v2.
 
 -----------------
 
+## **[0.6.1]** - _2021-01-09_
+
+### **Added**
+
+- a zip file containing old projects which are the "old version" of the current project.
+  It contains the logisim files of the BCM and its ressources, the old assembler in c++ and other things.
+- a timeline of old projects.
+- a README for the "old stuff".
+
+-----------------
+
 ## **[0.6.0]** - _2021-01-04_
 
 The "_Dynamic Recompiler_" update.
