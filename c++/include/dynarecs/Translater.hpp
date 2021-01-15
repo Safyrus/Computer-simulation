@@ -23,6 +23,9 @@ namespace dynarec
         void recompile(uint16_t pc);
         void deleteBlocks();
 
+        dynarec::Emitter* e;
+        uint32_t lastHz;
+
         const uint16_t MAX_BLOCK_SIZE = 256;
         uint16_t blockSize;
 
@@ -39,6 +42,8 @@ namespace dynarec
         ~Translater();
 
         int run(uint16_t pc);
+        void initStep(uint16_t pc);
+        int runStep();
         void printCPUState();
     };
 } // namespace dynarec

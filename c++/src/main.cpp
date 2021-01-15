@@ -153,15 +153,20 @@ int main(int argc, char const *argv[])
         runS257Compiler(filePath);
         break;
     case 2: // S257 dynamic recompiler
-        testBuffer();
-        std::cout << "\n###########################\n";
-        testEmitter();
-        std::cout << "\n###########################\n";
-        testTranslater();
-        std::cout << "\n###########################\n";
-        testTranslater2();
-        std::cout << "\n###########################\n";
-        testDeviceThread(filePath, hz);
+        if (print_debug)
+        {
+            testBuffer();
+            std::cout << "\n###########################\n";
+            testEmitter();
+            std::cout << "\n###########################\n";
+            testTranslater();
+            std::cout << "\n###########################\n";
+            testTranslater2();
+            std::cout << "\n###########################\n";
+            testDeviceThread(filePath, hz);
+            std::cout << "\n###########################\n";
+        }
+        testGraphicDynarec(filePath, print_debug);
         break;
     case 3: // old sasm compiler
         compiler = new AssemblerCompiler();

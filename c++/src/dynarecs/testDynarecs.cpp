@@ -19,6 +19,8 @@
 #include "utils/hexTxtToBin.hpp"
 #include "utils/console.hpp"
 
+#include "graphic/MainWindow.hpp"
+
 void printCPU(std::shared_ptr<computer::CPU> cpu)
 {
     std::cout << ansi(CYAN_FG) << "cpu:\n  cycle=" << std::dec << std::setfill('0') << std::setw(8) << cpu->cycle << "  pc=" << std::hex << std::setfill('0') << std::setw(4) << cpu->pc << std::endl;
@@ -189,6 +191,7 @@ void testDeviceThread(std::string filePath, uint32_t hz)
     computer::RunnableDevice runRAM(ram);
     std::cout << "load to RAM" << std::endl;
     ram->load(filePath);
+    ram->setPwr(true);
 
     std::cout << "Connect CPU and RAM" << std::endl;
     bus->addDevice(ram, 0x0000, 0x1000);
@@ -208,4 +211,18 @@ void testDeviceThread(std::string filePath, uint32_t hz)
     runRAM.stop();
     runRAM.join();
     std::cout << "RAM thread stop" << std::endl;
+}
+
+void testGraphicDynarec(std::string filePath, bool debug)
+{
+    std::cout << "Create MainWindow" << std::endl;
+    std::shared_ptr<graphic::MainWindow> app = std::make_shared<graphic::MainWindow>("S257 Dynamic Recompiler - Main Window", debug);
+
+    //std::cout << "Load ComWinManager config" << std::endl;
+    //app->loadConfig(filePath);
+
+    std::cout << "Run MainWindow" << std::endl;
+    app->display();
+
+    std::cout << "End MainWindow" << std::endl;
 }

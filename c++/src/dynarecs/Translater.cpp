@@ -45,7 +45,6 @@ void dynarec::Translater::deleteBlocks()
     }
 }
 
-
 dynarec::Emitter *dynarec::Translater::handlerEndBlock(int ret)
 {
     std::cout << ansi(YELLOW_FG) << "| handler end block" << std::endl;
@@ -57,6 +56,12 @@ dynarec::Emitter *dynarec::Translater::handlerEndBlock(int ret)
     case CODE_RET:
         std::cout << "|     CODE_RET: stopping cpu" << ansi(RESET) << std::endl;
         running = false;
+        cpu->setPwr(false);
+        break;
+    case CODE_RST:
+        std::cout << "|     CODE_RST: resetting cpu" << ansi(RESET) << std::endl;
+        cpu->reset();
+        return getBlock(cpu->pc);
         break;
     case CODE_JMP:
         std::cout << "|     CODE_JMP: jump to " << std::hex << std::setfill('0') << std::setw(4) << adrJmp << ansi(RESET) << std::endl;
@@ -83,18 +88,80 @@ dynarec::Emitter *dynarec::Translater::handlerEndBlock(int ret)
     return nullptr;
 }
 
+void dynarec::Translater::initStep(uint16_t pc)
+{
+    cpu->pc = pc;
+    startTime = std::chrono::steady_clock::now();
+    running = true;
+    lastHz = cpu->hz;
+    if (cpu->hz != 0)
+    {
+        blockSize = std::min((uint32_t)MAX_BLOCK_SIZE, std::max(cpu->hz / 4, (unsigned)1));
+    }
+    e = getBlock(cpu->pc);
+}
+
+int dynarec::Translater::runStep()
+{
+    if(!running)
+        return 0;
+    int res = 0;
+    if (cpu->hz != 0)
+    {
+        if (lastHz != cpu->hz)
+        {
+            startTime = std::chrono::steady_clock::now();
+            cpu->cycle = 0;
+            std::cout << "reset time" << std::endl;
+            blockSize = std::min((uint32_t)MAX_BLOCK_SIZE, cpu->hz);
+            deleteBlocks();
+            e = getBlock(cpu->pc);
+        }
+        lastHz = cpu->hz;
+
+        std::chrono::steady_clock::time_point timeNow = std::chrono::steady_clock::now();
+        std::chrono::duration<long long, std::nano> timeSinceStart = std::chrono::duration_cast<std::chrono::duration<long long, std::nano>>(timeNow - startTime);
+        uint64_t nbInstTime = (timeSinceStart.count()) / (1000000000 / cpu->hz);
+
+        std::cout << "nbInstTime: " << std::dec << nbInstTime << "  cycle:" << cpu->cycle << std::endl;
+        if (cpu->cycle > nbInstTime)
+        {
+            std::chrono::nanoseconds waiting((cpu->cycle - nbInstTime) * (1000000000 / cpu->hz));
+            std::cout << "wait: " << waiting.count() << "ns" << std::endl;
+            std::this_thread::sleep_for(waiting);
+        }
+    }
+
+    std::cout << "| run adr " << std::hex << std::setfill('0') << std::setw(4) << cpu->pc << " ..." << std::endl;
+    if (e != nullptr)
+    {
+        std::cout << "|     Execute block adr " << std::hex << std::setfill('0') << std::setw(4) << e->getStartAdr() << " with " << e->getInsCount() << " ins" << std::endl;
+        res = e->execute();
+        cpu->pc += (e->getInsCount()) * 4;
+        cpu->cycle += e->getInsCount();
+    }
+    else
+    {
+        std::cout << ansi(RED_FG) << "| /!\\ ERROR: Emitter null" << ansi(RESET) << std::endl;
+        res = CODE_ERR;
+    }
+    printCPUState();
+    e = handlerEndBlock(res);
+    return res;
+}
+
 int dynarec::Translater::run(uint16_t pc)
 {
     cpu->pc = pc;
-    Emitter *e = getBlock(cpu->pc);
     running = true;
     int res = 0;
     startTime = std::chrono::steady_clock::now();
-    uint32_t lastHz = cpu->hz;
+    lastHz = cpu->hz;
     if (cpu->hz != 0)
     {
-        blockSize = std::min((uint32_t)MAX_BLOCK_SIZE, std::max(cpu->hz/4, (unsigned)1));
+        blockSize = std::min((uint32_t)MAX_BLOCK_SIZE, std::max(cpu->hz / 4, (unsigned)1));
     }
+    e = getBlock(cpu->pc);
     while (running)
     {
         if (cpu->hz != 0)

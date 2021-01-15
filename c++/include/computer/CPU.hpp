@@ -21,6 +21,7 @@ namespace computer
     private:
         uint8_t rawBus[1024 * 64];
         std::shared_ptr<computer::Bus> bus;
+        bool threadWanted;
 
     public:
         uint16_t pc;
@@ -29,13 +30,17 @@ namespace computer
         uint64_t cycle;
 
         CPU(std::shared_ptr<computer::Bus> bus);
+        CPU(std::shared_ptr<computer::Bus> bus, bool threadWanted);
         ~CPU();
+
+        void reset();
+        void resetReg();
+        void setPwr(bool pwr);
 
         void run();
         uint8_t get(uint16_t adr);
         void set(uint16_t adr, uint8_t data);
 
-        void reset();
         uint8_t getBusData(uint16_t adr);
         void setBusData(uint16_t adr, uint8_t data);
         void loadOnBus(uint16_t start, std::vector<uint8_t> data);

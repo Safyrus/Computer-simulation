@@ -22,6 +22,33 @@ This project try to follow the [Semantic Versioning](https://semver.org/spec/v2.
 
 - more verif in verifCPU.
 - spelling mistakes.
+- graphics
+
+-----------------
+
+## **[0.6.2]** - _2021-01-15_
+
+### **Added**
+
+- a Computer class to manage a configuration of Devices.
+- a abstract class Window to create a graphical interface.
+- multiples Window classes:
+  - BaseWindow: just a blank window.
+  - MainWindow: for now it is just use to contain the computer and open a ComputerWindow.
+  - ComputerWindow: displays some basic information about the computer and allows you to power it on or off.
+- a testGraphicDynarec to test if the Computer can be manage by multiple Window.
+- a handler for code RST to the Translater.
+- a initStep and runStep function that execute one block to the Translater.
+- a new constructor in the CPU.
+
+### **Changed**
+
+- abstract Device class by adding a pwr and type variable and a reset function.
+- extended classes of Device to fit the new changes.
+- Bus by adding a getDeviceAdr fucntion.
+- RAM set and get functions to be use if the power is on.
+- CPU run function to use either the run or runStep function of the Translater and the reset function.
+- main case 2 to test the testGraphicDynarec and not testing anything else if the debug is false.
 
 -----------------
 

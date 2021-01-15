@@ -27,6 +27,8 @@ namespace computer
         RAM(uint16_t size, uint32_t hz);
         ~RAM();
 
+        void reset();
+
         void run();
         void set(uint16_t adr, uint8_t data);
         uint8_t get(uint16_t adr);
