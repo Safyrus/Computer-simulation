@@ -20,9 +20,37 @@ This project try to follow the [Semantic Versioning](https://semver.org/spec/v2.
 
 ### **Work on**
 
-- more verif in verifCPU.
-- spelling mistakes.
 - graphics
+
+-----------------
+
+## **[0.6.3]** - _2021-01-18_
+
+### **Added**
+
+- some print functions and a clear function to the console file.
+- a new Device: the ROM
+- some control keys to ComputerWindow to change the cpu frequency.
+- comments in hextxtToBin and Translater.
+
+### **Changed**
+
+- folders structure by moving progs and fonts to a data folder and conception.txt to the oldStuff.zip
+- the debugging display in many files (all the compiler files, main, ) to use functions in the console file.
+- global files functions location that are now in global.cpp.
+- Translater to have a less repetitive code.
+- verifCPU by changing the requirement for SET instructions.
+- the makefile to "install" file locate in the data folder.
+
+### **Fixed**
+
+- a bug in the viewport ratio due to a loss of precision between an integer and a float.
+
+### **Removed**
+
+- the compile sasm files and both main_old and main_thread files.
+
+### **Added**
 
 -----------------
 
