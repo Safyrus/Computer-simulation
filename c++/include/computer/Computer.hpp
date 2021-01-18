@@ -21,6 +21,7 @@ namespace computer
         computer::RunnableDevice* runCPU;
 
         void addRAM(uint16_t startAdr, uint16_t endAdr);
+        void addROM(uint16_t startAdr, uint16_t endAdr);
 
     public:
         Computer();

@@ -49,7 +49,7 @@ void graphic::ComputerWindow::start()
     {
         printError("Cannot open font");
     }
-    const_cast<sf::Texture&>(font.getTexture(6)).setSmooth(false);
+    const_cast<sf::Texture &>(font.getTexture(6)).setSmooth(false);
 
     text.setFont(font);
     text.setCharacterSize(6);
@@ -64,8 +64,6 @@ void graphic::ComputerWindow::start()
     rect.setSize(sf::Vector2f(width, height));
 
     window.setView(fixRatioCenterView());
-
-    printDebug("Start End");
 }
 
 void graphic::ComputerWindow::stop()
@@ -91,7 +89,21 @@ void graphic::ComputerWindow::loop()
             break;
         case sf::Event::KeyPressed:
             printDebug("Key " + std::to_string(event.key.code) + " Pressed");
-            computer->power();
+            if (event.key.code == sf::Keyboard::F1)
+            {
+                computer->power();
+            }
+            else if (event.key.code == sf::Keyboard::F2)
+            {
+                if(computer->getCpu()->hz / 2 > 0)
+                {
+                    computer->getCpu()->hz /= 2;
+                }
+            }
+            else if (event.key.code == sf::Keyboard::F3)
+            {
+                computer->getCpu()->hz *= 2;
+            }
             break;
         default:
             break;
@@ -102,18 +114,20 @@ void graphic::ComputerWindow::loop()
 
     window.draw(rect);
 
+    // set the computer infos string
     std::stringstream txt;
     txt << "Computer:\n";
-    txt << "  PWR  : " << ((computer->getPower())?"ON":"OFF") << "\n";
+    txt << "  PWR  : " << ((computer->getPower()) ? "ON" : "OFF") << "\n";
     txt << "  HZ   : " << computer->getCpu()->hz << "\n";
     txt << "  CYCLE: " << computer->getCpu()->cycle << "\n";
     txt << "  ADR  : " << std::hex << std::setfill('0') << std::setw(4) << computer->getCpu()->pc << "\n";
     txt << "  REG  : O  A  B  C  D  E  F  R  J1 J2 G0 G1 G2 G3 G4 G5\n         ";
     for (unsigned int i = 0; i < 16; i++)
     {
-        txt << std::hex << std::setfill('0') << std::setw(2) << (int)computer->getCpu()->reg[i] << " ";
+        txt << std::hex << std::uppercase << std::setfill('0') << std::setw(2) << (int)computer->getCpu()->reg[i] << " ";
     }
-    
+
+    // display the computer infos
     text.setString(txt.str());
     window.draw(text);
 

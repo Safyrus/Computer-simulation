@@ -1,0 +1,70 @@
+#include "computer/ROM.hpp"
+
+#include "utils/hexTxtToBin.hpp"
+
+#include <iostream>
+
+#ifndef _WIN32
+#include <thread>
+#else
+#include "mingw.thread.h"
+#endif
+
+computer::ROM::ROM()
+{
+    type = DEVICE_TYPE::ROM;
+    len = 0x0400;
+    this->data = new uint8_t[len];
+    this->hz = 0;
+}
+
+computer::ROM::ROM(uint16_t size)
+{
+    type = DEVICE_TYPE::ROM;
+    len = size;
+    this->data = new uint8_t[len];
+    this->hz = 0;
+}
+
+computer::ROM::ROM(uint16_t size, uint32_t hz)
+{
+    type = DEVICE_TYPE::ROM;
+    len = size;
+    this->data = new uint8_t[len];
+    this->hz = hz;
+}
+
+computer::ROM::~ROM()
+{
+    delete[] this->data;
+}
+
+void computer::ROM::reset()
+{
+}
+
+void computer::ROM::run()
+{
+}
+
+void computer::ROM::set(uint16_t adr, uint8_t data)
+{
+}
+
+uint8_t computer::ROM::get(uint16_t adr)
+{
+    if(!pwr)
+    {
+        return 0;
+    }
+    return this->data[adr];
+}
+
+void computer::ROM::load(std::string filePath)
+{
+    std::vector<uint8_t> vals = hexTxtToBin(filePath);
+    for (unsigned int i = 0; i < vals.size(); i++)
+    {
+        this->data[i % len] = vals[i];
+    }
+}

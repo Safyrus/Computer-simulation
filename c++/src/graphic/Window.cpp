@@ -70,7 +70,7 @@ sf::View graphic::Window::fixRatioCenterView()
 {
     float scrW = window.getSize().x;
     float scrH = window.getSize().y;
-    float ratio = width / height;
+    float ratio = (float)width / (float)height;
     float screenRatio = scrW / scrH;
     float xoff = 0;
     float yoff = 0;

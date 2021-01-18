@@ -187,14 +187,14 @@ void testDeviceThread(std::string filePath, uint32_t hz)
     computer::RunnableDevice runCPU(cpu);
 
     std::cout << "Create RAM thread" << std::endl;
-    std::shared_ptr<computer::RAM> ram = std::make_shared<computer::RAM>(0x1000, 0);
+    std::shared_ptr<computer::RAM> ram = std::make_shared<computer::RAM>(0x9000, 0);
     computer::RunnableDevice runRAM(ram);
     std::cout << "load to RAM" << std::endl;
     ram->load(filePath);
     ram->setPwr(true);
 
     std::cout << "Connect CPU and RAM" << std::endl;
-    bus->addDevice(ram, 0x0000, 0x1000);
+    bus->addDevice(ram, 0x0000, 0x9000);
 
     std::cout << "run RAM thread" << std::endl;
     runRAM.run();
@@ -215,14 +215,14 @@ void testDeviceThread(std::string filePath, uint32_t hz)
 
 void testGraphicDynarec(std::string filePath, bool debug)
 {
-    std::cout << "Create MainWindow" << std::endl;
+    printDebug("Create MainWindow");
     std::shared_ptr<graphic::MainWindow> app = std::make_shared<graphic::MainWindow>("S257 Dynamic Recompiler - Main Window", debug);
 
     //std::cout << "Load ComWinManager config" << std::endl;
     //app->loadConfig(filePath);
 
-    std::cout << "Run MainWindow" << std::endl;
+    printDebug("Run MainWindow");
     app->display();
 
-    std::cout << "End MainWindow" << std::endl;
+    printDebug("End MainWindow");
 }

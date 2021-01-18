@@ -8,7 +8,8 @@ enum DEVICE_TYPE{
     NOVAL = 0,
     CPU = 1,
     BUS = 2,
-    RAM = 3
+    RAM = 3,
+    ROM = 4
 };
 
 namespace computer
