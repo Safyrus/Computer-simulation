@@ -9,7 +9,7 @@ public:
     Node();
     virtual ~Node();
 
-    virtual void print();
+    virtual std::string toString();
     std::string getType();
     virtual Token getToken(int index);
 

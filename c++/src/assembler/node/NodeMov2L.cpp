@@ -15,17 +15,9 @@ NodeMov2L::~NodeMov2L()
 {
 }
 
-void NodeMov2L::print()
+std::string NodeMov2L::toString()
 {
-    std::cout << "(MOV2L";
-    cmd.print();
-    std::cout << ", ";
-    reg1.print();
-    std::cout << ", ";
-    reg2.print();
-    std::cout << ", ";
-    label.print();
-    std::cout << ")";
+    return "(MOV2L" + cmd.toString() + ", " + reg1.toString() + ", " + reg2.toString() + ", " + label.toString() + ")";
 }
 
 Token NodeMov2L::getToken(int index)

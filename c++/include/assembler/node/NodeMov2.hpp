@@ -14,6 +14,6 @@ public:
     NodeMov2(Token cmd, Token reg, Token val1, Token val2);
     virtual ~NodeMov2();
 
-    virtual void print();
+    virtual std::string toString();
     virtual Token getToken(int index);
 };

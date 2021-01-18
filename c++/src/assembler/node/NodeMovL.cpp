@@ -14,15 +14,9 @@ NodeMovL::~NodeMovL()
 {
 }
 
-void NodeMovL::print()
+std::string NodeMovL::toString()
 {
-    std::cout << "(MOVL";
-    cmd.print();
-    std::cout << ", ";
-    reg.print();
-    std::cout << ", ";
-    label.print();
-    std::cout << ")";
+    return "(MOVL" + cmd.toString() + ", " + reg.toString()  + ", " + label.toString() + ")";
 }
 
 Token NodeMovL::getToken(int index)

@@ -13,6 +13,6 @@ public:
     NodeBin(Token cmd, Token val1, Token val2);
     virtual ~NodeBin();
 
-    virtual void print();
+    virtual std::string toString();
     virtual Token getToken(int index);
 };

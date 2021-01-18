@@ -19,8 +19,9 @@ Node::~Node()
 {
 }
 
-void Node::print()
+std::string Node::toString()
 {
+    return "";
 }
 
 Token Node::getToken(int index)

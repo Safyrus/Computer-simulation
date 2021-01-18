@@ -2,14 +2,19 @@
 #define LINEARNODE_H
 
 #include <stdio.h>
+#include <iostream>
+#include <ctime>
+#include <iomanip>
+
 #include "utils/console.hpp"
+#include "global.hpp"
 
 #ifdef _WIN32
 #include <windows.h>
 
 // Some old MinGW/CYGWIN distributions don't define this:
 #ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
-#define ENABLE_VIRTUAL_TERMINAL_PROCESSING  0x0004
+#define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
 #endif
 
 static HANDLE stdoutHandle;
@@ -20,12 +25,12 @@ void setupConsole(void)
     DWORD outMode = 0;
     stdoutHandle = GetStdHandle(STD_OUTPUT_HANDLE);
 
-    if(stdoutHandle == INVALID_HANDLE_VALUE)
+    if (stdoutHandle == INVALID_HANDLE_VALUE)
     {
         exit(GetLastError());
     }
 
-    if(!GetConsoleMode(stdoutHandle, &outMode))
+    if (!GetConsoleMode(stdoutHandle, &outMode))
     {
         exit(GetLastError());
     }
@@ -35,7 +40,7 @@ void setupConsole(void)
     // Enable ANSI escape codes
     outMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
 
-    if(!SetConsoleMode(stdoutHandle, outMode))
+    if (!SetConsoleMode(stdoutHandle, outMode))
     {
         exit(GetLastError());
     }
@@ -46,7 +51,7 @@ void restoreConsole(void)
     printf("\x1b[0m");
 
     // Reset console mode
-    if(!SetConsoleMode(stdoutHandle, outModeInit))
+    if (!SetConsoleMode(stdoutHandle, outModeInit))
     {
         exit(GetLastError());
     }
@@ -64,9 +69,9 @@ void SetWindow(int Width, int Height)
     Rect.Bottom = Height - 1;
     Rect.Right = Width - 1;
 
-    HANDLE Handle = GetStdHandle(STD_OUTPUT_HANDLE);      // Get Handle
-    SetConsoleScreenBufferSize(Handle, coord);            // Set Buffer Size
-    SetConsoleWindowInfo(Handle, TRUE, &Rect);            // Set Window Size
+    HANDLE Handle = GetStdHandle(STD_OUTPUT_HANDLE); // Get Handle
+    SetConsoleScreenBufferSize(Handle, coord);       // Set Buffer Size
+    SetConsoleWindowInfo(Handle, TRUE, &Rect);       // Set Window Size
 }
 
 void rawConsole(bool raw)
@@ -83,11 +88,13 @@ void rawConsole(bool raw)
 static struct termios orig_term_attr;
 static struct termios new_term_attr;
 
-void setupConsole(void) {
+void setupConsole(void)
+{
 }
 
-void rawConsole(bool raw){
-    if(raw)
+void rawConsole(bool raw)
+{
+    if (raw)
     {
         tcgetattr(fileno(stdin), &orig_term_attr);
         memcpy(&new_term_attr, &orig_term_attr, sizeof(struct termios));
@@ -95,7 +102,8 @@ void rawConsole(bool raw){
         new_term_attr.c_cc[VTIME] = 0;
         new_term_attr.c_cc[VMIN] = 0;
         tcsetattr(fileno(stdin), TCSANOW, &new_term_attr);
-    }else
+    }
+    else
     {
         tcsetattr(fileno(stdin), TCSANOW, &orig_term_attr);
     }
@@ -120,4 +128,52 @@ std::string ansi(ANSI_CODE code)
     ret += std::to_string(code);
     ret += "m";
     return ret;
+}
+
+void clearConsole()
+{
+    std::cout << "\x1b[1;1H\x1b[2J";
+}
+
+void printDebug(std::string str, bool plain)
+{
+    if (print_debug)
+    {
+        time_t now = time(0);
+        tm *ltm = localtime(&now);
+        if (!plain)
+        {
+            std::cout << ansi(BLUE_FG) << std::dec
+                      << "[" << std::setfill('0') << std::setw(2) << ltm->tm_hour
+                      << ":" << std::setfill('0') << std::setw(2) << ltm->tm_min
+                      << ":" << std::setfill('0') << std::setw(2) << ltm->tm_sec
+                      << "] " << str << ansi(RESET) << std::endl;
+        }
+        else
+        {
+            std::cout << ansi(BLUE_FG) << str << ansi(RESET);
+        }
+    }
+}
+
+void printInfo(std::string str)
+{
+    time_t now = time(0);
+    tm *ltm = localtime(&now);
+    std::cout << ansi(WHITE_FG) << std::dec
+              << "[" << std::setfill('0') << std::setw(2) << ltm->tm_hour
+              << ":" << std::setfill('0') << std::setw(2) << ltm->tm_min
+              << ":" << std::setfill('0') << std::setw(2) << ltm->tm_sec
+              << "] " << str << ansi(RESET) << std::endl;
+}
+
+void printError(std::string str)
+{
+    time_t now = time(0);
+    tm *ltm = localtime(&now);
+    std::cout << ansi(RED_FG) << std::dec
+              << "[" << std::setfill('0') << std::setw(2) << ltm->tm_hour
+              << ":" << std::setfill('0') << std::setw(2) << ltm->tm_min
+              << ":" << std::setfill('0') << std::setw(2) << ltm->tm_sec
+              << "] /!\\ ERROR /!\\ : " << str << ansi(RESET) << std::endl;
 }

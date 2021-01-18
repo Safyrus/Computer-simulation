@@ -15,17 +15,9 @@ NodeTri::~NodeTri()
 {
 }
 
-void NodeTri::print()
+std::string NodeTri::toString()
 {
-    std::cout << "(TRI";
-    cmd.print();
-    std::cout << ", ";
-    val1.print();
-    std::cout << ", ";
-    val2.print();
-    std::cout << ", ";
-    val3.print();
-    std::cout << ")";
+    return "(TRI" + cmd.toString() + ", " + val1.toString() + ", " + val2.toString() + ", " + val3.toString() + ")";
 }
 
 Token NodeTri::getToken(int index)

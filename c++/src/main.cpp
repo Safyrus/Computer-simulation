@@ -1,10 +1,8 @@
-
 #include <iostream>
 #include <iomanip>
 #include <chrono>
 #include <thread>
 #include <string.h>
-#include <fstream>
 
 #ifndef _WIN32
 #include <thread>
@@ -15,89 +13,21 @@
 
 #include <SFML/Graphics.hpp>
 
+#include "global.hpp"
+#include "runS257Compiler.hpp"
+#include "runS257Interpreter.hpp"
+
 #include "assembler/AssemblerCompiler.hpp"
 #include "assembler/Interpreter.hpp"
 #include "assembler/Parser.hpp"
 #include "assembler/Lexer.hpp"
 
-#include "global.hpp"
 #include "utils/console.hpp"
-#include "runS257Compiler.hpp"
-#include "runS257Interpreter.hpp"
+#include "utils/hexTxtToBin.hpp"
 
 #include "dynarecs/testDynarecs.hpp"
 
-#include "utils/hexTxtToBin.hpp"
 
-bool print_debug = false;
-sf::Font baseFont;
-
-std::string openFile(std::string f)
-{
-    //open file
-    std::string fileName = f;
-    std::ifstream file;
-    file.open(f);
-    if (!file.is_open())
-    {
-        std::string e = "Unable to open file " + fileName + "\n";
-        throw e;
-    }
-    else
-    {
-        if (print_debug)
-            std::cout << "file " + fileName + " open \n";
-    }
-
-    // get file content
-    if (print_debug)
-        std::cout << "read file " + fileName + " ...";
-    std::string str = "";
-    std::string line = "";
-    while (getline(file, line))
-    {
-        str += line + '\n';
-    }
-    if (print_debug)
-        std::cout << "done\n";
-
-    //close file
-    file.close();
-    if (print_debug)
-        std::cout << "file " + fileName + " close\n";
-
-    return str;
-}
-
-void writeFile(std::string content, std::string fileName)
-{
-    // open file
-    std::ofstream file;
-    file.open(fileName);
-
-    // write strings of hex numbers in the file
-    int spaceCount = 0;
-    for (unsigned int i = 0; i < content.size(); i++)
-    {
-        file << content[i];
-        if (content[i] == ' ')
-        {
-            spaceCount++;
-            if (spaceCount >= 16)
-            {
-                file << '\n';
-                spaceCount = 0;
-            }
-            else if (spaceCount % 4 == 0)
-            {
-                file << ' ';
-            }
-        }
-    }
-
-    // close file
-    file.close();
-}
 
 int main(int argc, char const *argv[])
 {
@@ -128,15 +58,16 @@ int main(int argc, char const *argv[])
     {
         hz = std::stoi(argv[3], NULL, 10);
     }
-    // load font
-    if (!baseFont.loadFromFile("pix46.ttf"))
-    {
-        std::cout << "ERROR: could not load font";
-    }
 
     // setup console
     setupConsole();
-    std::cout << "\x1b[1;1H\x1b[2J";
+    clearConsole();
+
+    // load font
+    if (!baseFont.loadFromFile("pix46.ttf"))
+    {
+        printError("Could not load font");
+    }
 
     // wait for input
     std::cout << "--- What do you want to test ? ---\n"
@@ -152,6 +83,7 @@ int main(int argc, char const *argv[])
     case 1: // sasm Compiler
         runS257Compiler(filePath);
         break;
+
     case 2: // S257 dynamic recompiler
         if (print_debug)
         {
@@ -168,6 +100,7 @@ int main(int argc, char const *argv[])
         }
         testGraphicDynarec(filePath, print_debug);
         break;
+
     case 3: // old sasm compiler
         compiler = new AssemblerCompiler();
 
@@ -189,9 +122,11 @@ int main(int argc, char const *argv[])
         compiler->saveBinary(filePath.c_str());
         delete compiler;
         break;
+
     case 4: // S257 interpreter
         runS257Interpreter(filePath, hz);
         break;
+
     default:
         break;
     }
@@ -202,6 +137,6 @@ int main(int argc, char const *argv[])
     std::cin.ignore();
 
     // restore console
-    std::cout << "\x1b[1;1H\x1b[2J";
+    clearConsole();
     restoreConsole();
 }

@@ -31,9 +31,9 @@ Token::~Token()
 {
 }
 
-void Token::print()
+std::string Token::toString()
 {
-    std::cout << "[" << this->type << ":" << this->value << "]";
+    return "[" + this->type + ":" + this->value + "]";
 }
 
 std::string Token::getValue()

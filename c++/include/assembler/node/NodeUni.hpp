@@ -12,6 +12,6 @@ public:
     NodeUni(Token token);
     virtual ~NodeUni();
 
-    virtual void print();
+    virtual std::string toString();
     virtual Token getToken(int index);
 };

@@ -14,6 +14,6 @@ public:
     NodeTri(Token cmd, Token val1, Token val2, Token val3);
     virtual ~NodeTri();
 
-    virtual void print();
+    virtual std::string toString();
     virtual Token getToken(int index);
 };

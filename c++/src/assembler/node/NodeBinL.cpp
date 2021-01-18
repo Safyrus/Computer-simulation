@@ -14,15 +14,9 @@ NodeBinL::~NodeBinL()
 {
 }
 
-void NodeBinL::print()
+std::string NodeBinL::toString()
 {
-    std::cout << "(BINL";
-    cmd.print();
-    std::cout << ", ";
-    val.print();
-    std::cout << ", ";
-    label.print();
-    std::cout << ")";
+    return "(BINL" + cmd.toString() + ", " + val.toString() + ", " + label.toString() + ")";
 }
 
 Token NodeBinL::getToken(int index)

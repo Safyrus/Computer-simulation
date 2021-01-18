@@ -23,7 +23,7 @@ public:
     static const std::string IMPORT;
     static const std::string ERR;
 
-    void print();
+    std::string toString();
 
     std::string getValue();
     std::string getType();

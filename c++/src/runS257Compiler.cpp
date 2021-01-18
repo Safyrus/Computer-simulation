@@ -6,12 +6,15 @@
 
 #include "global.hpp"
 
+#include "utils/console.hpp"
+
 #include "assembler/Lexer.hpp"
 #include "assembler/Parser.hpp"
 #include "assembler/Interpreter.hpp"
 
 bool runS257Compiler(std::string filePath)
 {
+    // declare variables
     Lexer *lexer;
     Parser *parser;
     Interpreter *interpreter;
@@ -20,14 +23,16 @@ bool runS257Compiler(std::string filePath)
     bool error = false;
     std::string fileOut = "";
     std::string content = "";
+    std::string debugStr = "";
 
+    // read the file
     try
     {
-        content = openFile(filePath);
+        content = readFile(filePath);
     }
     catch (std::string e)
     {
-        std::cout << e;
+        printError(e);
         return false;
     }
 
@@ -37,6 +42,7 @@ bool runS257Compiler(std::string filePath)
     delete lexer;
 
     //verif lexing
+    debugStr.clear();
     for (unsigned int i = 0; i < tokens.size(); i++)
     {
         if (tokens[i].getType() == Token::ERR)
@@ -45,16 +51,13 @@ bool runS257Compiler(std::string filePath)
         }
         if (print_debug)
         {
-            tokens[i].print();
-            std::cout << ", ";
+            debugStr += tokens[i].toString() + ", ";
         }
     }
-    if (print_debug)
-        std::cout << "\n\n";
+    printDebug(debugStr + "\n");
     if (error)
     {
-        std::cout << "Error during Lexing, cannot continue\n"
-                  << std::flush;
+        printError("Error during Lexing, cannot continue\n");
         return false;
     }
 
@@ -64,23 +67,20 @@ bool runS257Compiler(std::string filePath)
     delete parser;
 
     //print parsing
+    debugStr.clear();
     for (unsigned int i = 0; i < nodes.size(); i++)
     {
         if (print_debug)
-            nodes[i]->print();
+            debugStr += nodes[i]->toString() + ", ";
         if (nodes[i]->getToken(0).getType().compare(Token::ERR) == 0)
         {
             error = true;
         }
-        if (print_debug)
-            std::cout << ", ";
     }
-    if (print_debug)
-        std::cout << "\n\n";
+    printDebug(debugStr + "\n");
     if (error)
     {
-        std::cout << "Error during Parsing, cannot continue\n"
-                  << std::flush;
+        printError("Error during Parsing, cannot continue\n");
         for (unsigned int i = 0; i < nodes.size(); i++)
         {
             delete nodes[i];
@@ -94,11 +94,7 @@ bool runS257Compiler(std::string filePath)
     delete interpreter;
 
     //verif interpreting
-    std::cout << "\n\n"
-              << std::flush;
-    if (print_debug)
-        std::cout << fileOut;
-
+    printDebug("\n" + fileOut);
     for (unsigned int i = 0; i < nodes.size(); i++)
     {
         delete nodes[i];
@@ -106,10 +102,10 @@ bool runS257Compiler(std::string filePath)
     error = fileOut.find("FFFFFFFF") != std::string::npos;
     if (error)
     {
-        std::cout << "Error during Interpreting, cannot continue\n";
+        printError("Error during Interpreting, cannot continue\n");
         return false;
     }
-    writeFile(fileOut, filePath.substr(0, filePath.find_last_of('.')));
+    writeHexFile(fileOut, filePath.substr(0, filePath.find_last_of('.')));
 
     return true;
 }

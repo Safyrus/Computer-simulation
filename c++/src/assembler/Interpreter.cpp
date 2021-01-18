@@ -1,11 +1,15 @@
 #include "assembler/Interpreter.hpp"
 #include "assembler/Lexer.hpp"
 #include "assembler/Parser.hpp"
+
+#include "global.hpp"
+
+#include "utils/console.hpp"
+
 #include <algorithm>
 #include <iomanip>
 #include <sstream>
 #include <iostream>
-#include "global.hpp"
 
 std::vector<std::string> Interpreter::importName;
 
@@ -66,14 +70,15 @@ std::string Interpreter::interprete()
                 }
                 if (sameLabel)
                 {
-                    std::cout << "[ASSEMBLER ERROR]: same label in file " << t.getPos().getFileName() << " at " << t.getPos().getLine() << ":" << t.getPos().getCol() << "\n";
+                    std::stringstream debugStr;
+                    debugStr << "[ASSEMBLER ERROR]: same label in file " << t.getPos().getFileName() << " at " << t.getPos().getLine() << ":" << t.getPos().getCol();
+                    printError(debugStr.str());
                 }
                 else
                 {
                     labels.push_back(nodes[i]);
                     labels_adr.push_back(index);
-                    if(print_debug)
-                        std::cout << "label " << nodes[i]->getToken(0).getValue() << ":" << index << "\n";
+                    printDebug("label " + nodes[i]->getToken(0).getValue() + ":" + std::to_string(index));
                 }
             }
             else if (t.getType().compare(Token::CMD) == 0)
@@ -95,7 +100,9 @@ std::string Interpreter::interprete()
                 {
                     if (importName[i].compare(impName) == 0)
                     {
-                        std::cout << "[ASSEMBLER ERROR]: cannot import already imported file " << impName << " in " << t.getPos().getFileName() << " at " << t.getPos().getLine() << ":" << t.getPos().getCol() << "\n";
+                        std::stringstream debugStr;
+                        debugStr << "[ASSEMBLER ERROR]: cannot import already imported file " << impName << " in " << t.getPos().getFileName() << " at " << t.getPos().getLine() << ":" << t.getPos().getCol();
+                        printError(debugStr.str());
                         return "FFFFFFFF ";
                     }
                 }
@@ -126,8 +133,7 @@ std::string Interpreter::interprete()
 
     for (unsigned int i = 0; i < nodes.size(); i++)
     {
-        if (print_debug)
-            nodes[i]->print();
+        printDebug(nodes[i]->toString());
         if (nodes[i]->getType() == Node::NODE_UNI)
         {
             res += nodeUni(nodes[i]);
@@ -167,8 +173,8 @@ std::string Interpreter::interprete()
 
 std::string Interpreter::nodeUni(Node *n)
 {
-    if (print_debug)
-        std::cout << "find uni node\n";
+    printDebug("find uni node");
+
     std::stringstream res;
     res << std::hex;
     Token t = n->getToken(0);
@@ -216,7 +222,9 @@ std::string Interpreter::nodeUni(Node *n)
         }
         if (!find)
         {
-            std::cout << "[ASSEMBLER ERROR]: can't find label in file " << t.getPos().getFileName() << " at " << t.getPos().getLine() << ":" << t.getPos().getCol() << "\n";
+            std::stringstream debugStr;
+            debugStr << "[ASSEMBLER ERROR]: can't find label in file " << t.getPos().getFileName() << " at " << t.getPos().getLine() << ":" << t.getPos().getCol();
+            printError(debugStr.str());
             return "FFFFFFFF ";
         }
     }
@@ -234,8 +242,7 @@ std::string Interpreter::nodeUni(Node *n)
 
 std::string Interpreter::nodeBin(Node *n)
 {
-    if (print_debug)
-        std::cout << "find bin node\n";
+    printDebug("find bin node");
     std::stringstream res;
     res << std::hex;
     Token cmd = n->getToken(0);
@@ -269,8 +276,7 @@ std::string Interpreter::nodeBin(Node *n)
 
 std::string Interpreter::nodeMov(Node *n)
 {
-    if (print_debug)
-        std::cout << "find mov node\n";
+    printDebug("find mov node");
     std::stringstream res;
     res << std::hex;
     Token cmd = n->getToken(0);
@@ -305,8 +311,7 @@ std::string Interpreter::nodeMov(Node *n)
 
 std::string Interpreter::nodeMov2(Node *n)
 {
-    if (print_debug)
-        std::cout << "find mov2 node\n";
+    printDebug("find mov2 node");
     std::stringstream res;
     res << std::hex;
     Token cmd = n->getToken(0);
@@ -349,8 +354,7 @@ std::string Interpreter::nodeMov2(Node *n)
 
 std::string Interpreter::nodeBinL(Node *n)
 {
-    if (print_debug)
-        std::cout << "find binl node\n";
+    printDebug("find binl node");
     std::stringstream res;
     res << std::hex;
     Token cmd = n->getToken(0);
@@ -388,7 +392,9 @@ std::string Interpreter::nodeBinL(Node *n)
     }
     if (!find)
     {
-        std::cout << "[ASSEMBLER ERROR]: can't find label in file " << label.getPos().getFileName() << " at " << label.getPos().getLine() << ":" << label.getPos().getCol() << "\n";
+        std::stringstream debugStr;
+        debugStr << "[ASSEMBLER ERROR]: can't find label in file " << label.getPos().getFileName() << " at " << label.getPos().getLine() << ":" << label.getPos().getCol();
+        printError(debugStr.str());
         return "FFFFFFFF ";
     }
 
@@ -397,8 +403,7 @@ std::string Interpreter::nodeBinL(Node *n)
 
 std::string Interpreter::nodeMovL(Node *n)
 {
-    if (print_debug)
-        std::cout << "find movl node\n";
+    printDebug("find movl node");
     std::stringstream res;
     res << std::hex;
     Token cmd = n->getToken(0);
@@ -440,7 +445,9 @@ std::string Interpreter::nodeMovL(Node *n)
     }
     if (!find)
     {
-        std::cout << "[ASSEMBLER ERROR]: can't find label in file " << label.getPos().getFileName() << " at " << label.getPos().getLine() << ":" << label.getPos().getCol() << "\n";
+        std::stringstream debugStr;
+        debugStr << "[ASSEMBLER ERROR]: can't find label in file " << label.getPos().getFileName() << " at " << label.getPos().getLine() << ":" << label.getPos().getCol();
+        printError(debugStr.str());
         return "FFFFFFFF ";
     }
 
@@ -449,8 +456,7 @@ std::string Interpreter::nodeMovL(Node *n)
 
 std::string Interpreter::nodeMov2L(Node *n)
 {
-    if (print_debug)
-        std::cout << "find mov2l node\n";
+    printDebug("find mov2l node");
     std::stringstream res;
     res << std::hex;
     Token cmd = n->getToken(0);
@@ -496,7 +502,9 @@ std::string Interpreter::nodeMov2L(Node *n)
     }
     if (!find)
     {
-        std::cout << "[ASSEMBLER ERROR]: can't find label in file " << label.getPos().getFileName() << " at " << label.getPos().getLine() << ":" << label.getPos().getCol() << "\n";
+        std::stringstream debugStr;
+        debugStr << "[ASSEMBLER ERROR]: can't find label in file " << label.getPos().getFileName() << " at " << label.getPos().getLine() << ":" << label.getPos().getCol();
+        printError(debugStr.str());
         return "FFFFFFFF ";
     }
 
@@ -512,8 +520,7 @@ std::string Interpreter::nodeMov2L(Node *n)
 
 std::string Interpreter::nodeTri(Node *n)
 {
-    if (print_debug)
-        std::cout << "find tri node\n";
+    printDebug("find tri node");
     std::stringstream res;
     res << std::hex;
     Token cmd = n->getToken(0);
@@ -568,7 +575,9 @@ int Interpreter::getRegCode(Token reg)
     }
     else
     {
-        std::cout << "[ASSEMBLER ERROR] can't find reg code in file " << reg.getPos().getFileName() << " at " << reg.getPos().getLine() << ":" << reg.getPos().getCol() << "\n";
+        std::stringstream debugStr;
+        debugStr << "[ASSEMBLER ERROR] can't find reg code in file " << reg.getPos().getFileName() << " at " << reg.getPos().getLine() << ":" << reg.getPos().getCol();
+        printError(debugStr.str());
         return -1;
     }
 }
@@ -603,22 +612,24 @@ std::vector<Node *> Interpreter::import(std::string fileName)
     importName.push_back(fileName);
     bool error = false;
     std::vector<Node *> nodesError = {new Node()};
+    std::string debugStr = "";
 
     //lexing
     std::string file = "";
     try
     {
-        file = openFile(fileName);
+        file = readFile(fileName);
     }
     catch (std::string e)
     {
-        std::cout << e;
+        printError(e);
         return nodes;
     }
     Lexer lexer(file, fileName);
     std::vector<Token> tokens = lexer.makeToken();
 
     //verif lexing
+    debugStr.clear();
     for (unsigned int i = 0; i < tokens.size(); i++)
     {
         if (tokens[i].getType() == Token::ERR)
@@ -627,16 +638,13 @@ std::vector<Node *> Interpreter::import(std::string fileName)
         }
         if (print_debug)
         {
-            tokens[i].print();
-            std::cout << ", ";
+            debugStr += tokens[i].toString() + ", ";
         }
     }
-    if (print_debug)
-        std::cout << "\n\n";
+    printDebug(debugStr + "\n");
     if (error)
     {
-        std::cout << "Error during Lexing in file " + fileName + ", cannot continue\n"
-                  << std::flush;
+        printError("Error during Lexing in file " + fileName + ", cannot continue");
         return nodesError;
     }
 
@@ -645,23 +653,20 @@ std::vector<Node *> Interpreter::import(std::string fileName)
     std::vector<Node *> parseNodes = parser.parse();
 
     //print parsing
+    debugStr.clear();
     for (unsigned int i = 0; i < parseNodes.size(); i++)
     {
         if (print_debug)
-            parseNodes[i]->print();
+            debugStr += nodes[i]->toString() + ", ";
         if (parseNodes[i]->getToken(0).getType().compare(Token::ERR) == 0)
         {
             error = true;
         }
-        if (print_debug)
-            std::cout << ", " << std::flush;
     }
-    if (print_debug)
-        std::cout << "\n\n";
+    printDebug(debugStr + "\n");
     if (error)
     {
-        std::cout << "Error during Parsing in file " + fileName + ", cannot continue\n"
-                  << std::flush;
+        printError("Error during Parsing in file " + fileName + ", cannot continue");
         for (unsigned int i = 0; i < parseNodes.size(); i++)
         {
             delete parseNodes[i];

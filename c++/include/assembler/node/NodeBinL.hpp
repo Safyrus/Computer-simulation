@@ -13,6 +13,6 @@ public:
     NodeBinL(Token cmd, Token val, Token label);
     virtual ~NodeBinL();
 
-    virtual void print();
+    virtual std::string toString();
     virtual Token getToken(int index);
 };

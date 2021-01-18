@@ -35,3 +35,7 @@ void SetWindow(int Width, int Height);
 void rawConsole(bool raw);
 
 std::string ansi(ANSI_CODE code);
+void clearConsole();
+void printDebug(std::string str, bool plain = false);
+void printInfo(std::string str);
+void printError(std::string str);

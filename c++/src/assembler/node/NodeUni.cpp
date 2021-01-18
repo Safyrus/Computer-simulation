@@ -12,11 +12,9 @@ NodeUni::~NodeUni()
 {
 }
 
-void NodeUni::print()
+std::string NodeUni::toString()
 {
-    std::cout << "(UNI";
-    token.print();
-    std::cout << ")";
+    return "(UNI" + token.toString() + ")";
 }
 
 Token NodeUni::getToken(int index)

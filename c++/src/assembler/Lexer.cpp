@@ -1,4 +1,7 @@
 #include "assembler/Lexer.hpp"
+
+#include "utils/console.hpp"
+
 #include <iostream>
 #include <string.h>
 
@@ -141,8 +144,8 @@ Token Lexer::findToken()
         return Token(Token::HEX, word, newPos);
     }
 
-    std::string error = "[ASSEMBLER ERROR]: Undefined word " + word + " in file " + fileName + " at " + std::to_string(newPos.getLine()) + ":" + std::to_string(newPos.getCol()) + "\n";
-    std::cout << error;
+    std::string error = "[ASSEMBLER ERROR]: Undefined word " + word + " in file " + fileName + " at " + std::to_string(newPos.getLine()) + ":" + std::to_string(newPos.getCol());
+    printError(error);
     return Token(Token::ERR, word, newPos);
 }
 

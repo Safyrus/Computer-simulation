@@ -14,28 +14,22 @@ NodeBin::~NodeBin()
 {
 }
 
-void NodeBin::print()
+std::string NodeBin::toString()
 {
-    std::cout << "(BIN";
-    cmd.print();
-    std::cout << ", ";
-    val1.print();
-    std::cout << ", ";
-    val2.print();
-    std::cout << ")";
+    return "(BIN" + cmd.toString() + ", " + val1.toString() + ", " + val2.toString() + ")";
 }
 
 Token NodeBin::getToken(int index)
 {
-    if(index==0)
+    if (index == 0)
     {
         return cmd;
     }
-    if(index==1)
+    if (index == 1)
     {
         return val1;
     }
-    if(index==2)
+    if (index == 2)
     {
         return val2;
     }

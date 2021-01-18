@@ -13,6 +13,6 @@ public:
     NodeMovL(Token cmd, Token reg, Token label);
     virtual ~NodeMovL();
 
-    virtual void print();
+    virtual std::string toString();
     virtual Token getToken(int index);
 };

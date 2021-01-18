@@ -14,15 +14,9 @@ NodeMov::~NodeMov()
 {
 }
 
-void NodeMov::print()
+std::string NodeMov::toString()
 {
-    std::cout << "(MOV";
-    cmd.print();
-    std::cout << ", ";
-    reg.print();
-    std::cout << ", ";
-    val.print();
-    std::cout << ")";
+    return "(MOV" + cmd.toString() + ", " + reg.toString() + ", " + val.toString() + ")";
 }
 
 Token NodeMov::getToken(int index)
