@@ -1,4 +1,4 @@
-# -=[ S257-xx ASSEMBLY LANGUAGE ]=-
+# -=[ S257-xx INFORMATION ]=-
 
 ## INSTRUCTION SET
 
@@ -108,13 +108,11 @@
 |  PC |   \   | PROG COUNTER|
 
 <br/>
-<br/>
 
 ### Normal Register (A,B,C,D,E)
 
 Primary general register
 
-<br/>
 <br/>
 
 ### FLAG Register (F)
@@ -135,13 +133,11 @@ meaning:
 - C : Carry
 
 <br/>
-<br/>
 
 ### Random register (R)
 
 Contain a random value
 
-<br/>
 <br/>
 
 ### Jump register (J1,J2)
@@ -151,7 +147,6 @@ Special registers that are updated at each JMP instruction
 Contains the adresse just after the JMP instruction
 
 <br/>
-<br/>
 
 ### General register (Gx)
 
@@ -159,3 +154,15 @@ Secondary general register
 
 <br/>
 <br/>
+
+## Assembly
+
+### Basics
+
+<br/>
+
+### Special characters
+
+<br/>
+
+### Simple example
