@@ -29,7 +29,6 @@ void computer::Bus::setPwr(bool pwr)
     for (unsigned int i = 0; i < devices.size(); i++)
     {
         devices[i]->setPwr(pwr);
-        std::cout << "pwr["+std::to_string(i)+"]=" << devices[i]->getPwr() << "\n";
     }
 }
 
@@ -37,9 +36,9 @@ uint8_t computer::Bus::get(uint16_t adr)
 {
     for (unsigned int i = 0; i < devices.size(); i++)
     {
-        if (startAdrs.at(i) <= adr && endAdrs.at(i) >= adr)
+        if (startAdrs[i] <= adr && endAdrs[i] >= adr)
         {
-            return devices.at(i).get()->get(adr - startAdrs.at(i));
+            return devices[i].get()->get(adr - startAdrs[i]);
         }
     }
     std::cout << "no device found\n";
@@ -50,9 +49,9 @@ void computer::Bus::set(uint16_t adr, uint8_t data)
 {
     for (unsigned int i = 0; i < devices.size(); i++)
     {
-        if (startAdrs.at(i) <= adr && endAdrs.at(i) >= adr)
+        if (startAdrs[i] <= adr && endAdrs[i] >= adr)
         {
-            devices.at(i).get()->set(adr - startAdrs.at(i), data);
+            devices[i].get()->set(adr - startAdrs[i], data);
         }
     }
 }
@@ -68,7 +67,7 @@ void computer::Bus::removeDevice(std::shared_ptr<computer::Device> device)
 {
     for (unsigned int i = 0; i < devices.size(); i++)
     {
-        if (devices.at(i) == device)
+        if (devices[i] == device)
         {
             devices.erase(devices.begin() + i);
             startAdrs.erase(startAdrs.begin() + i);
@@ -82,7 +81,7 @@ uint32_t computer::Bus::getDeviceAdr(std::shared_ptr<computer::Device> device)
     uint32_t res = 0;
     for (unsigned int i = 0; i < devices.size(); i++)
     {
-        if (devices.at(i) == device)
+        if (devices[i] == device)
         {
             res = (startAdrs[i] << 16);
             res += endAdrs[i];

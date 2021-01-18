@@ -8,6 +8,7 @@
 #endif
 
 #include <iostream>
+#include <sstream>
 #include <iomanip>
 #ifndef _WIN32
 #include <thread>
@@ -38,50 +39,73 @@ void dynarec::Translater::deleteBlocks()
     {
         if (blocks[i] != nullptr)
         {
-            std::cout << "delete block " << i << std::endl;
+            printDebug(ansi(WHITE_FG) + "delete block " + std::to_string(i));
             delete blocks[i];
             blocks[i] = nullptr;
         }
     }
 }
 
+void deleteBlocks(uint16_t adr)
+{
+    // TODO
+}
+
 dynarec::Emitter *dynarec::Translater::handlerEndBlock(int ret)
 {
-    std::cout << ansi(YELLOW_FG) << "| handler end block" << std::endl;
+    // print debug msg
+    printDebug(ansi(YELLOW_FG) + "| handler end block" + ansi(RESET));
+    std::stringstream debugStr;
+
+    // decode value return from the block
     uint8_t val = ((ret & 0xff000000) >> 24);
     uint16_t adrJmp = ((ret & 0xffff00) >> 8);
     uint8_t code = (ret & 0xff);
+
+    // find what to do
     switch (code)
     {
-    case CODE_RET:
-        std::cout << "|     CODE_RET: stopping cpu" << ansi(RESET) << std::endl;
+    case CODE_RET: // end of the program
+        printDebug(ansi(YELLOW_FG) + "|     CODE_RET: stopping cpu" + ansi(RESET));
         running = false;
         cpu->setPwr(false);
         break;
-    case CODE_RST:
-        std::cout << "|     CODE_RST: resetting cpu" << ansi(RESET) << std::endl;
+
+    case CODE_RST: // reset the cpu
+        printDebug(ansi(YELLOW_FG) + "|     CODE_RST: resetting cpu" + ansi(RESET));
         cpu->reset();
         return getBlock(cpu->pc);
         break;
-    case CODE_JMP:
-        std::cout << "|     CODE_JMP: jump to " << std::hex << std::setfill('0') << std::setw(4) << adrJmp << ansi(RESET) << std::endl;
+
+    case CODE_JMP: // jump to an adress
+        debugStr << ansi(YELLOW_FG) << "|     CODE_JMP: jump to " << std::hex << std::setfill('0') << std::setw(4) << adrJmp << ansi(RESET);
+        printDebug(debugStr.str());
         cpu->reg[J1] = ((cpu->pc & 0xff00) >> 8);
         cpu->reg[J2] = (cpu->pc & 0xff);
         cpu->pc = adrJmp;
         return getBlock(cpu->pc);
-    case CODE_NXT:
-        std::cout << "|     CODE_NXT: procede to next block at " << std::hex << std::setfill('0') << std::setw(4) << cpu->pc << ansi(RESET) << std::endl;
+
+    case CODE_NXT: // executing the next block
+        debugStr << ansi(YELLOW_FG) << "|     CODE_NXT: procede to next block at " << std::hex << std::setfill('0') << std::setw(4) << cpu->pc << ansi(RESET);
+        printDebug(debugStr.str());
+
         return getBlock(cpu->pc);
-    case CODE_SET:
-        std::cout << "|     CODE_SET: set val at " << std::hex << std::setfill('0') << std::setw(4) << adrJmp << " to " << std::hex << std::setfill('0') << std::setw(2) << val << ansi(RESET) << std::endl;
+
+    case CODE_SET: // execute SET instruction
+        debugStr << ansi(YELLOW_FG) << "|     CODE_SET: " << std::hex << ret << "set val at " << std::hex << std::setfill('0') << std::setw(4) << adrJmp << " to " << std::hex << std::setfill('0') << std::setw(2) << val << ansi(RESET);
+        printDebug(debugStr.str());
         cpu->set(adrJmp, val);
+        // TODO erase blocks with the adrJmp
         return getBlock(cpu->pc);
-    case CODE_GET:
-        std::cout << "|     CODE_GET: get val at " << std::hex << std::setfill('0') << std::setw(4) << adrJmp << " to reg[" << std::hex << (int)val << "]" << ansi(RESET) << std::endl;
+
+    case CODE_GET: // execute GET instruction
+        debugStr << ansi(YELLOW_FG) << "|     CODE_GET: get val at " << std::hex << std::setfill('0') << std::setw(4) << adrJmp << " to reg[" << std::hex << (int)val << "]" << ansi(RESET);
+        printDebug(debugStr.str());
         cpu->reg[val] = cpu->get(adrJmp);
         return getBlock(cpu->pc);
+
     default:
-        std::cout << ansi(RED_FG) << "| /!\\ ERROR: No Handler" << ansi(RESET) << std::endl;
+        printError("No Handler");
         running = false;
         break;
     }
@@ -90,147 +114,205 @@ dynarec::Emitter *dynarec::Translater::handlerEndBlock(int ret)
 
 void dynarec::Translater::initStep(uint16_t pc)
 {
+    // setup variables
     cpu->pc = pc;
     startTime = std::chrono::steady_clock::now();
     running = true;
     lastHz = cpu->hz;
+
+    // set a low blockSize if the Hz is low
     if (cpu->hz != 0)
     {
         blockSize = std::min((uint32_t)MAX_BLOCK_SIZE, std::max(cpu->hz / 4, (unsigned)1));
     }
+
+    // get the current block
     e = getBlock(cpu->pc);
 }
 
-int dynarec::Translater::runStep()
+void dynarec::Translater::waitInst()
 {
-    if(!running)
-        return 0;
-    int res = 0;
+    std::stringstream debugStr;
+
     if (cpu->hz != 0)
     {
+        // if the cpu frequency had change
         if (lastHz != cpu->hz)
         {
+            printDebug(ansi(WHITE_FG) + "reset time");
+
+            // reset blocks
             startTime = std::chrono::steady_clock::now();
             cpu->cycle = 0;
-            std::cout << "reset time" << std::endl;
             blockSize = std::min((uint32_t)MAX_BLOCK_SIZE, cpu->hz);
             deleteBlocks();
             e = getBlock(cpu->pc);
         }
+
+        // update lastHz
         lastHz = cpu->hz;
 
+        // find the time since the start (or the last reset or the last hz change)
         std::chrono::steady_clock::time_point timeNow = std::chrono::steady_clock::now();
         std::chrono::duration<long long, std::nano> timeSinceStart = std::chrono::duration_cast<std::chrono::duration<long long, std::nano>>(timeNow - startTime);
+
+        // find the time that had past base in "instruction time"
         uint64_t nbInstTime = (timeSinceStart.count()) / (1000000000 / cpu->hz);
 
-        std::cout << "nbInstTime: " << std::dec << nbInstTime << "  cycle:" << cpu->cycle << std::endl;
+        // print debug the isntructions time
+        debugStr.str("");
+        debugStr << ansi(WHITE_FG) << "nbInstTime: " << std::dec << nbInstTime << "  cycle:" << cpu->cycle;
+        printDebug(debugStr.str());
+
+        // if we had execute too many instruction compare to the total "instruction time"
         if (cpu->cycle > nbInstTime)
         {
+            // then find the time to wait (the number of cycle - the total "instruction time")
             std::chrono::nanoseconds waiting((cpu->cycle - nbInstTime) * (1000000000 / cpu->hz));
-            std::cout << "wait: " << waiting.count() << "ns" << std::endl;
+
+            // print debug how many nansecond we wait
+            debugStr.str("");
+            debugStr << ansi(WHITE_FG) << "wait: " << waiting.count() << "ns";
+            printDebug(debugStr.str());
+
+            // wait
             std::this_thread::sleep_for(waiting);
         }
     }
+}
 
-    std::cout << "| run adr " << std::hex << std::setfill('0') << std::setw(4) << cpu->pc << " ..." << std::endl;
+int dynarec::Translater::runStep()
+{
+    // if translater not running do nothing
+    if (!running)
+        return 0;
+
+    // setup variables
+    std::stringstream debugStr;
+    int res = 0;
+
+    // timing to wait between each block
+    waitInst();
+
+    // print debug what adr we will run
+    debugStr.str("");
+    debugStr << ansi(WHITE_FG) << "| run adr " << std::hex << std::setfill('0') << std::setw(4) << cpu->pc << " ...";
+    printDebug(debugStr.str());
+
     if (e != nullptr)
     {
-        std::cout << "|     Execute block adr " << std::hex << std::setfill('0') << std::setw(4) << e->getStartAdr() << " with " << e->getInsCount() << " ins" << std::endl;
+        // print debug what block we execute
+        debugStr.str("");
+        debugStr << ansi(WHITE_FG) << "|     Execute block adr " << std::hex << std::setfill('0') << std::setw(4) << e->getStartAdr() << " with " << e->getInsCount() << " ins";
+        printDebug(debugStr.str());
+
+        //execute the block
         res = e->execute();
+
+        // update cpu registers
         cpu->pc += (e->getInsCount()) * 4;
         cpu->cycle += e->getInsCount();
     }
     else
     {
-        std::cout << ansi(RED_FG) << "| /!\\ ERROR: Emitter null" << ansi(RESET) << std::endl;
+        // we do not have an Emitter to execute so send an error code
         res = CODE_ERR;
+
+        // print debug that we have no Emitter
+        printDebug(ansi(RED_FG) + "| /!\\ ERROR: Emitter null" + ansi(RESET));
     }
+
+    // print the cpu state after the block execution
     printCPUState();
+
+    // handle the response of the block
     e = handlerEndBlock(res);
+
     return res;
 }
 
 int dynarec::Translater::run(uint16_t pc)
 {
-    cpu->pc = pc;
-    running = true;
+    // init the Translater
     int res = 0;
-    startTime = std::chrono::steady_clock::now();
-    lastHz = cpu->hz;
-    if (cpu->hz != 0)
-    {
-        blockSize = std::min((uint32_t)MAX_BLOCK_SIZE, std::max(cpu->hz / 4, (unsigned)1));
-    }
-    e = getBlock(cpu->pc);
+    initStep(pc);
+
+    // while the translater is running
     while (running)
     {
-        if (cpu->hz != 0)
-        {
-            if (lastHz != cpu->hz)
-            {
-                startTime = std::chrono::steady_clock::now();
-                cpu->cycle = 0;
-                std::cout << "reset time" << std::endl;
-                blockSize = std::min((uint32_t)MAX_BLOCK_SIZE, cpu->hz);
-                deleteBlocks();
-                e = getBlock(cpu->pc);
-            }
-            lastHz = cpu->hz;
-
-            std::chrono::steady_clock::time_point timeNow = std::chrono::steady_clock::now();
-            std::chrono::duration<long long, std::nano> timeSinceStart = std::chrono::duration_cast<std::chrono::duration<long long, std::nano>>(timeNow - startTime);
-            uint64_t nbInstTime = (timeSinceStart.count()) / (1000000000 / cpu->hz);
-
-            std::cout << "nbInstTime: " << std::dec << nbInstTime << "  cycle:" << cpu->cycle << std::endl;
-            if (cpu->cycle > nbInstTime)
-            {
-                std::chrono::nanoseconds waiting((cpu->cycle - nbInstTime) * (1000000000 / cpu->hz));
-                std::cout << "wait: " << waiting.count() << "ns" << std::endl;
-                std::this_thread::sleep_for(waiting);
-            }
-        }
-
-        std::cout << "| run adr " << std::hex << std::setfill('0') << std::setw(4) << cpu->pc << " ..." << std::endl;
-        if (e != nullptr)
-        {
-            std::cout << "|     Execute block adr " << std::hex << std::setfill('0') << std::setw(4) << e->getStartAdr() << " with " << e->getInsCount() << " ins" << std::endl;
-            res = e->execute();
-            cpu->pc += (e->getInsCount()) * 4;
-            cpu->cycle += e->getInsCount();
-        }
-        else
-        {
-            std::cout << ansi(RED_FG) << "| /!\\ ERROR: Emitter null" << ansi(RESET) << std::endl;
-            res = CODE_ERR;
-        }
-        printCPUState();
-        e = handlerEndBlock(res);
+        res = runStep();
     }
+
+    // return the last code from the Translater
     return res;
 }
 
 dynarec::Emitter *dynarec::Translater::getBlock(uint16_t pc)
 {
+    // if the block we want does not exist
     if (blocks[pc] == nullptr)
     {
+        // then we recompile it
         recompile(pc);
     }
+
+    // return the wanted block
     return blocks[pc];
+}
+
+void dynarec::Translater::printCPUState()
+{
+    // debug string
+    std::stringstream debugStr;
+
+    // general info
+    debugStr << ansi(CYAN_FG) << "| cpu:";
+    printDebug(debugStr.str());
+    debugStr.str("");
+    debugStr << ansi(CYAN_FG) << "|   cycle=" << std::dec << std::setfill('0') << std::setw(8) << cpu->cycle << "  pc=" << std::hex << std::setfill('0') << std::setw(4) << cpu->pc;
+    printDebug(debugStr.str());
+
+    // registers names
+    debugStr.str("");
+    debugStr << ansi(CYAN_FG) << "|   reg O   A   B   C   D   E   F   R   J1  J2  G0  G1  G2  G3  G4  G5";
+    printDebug(debugStr.str());
+
+    // registers values
+    debugStr.str("");
+    debugStr << ansi(CYAN_FG) << "|       ";
+    for (unsigned int i = 0; i < 16; i++)
+    {
+        debugStr << std::hex << std::setfill('0') << std::setw(2) << (int)cpu->reg[i] << "  ";
+    }
+
+    // print debug the cpu state
+    printDebug(debugStr.str());
 }
 
 void dynarec::Translater::recompile(uint16_t pc)
 {
-    std::cout << "| recompile adr " << std::hex << std::setfill('0') << std::setw(4) << pc << " ..." << std::endl;
+    std::stringstream debugStr;
+
+    // print debug what block we want to recompile
+    debugStr << ansi(WHITE_FG) << "| recompile adr " << std::hex << std::setfill('0') << std::setw(4) << pc << " ...";
+    printDebug(debugStr.str());
+
+    // if the block already exist
     if (blocks[pc] != nullptr)
     {
+        // then delete it
         delete blocks[pc];
     }
+
+    // get a new Emitter (block)
 #ifndef _WIN32
     blocks[pc] = new Emitter64(cpu, pc);
 #else
     blocks[pc] = new Emitter86(cpu, pc);
 #endif
     Emitter *emitter = blocks[pc];
+
+    // while we need to recompile
     bool recompile = true;
     while (recompile)
     {
@@ -238,6 +320,8 @@ void dynarec::Translater::recompile(uint16_t pc)
         uint8_t dst = 0;
         uint8_t src = 0;
         uint8_t val = 0;
+
+        // get the bus data at the current pc adress
         if (rawBus)
         {
             ins = cpu->getBusData(pc);
@@ -252,324 +336,321 @@ void dynarec::Translater::recompile(uint16_t pc)
             src = cpu->get(pc + 2);
             val = cpu->get(pc + 3);
         }
+
+        // what instruction we need to emit
         switch (ins)
         {
         case NOP:
-            std::cout << "|     Compile: NOP " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: NOP ");
             emitter->NOP();
             break;
         case OFF:
-            std::cout << "|     Compile: OFF " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: OFF ");
             emitter->OFF();
             recompile = false;
             break;
         case MOV_RV:
-            std::cout << "|     Compile: MOV_RV " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: MOV_RV ");
             emitter->MOV((REG)dst, src);
             break;
         case MOV_RR:
-            std::cout << "|     Compile: MOV_RR " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: MOV_RR ");
             emitter->MOV((REG)dst, (REG)src);
             break;
         case CMP_RR:
-            std::cout << "|     Compile: CMP_RR " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: CMP_RR ");
             emitter->CMP((REG)src, (REG)val);
             break;
         case CMP_RV:
-            std::cout << "|     Compile: CMP_RV " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: CMP_RV ");
             emitter->CMP((REG)src, val);
             break;
         case CMP_VR:
-            std::cout << "|     Compile: CMP_VR " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: CMP_VR ");
             emitter->CMP(src, (REG)val);
             break;
         case CMP_VV:
-            std::cout << "|     Compile: CMP_VV " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: CMP_VV ");
             emitter->CMP(src, val);
             break;
         case ADD_RR:
-            std::cout << "|     Compile: ADD_RR " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: ADD_RR ");
             emitter->ADD((REG)dst, (REG)src, (REG)val);
             break;
         case ADD_VR:
-            std::cout << "|     Compile: ADD_VR " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: ADD_VR ");
             emitter->ADD((REG)dst, src, (REG)val);
             break;
         case ADD_RV:
-            std::cout << "|     Compile: ADD_RV " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: ADD_RV ");
             emitter->ADD((REG)dst, (REG)src, val);
             break;
         case ADD_VV:
-            std::cout << "|     Compile: ADD_VV " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: ADD_VV ");
             emitter->ADD((REG)dst, src, val);
             break;
         case ADC_RR:
-            std::cout << "|     Compile: ADC_RR " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: ADC_RR ");
             emitter->ADC((REG)dst, (REG)src, (REG)val);
             break;
         case ADC_VR:
-            std::cout << "|     Compile: ADC_VR " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: ADC_VR ");
             emitter->ADC((REG)dst, src, (REG)val);
             break;
         case ADC_RV:
-            std::cout << "|     Compile: ADC_RV " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: ADC_RV ");
             emitter->ADC((REG)dst, (REG)src, val);
             break;
         case ADC_VV:
-            std::cout << "|     Compile: ADC_VV " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: ADC_VV ");
             emitter->ADC((REG)dst, src, val);
             break;
         case SUB_RR:
-            std::cout << "|     Compile: SUB_RR " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: SUB_RR ");
             emitter->SUB((REG)dst, (REG)src, (REG)val);
             break;
         case SUB_VR:
-            std::cout << "|     Compile: SUB_VR " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: SUB_VR ");
             emitter->SUB((REG)dst, src, (REG)val);
             break;
         case SUB_RV:
-            std::cout << "|     Compile: SUB_RV " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: SUB_RV ");
             emitter->SUB((REG)dst, (REG)src, val);
             break;
         case SUB_VV:
-            std::cout << "|     Compile: SUB_VV " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: SUB_VV ");
             emitter->SUB((REG)dst, src, val);
             break;
         case SBB_RR:
-            std::cout << "|     Compile: SBB_RR " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: SBB_RR ");
             emitter->SBB((REG)dst, (REG)src, (REG)val);
             break;
         case SBB_VR:
-            std::cout << "|     Compile: SBB_VR " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: SBB_VR ");
             emitter->SBB((REG)dst, src, (REG)val);
             break;
         case SBB_RV:
-            std::cout << "|     Compile: SBB_RV " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: SBB_RV ");
             emitter->SBB((REG)dst, (REG)src, val);
             break;
         case SBB_VV:
-            std::cout << "|     Compile: SBB_VV " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: SBB_VV ");
             emitter->SBB((REG)dst, src, val);
             break;
         case MUL_RR:
-            std::cout << "|     Compile: MUL_RR " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: MUL_RR ");
             emitter->MUL((REG)dst, (REG)src, (REG)val);
             break;
         case MUL_VR:
-            std::cout << "|     Compile: MUL_VR " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: MUL_VR ");
             emitter->MUL((REG)dst, src, (REG)val);
             break;
         case MUL_RV:
-            std::cout << "|     Compile: MUL_RV " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: MUL_RV ");
             emitter->MUL((REG)dst, (REG)src, val);
             break;
         case MUL_VV:
-            std::cout << "|     Compile: MUL_VV " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: MUL_VV ");
             emitter->MUL((REG)dst, src, val);
             break;
         case DIV_RR:
-            std::cout << "|     Compile: DIV_RR " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: DIV_RR ");
             emitter->DIV((REG)dst, (REG)src, (REG)val);
             break;
         case DIV_VR:
-            std::cout << "|     Compile: DIV_VR " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: DIV_VR ");
             emitter->DIV((REG)dst, src, (REG)val);
             break;
         case DIV_RV:
-            std::cout << "|     Compile: DIV_RV " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: DIV_RV ");
             emitter->DIV((REG)dst, (REG)src, val);
             break;
         case DIV_VV:
-            std::cout << "|     Compile: DIV_VV " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: DIV_VV ");
             emitter->DIV((REG)dst, src, val);
             break;
         case MOD_RR:
-            std::cout << "|     Compile: MOD_RR " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: MOD_RR ");
             emitter->MOD((REG)dst, (REG)src, (REG)val);
             break;
         case MOD_VR:
-            std::cout << "|     Compile: MOD_VR " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: MOD_VR ");
             emitter->MOD((REG)dst, src, (REG)val);
             break;
         case MOD_RV:
-            std::cout << "|     Compile: MOD_RV " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: MOD_RV ");
             emitter->MOD((REG)dst, (REG)src, val);
             break;
         case MOD_VV:
-            std::cout << "|     Compile: MOD_VV " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: MOD_VV ");
             emitter->MOD((REG)dst, src, val);
             break;
         case AND_RR:
-            std::cout << "|     Compile: AND_RR " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: AND_RR ");
             emitter->AND((REG)dst, (REG)src, (REG)val);
             break;
         case AND_VR:
-            std::cout << "|     Compile: AND_VR " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: AND_VR ");
             emitter->AND((REG)dst, src, (REG)val);
             break;
         case AND_RV:
-            std::cout << "|     Compile: AND_RV " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: AND_RV ");
             emitter->AND((REG)dst, (REG)src, val);
             break;
         case AND_VV:
-            std::cout << "|     Compile: AND_VV " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: AND_VV ");
             emitter->AND((REG)dst, src, val);
             break;
         case OR_RR:
-            std::cout << "|     Compile: OR_RR " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: OR_RR ");
             emitter->OR((REG)dst, (REG)src, (REG)val);
             break;
         case OR_VR:
-            std::cout << "|     Compile: OR_VR " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: OR_VR ");
             emitter->OR((REG)dst, src, (REG)val);
             break;
         case OR_RV:
-            std::cout << "|     Compile: OR_RV " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: OR_RV ");
             emitter->OR((REG)dst, (REG)src, val);
             break;
         case OR_VV:
-            std::cout << "|     Compile: OR_VV " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: OR_VV ");
             emitter->OR((REG)dst, src, val);
             break;
         case XOR_RR:
-            std::cout << "|     Compile: XOR_RR " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: XOR_RR ");
             emitter->XOR((REG)dst, (REG)src, (REG)val);
             break;
         case XOR_VR:
-            std::cout << "|     Compile: XOR_VR " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: XOR_VR ");
             emitter->XOR((REG)dst, src, (REG)val);
             break;
         case XOR_RV:
-            std::cout << "|     Compile: XOR_RV " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: XOR_RV ");
             emitter->XOR((REG)dst, (REG)src, val);
             break;
         case XOR_VV:
-            std::cout << "|     Compile: XOR_VV " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: XOR_VV ");
             emitter->XOR((REG)dst, src, val);
             break;
         case JMP_RRR:
-            std::cout << "|     Compile: JMP_RRR " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: JMP_RRR ");
             recompile = false;
             emitter->JMP((REG)dst, (REG)src, (REG)val);
             break;
         case JMP_RVR:
-            std::cout << "|     Compile: JMP_RVR " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: JMP_RVR ");
             recompile = false;
             emitter->JMP((REG)dst, src, (REG)val);
             break;
         case JMP_RRV:
-            std::cout << "|     Compile: JMP_RRV " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: JMP_RRV ");
             recompile = false;
             emitter->JMP((REG)dst, (REG)src, val);
             break;
         case JMP_RVV:
-            std::cout << "|     Compile: JMP_RVV " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: JMP_RVV ");
             recompile = false;
             emitter->JMP((REG)dst, src, val);
             break;
         case JMP_VRR:
-            std::cout << "|     Compile: JMP_VRR " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: JMP_VRR ");
             recompile = false;
             emitter->JMP(dst, (REG)src, (REG)val);
             break;
         case JMP_VVR:
-            std::cout << "|     Compile: JMP_VVR " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: JMP_VVR ");
             recompile = false;
             emitter->JMP(dst, src, (REG)val);
             break;
         case JMP_VRV:
-            std::cout << "|     Compile: JMP_VRV " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: JMP_VRV ");
             recompile = false;
             emitter->JMP(dst, (REG)src, val);
             break;
         case JMP_VVV:
-            std::cout << "|     Compile: JMP_VVV " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: JMP_VVV ");
             recompile = false;
             emitter->JMP(dst, src, val);
             break;
         case GET_RR:
-            std::cout << "|     Compile: GET_RR " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: GET_RR ");
             recompile = false;
             emitter->GET((REG)dst, (REG)src, (REG)val);
             break;
         case GET_VR:
-            std::cout << "|     Compile: GET_VR " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: GET_VR ");
             recompile = false;
             emitter->GET((REG)dst, src, (REG)val);
             break;
         case GET_RV:
-            std::cout << "|     Compile: GET_RV " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: GET_RV ");
             recompile = false;
             emitter->GET((REG)dst, (REG)src, val);
             break;
         case GET_VV:
-            std::cout << "|     Compile: GET_VV " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: GET_VV ");
             recompile = false;
             emitter->GET((REG)dst, src, val);
             break;
         case SET_RRR:
-            std::cout << "|     Compile: SET_RRR " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: SET_RRR ");
             recompile = false;
             emitter->SET((REG)dst, (REG)src, (REG)val);
             break;
         case SET_RVR:
-            std::cout << "|     Compile: SET_RVR " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: SET_RVR ");
             recompile = false;
             emitter->SET((REG)dst, src, (REG)val);
             break;
         case SET_RRV:
-            std::cout << "|     Compile: SET_RRV " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: SET_RRV ");
             recompile = false;
             emitter->SET((REG)dst, (REG)src, val);
             break;
         case SET_RVV:
-            std::cout << "|     Compile: SET_RVV " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: SET_RVV ");
             recompile = false;
             emitter->SET((REG)dst, src, val);
             break;
         case SET_VRR:
-            std::cout << "|     Compile: SET_VRR " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: SET_VRR ");
             recompile = false;
             emitter->SET(dst, (REG)src, (REG)val);
             break;
         case SET_VVR:
-            std::cout << "|     Compile: SET_VVR " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: SET_VVR ");
             recompile = false;
             emitter->SET(dst, src, (REG)val);
             break;
         case SET_VRV:
-            std::cout << "|     Compile: SET_VRV " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: SET_VRV ");
             recompile = false;
             emitter->SET(dst, (REG)src, val);
             break;
         case SET_VVV:
-            std::cout << "|     Compile: SET_VVV " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: SET_VVV ");
             recompile = false;
             emitter->SET(dst, src, val);
             break;
         default:
-            std::cout << ansi(RED_FG) << "| /!\\ ERROR: no instruction with the opcode " << std::hex << (int)ins << ansi(RESET) << std::endl;
+            debugStr.str("");
+            debugStr << ansi(RED_FG) << "| /!\\ ERROR: no instruction with the opcode " << std::hex << (int)ins << ansi(RESET);
+            printDebug(debugStr.str());
             break;
         }
+
+        // increment the program counter to the next instruction
         pc += 4;
+
+        // if we had compile too many instruction for one block
         if (emitter->getInsCount() >= blockSize)
         {
-            std::cout << "|     Compile: block too big, stop " << std::endl;
+            printDebug(ansi(WHITE_FG) + "|     Compile: block too big, stop ");
             emitter->NXT();
             recompile = false;
         }
     }
 
-    std::cout << "| recompile done" << std::endl;
-}
-
-void dynarec::Translater::printCPUState()
-{
-    std::cout << ansi(CYAN_FG) << "| cpu:\n|   cycle=" << std::dec << std::setfill('0') << std::setw(8) << cpu->cycle << "  pc=" << std::hex << std::setfill('0') << std::setw(4) << cpu->pc << std::endl;
-    std::cout << "|   reg O   A   B   C   D   E   F   R   J1  J2  G0  G1  G2  G3  G4  G5\n|       ";
-    for (unsigned int i = 0; i < 16; i++)
-    {
-        std::cout << std::hex << std::setfill('0') << std::setw(2) << (int)cpu->reg[i] << "  ";
-    }
-    std::cout << ansi(RESET) << "\n";
+    printDebug(ansi(WHITE_FG) + "| recompile done");
 }

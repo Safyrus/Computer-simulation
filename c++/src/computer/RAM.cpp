@@ -15,7 +15,7 @@ computer::RAM::RAM()
     type = DEVICE_TYPE::RAM;
     len = 0x0400;
     this->data = new uint8_t[len];
-    this->hz = 10000;
+    this->hz = 0;
 }
 
 computer::RAM::RAM(uint16_t size)
@@ -23,7 +23,7 @@ computer::RAM::RAM(uint16_t size)
     type = DEVICE_TYPE::RAM;
     len = size;
     this->data = new uint8_t[len];
-    this->hz = 10000;
+    this->hz = 0;
 }
 
 computer::RAM::RAM(uint16_t size, uint32_t hz)
@@ -72,11 +72,13 @@ void computer::RAM::set(uint16_t adr, uint8_t data)
 {
     if(!pwr)
         return;
-    adrBuf.push_back(adr);
-    dataBuf.push_back(data);
     if (hz == 0)
     {
         this->data[adr] = data;
+    }else
+    {
+        adrBuf.push_back(adr);
+        dataBuf.push_back(data);
     }
 }
 
@@ -84,7 +86,6 @@ uint8_t computer::RAM::get(uint16_t adr)
 {
     if(!pwr)
     {
-        std::cout << "nopower\n";
         return 0;
     }
     return this->data[adr];

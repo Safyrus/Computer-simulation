@@ -22,6 +22,8 @@ namespace dynarec
         dynarec::Emitter *getBlock(uint16_t pc);
         void recompile(uint16_t pc);
         void deleteBlocks();
+        void deleteBlocks(uint16_t adr);
+        void waitInst();
 
         dynarec::Emitter* e;
         uint32_t lastHz;
