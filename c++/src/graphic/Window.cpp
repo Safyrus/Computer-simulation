@@ -1,6 +1,7 @@
 #include "graphic/Window.hpp"
 
 #include <iostream>
+#include <chrono>
 
 #include "utils/console.hpp"
 
@@ -9,6 +10,7 @@ graphic::Window::Window()
     windowName = "noName";
     width = 10;
     height = 10;
+    fps = 60;
 }
 
 graphic::Window::Window(std::string windowName)
@@ -16,6 +18,7 @@ graphic::Window::Window(std::string windowName)
     this->windowName = windowName;
     width = 10;
     height = 10;
+    fps = 60;
 }
 
 graphic::Window::Window(std::string windowName, bool debug)
@@ -24,6 +27,7 @@ graphic::Window::Window(std::string windowName, bool debug)
     this->debug = debug;
     width = 10;
     height = 10;
+    fps = 60;
 }
 
 graphic::Window::~Window()
@@ -110,6 +114,7 @@ void graphic::Window::display()
     // while running or window is open
     while (run)
     {
+        std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
         loop();
         for (unsigned int i = 0; i < subWindows.size(); i++)
         {
@@ -124,6 +129,10 @@ void graphic::Window::display()
                 subWindows.erase(subWindows.begin() + i);
             }
         }
+        std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+        int delta = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+        int sleepFor = std::max(0, (1000/fps)-delta);
+        sf::sleep(sf::milliseconds(sleepFor));
     }
 
     // stoping
@@ -135,4 +144,10 @@ void graphic::Window::display()
     stop();
 
     run = false;
+}
+
+void graphic::Window::openSubWindow(std::string windowName)
+{
+    std::string msg = "methode 'openSubWindow' not define, cannot open " + windowName;
+    printDebug(msg);
 }

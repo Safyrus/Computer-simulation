@@ -1,6 +1,8 @@
 #ifndef DEVICE_HPP
 #define DEVICE_HPP
 
+#include <string>
+
 typedef unsigned char uint8_t;
 typedef unsigned short uint16_t;
 
@@ -19,6 +21,7 @@ namespace computer
     protected:
         DEVICE_TYPE type;
         bool pwr;
+        std::string name;
 
     public:
         bool running;
@@ -29,6 +32,8 @@ namespace computer
         DEVICE_TYPE getType();
         void setPwr(bool pwr);
         bool getPwr();
+        void setName(std::string name);
+        std::string getName();
 
         virtual void reset() = 0;
         virtual void run() = 0;

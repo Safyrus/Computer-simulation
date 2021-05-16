@@ -5,10 +5,12 @@
 
 #include "computer/Computer.hpp"
 #include "graphic/Window.hpp"
+#include "data/menu/Menu.hpp"
+#include "graphic/MenuView.hpp"
 
 namespace graphic
 {
-    class MainWindow : public Window
+    class MainWindow : public Window, public std::enable_shared_from_this<MainWindow>
     {
     protected:
         std::shared_ptr<computer::Computer> computer;
@@ -16,6 +18,11 @@ namespace graphic
         sf::Font font;
         sf::Text text;
         sf::RectangleShape rect;
+
+        std::shared_ptr<data::menu::Menu> menu;
+        std::shared_ptr<MenuView> menuView;
+
+        void makeMenu();
 
         void start();
         void stop();
@@ -26,6 +33,8 @@ namespace graphic
         MainWindow(std::string windowName);
         MainWindow(std::string windowName, bool debug);
         ~MainWindow();
+
+        void openSubWindow(std::string windowName);
 
         /*void loadConfig(std::string filePath);
         void saveConfig(std::string filePath);

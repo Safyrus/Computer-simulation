@@ -39,7 +39,7 @@ clean:
 else
 install:
 	-cp ../data/pix46.ttf $(BIN)
-	-cp ../data/prog $(BIN)
+	-cp -r ../data/prog $(BIN)
 
 clean:
 	-rm $(BIN)/$(EXECUTABLE)

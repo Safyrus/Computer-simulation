@@ -34,6 +34,7 @@ int main(int argc, char const *argv[])
     // define variables
     std::string filePath = "";
     int hz = 8;
+    bool test = false;
     int choice = 0;
     AssemblerCompiler *compiler;
 
@@ -42,7 +43,7 @@ int main(int argc, char const *argv[])
     {
         if (strcmp(argv[1], "help") == 0)
         {
-            std::cout << "arg: main [debug][file][hz]\n";
+            std::cout << "arg: main [debug][file][hz][test]\n";
             return 0;
         }
         if (strcmp(argv[1], "true") == 0 || strcmp(argv[1], "1") == 0)
@@ -57,6 +58,11 @@ int main(int argc, char const *argv[])
     if (argc > 3)
     {
         hz = std::stoi(argv[3], NULL, 10);
+    }
+    if (argc > 4)
+    {
+        if (strcmp(argv[4], "true") == 0 || strcmp(argv[4], "1") == 0)
+            test = true;
     }
 
     // setup console
@@ -85,7 +91,7 @@ int main(int argc, char const *argv[])
         break;
 
     case 2: // S257 dynamic recompiler
-        if (print_debug)
+        if (test)
         {
             testBuffer();
             std::cout << "\n###########################\n";
@@ -93,7 +99,7 @@ int main(int argc, char const *argv[])
             std::cout << "\n###########################\n";
             testTranslater();
             std::cout << "\n###########################\n";
-            testTranslater2();
+            testTranslater2(filePath);
             std::cout << "\n###########################\n";
             testDeviceThread(filePath, hz);
             std::cout << "\n###########################\n";

@@ -46,7 +46,7 @@ void dynarec::Translater::deleteBlocks()
     }
 }
 
-void deleteBlocks(uint16_t adr)
+void dynarec::Translater::deleteBlocks(uint16_t adr)
 {
     // TODO
 }
@@ -94,14 +94,30 @@ dynarec::Emitter *dynarec::Translater::handlerEndBlock(int ret)
     case CODE_SET: // execute SET instruction
         debugStr << ansi(YELLOW_FG) << "|     CODE_SET: " << std::hex << ret << "set val at " << std::hex << std::setfill('0') << std::setw(4) << adrJmp << " to " << std::hex << std::setfill('0') << std::setw(2) << val << ansi(RESET);
         printDebug(debugStr.str());
-        cpu->set(adrJmp, val);
+
+        if (rawBus)
+        {
+            cpu->setBusData(adrJmp, val);
+        }else
+        {
+            cpu->set(adrJmp, val);
+        }
+
         // TODO erase blocks with the adrJmp
         return getBlock(cpu->pc);
 
     case CODE_GET: // execute GET instruction
         debugStr << ansi(YELLOW_FG) << "|     CODE_GET: get val at " << std::hex << std::setfill('0') << std::setw(4) << adrJmp << " to reg[" << std::hex << (int)val << "]" << ansi(RESET);
         printDebug(debugStr.str());
-        cpu->reg[val] = cpu->get(adrJmp);
+
+        if (rawBus)
+        {
+            cpu->reg[val] = cpu->getBusData(adrJmp);
+        }else
+        {
+            cpu->reg[val] = cpu->get(adrJmp);
+        }
+
         return getBlock(cpu->pc);
 
     default:

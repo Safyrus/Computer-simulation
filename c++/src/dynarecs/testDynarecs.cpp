@@ -158,14 +158,14 @@ void testTranslater()
     printCPU(cpu);
 }
 
-void testTranslater2()
+void testTranslater2(std::string filePath)
 {
     std::cout << "\nCreate Translater" << std::endl;
     std::shared_ptr<computer::CPU> cpu = std::make_shared<computer::CPU>(nullptr);
     dynarec::Translater t(cpu, true);
 
     std::cout << "Create Data from file" << std::endl;
-    std::vector<uint8_t> data = hexTxtToBin("prog/test/testDynarec");
+    std::vector<uint8_t> data = hexTxtToBin(filePath);
 
     std::cout << "Load data on Bus" << std::endl;
     cpu->loadOnBus(0x0000, data);

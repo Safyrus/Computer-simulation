@@ -159,10 +159,85 @@ Secondary general register
 
 ### Basics
 
+The basic syntax of the S257 assembly (or SASM) is as described below:
+
+```sasm
+[INSTRUCTION MNEMONIC (MEM)] [PARAMETER 1 (DST)] [PARAMETER 2 (SRC)] [PARAMETER 3 (VAL)]
+```
+
+To know if you need to give DST SRC or VAL, refer to the INSTRUCTION SET above.
+
+<br/>
+
+You can also declare comment that will not be considered by the program like this:
+
+```sasm
+# This is a comment
+```
+
+
 <br/>
 
 ### Special characters
 
+- `#` comment the rest of the line
+    > `[INSTRUCTION (optionnal)] # [comment]`
+- `@` import a file
+    > `@ [file name]`
+- `:` define or use a label
+    > `[label name]:`
+
+    > `:[label name]`
+- `$` write the register index
+    > `$[register name]`
+- `%` make writting decimal numbers possible
+    > `%[decimal number]`
+
 <br/>
 
 ### Simple example
+
+#### Add two numbers
+
+```sasm
+# Simple program to add two numbers
+
+MOV $A 01       # move the value 1 in the register A.
+MOV $B 03       # move the value 3 in the register B.
+
+ADD $C $A $B    # add the value in the register A and the value in the register B together.
+                # and place the result in the register C.
+```
+
+#### Compare and jump
+
+```sasm
+# Simple program to compare if to number are equals and make a desicion base on that
+
+MOV $A 0F       # move the value 0F(15 in decimal) in the register A.
+MOV $B 08       # move the value 8 in the register B.
+
+CMP $A $B       # compare the value in A and B and set flags in the F register.
+                # if the 2 number are equals then the third flag (04 in hex) is set.
+
+JMP 04 :EQUAL       # if the F register have the third flag (04 in hex) set then jump to EQUAL.
+JMP $F :NOT_EQUAL   # otherwise we jump to NOT_EQUAL.
+                    # Note that we are using the flags of the F register the check with the F register.
+                    # It is intended because flags of F will always be set compare to itself and so
+                    # it will always jump
+
+
+# code to execute if the numbers are equals
+EQUAL:
+    MOV $C 01   # set the register C to 1
+    JMP $F :CONTINUE
+
+# code to execute if the numbers are not equals
+NOT_EQUAL:
+    MOV $C 00   # set the register C to 0
+    # we don't need a jump because the code we want just follow this line
+
+# rest of the program
+CONTINUE:
+
+```

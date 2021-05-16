@@ -15,7 +15,7 @@ void testEmitter();
 
 void testTranslater();
 
-void testTranslater2();
+void testTranslater2(std::string filePath);
 
 void testDeviceThread(std::string filePath, uint32_t hz);
 

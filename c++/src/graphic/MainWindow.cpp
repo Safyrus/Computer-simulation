@@ -3,6 +3,9 @@
 #include "graphic/MainWindow.hpp"
 #include "graphic/ComputerWindow.hpp"
 
+#include "data/menu/MenuActionTest.hpp"
+#include "data/menu/MenuActionOpenWindow.hpp"
+
 #include "utils/console.hpp"
 
 graphic::MainWindow::MainWindow()
@@ -40,6 +43,17 @@ graphic::MainWindow::~MainWindow()
 {
 }
 
+void graphic::MainWindow::makeMenu()
+{
+    menu = std::make_shared<data::menu::Menu>();
+    menu->addItem("COM", std::make_shared<data::menu::MenuActionOpenWindow>(shared_from_this(), computerWindowName));
+    menu->addItem("TEST", std::make_shared<data::menu::MenuActionTest>("TEST"));
+    menu->addItem("ANOTHER TEST", std::make_shared<data::menu::MenuActionTest>("ANOTHER TEST"));
+    menuView = std::make_shared<graphic::MenuView>(menu);
+    menuView->setPos(0, 0);
+    menuView->setSize(width, 6);
+}
+
 void graphic::MainWindow::start()
 {
     printDebug("Start");
@@ -56,7 +70,7 @@ void graphic::MainWindow::start()
     text.setFont(font);
     text.setCharacterSize(6);
 
-    text.setString("Placeholder for the futur screen\nPress F1 to show another window");
+    text.setString("Placeholder for the futur screen\nPress F1 to show another window\nor the COM button on the top\nmenu");
     text.setFillColor(sf::Color::White);
     sf::Vector2f pos(0, 32);
     text.setPosition(pos);
@@ -64,6 +78,8 @@ void graphic::MainWindow::start()
     rect.setPosition(0, 0);
     rect.setFillColor(sf::Color::Black);
     rect.setSize(sf::Vector2f(width, height));
+
+    makeMenu();
 
     window.setView(fixRatioCenterView());
 }
@@ -78,6 +94,8 @@ void graphic::MainWindow::loop()
     sf::Event event;
     while (window.pollEvent(event))
     {
+        sf::Vector2i mousePos;
+        sf::Vector2f viewMousePos;
         switch (event.type)
         {
         case sf::Event::Closed:
@@ -89,22 +107,24 @@ void graphic::MainWindow::loop()
             printDebug("Resize");
             window.setView(fixRatioCenterView());
             break;
+        case sf::Event::MouseMoved:
+            mousePos = sf::Vector2i(event.mouseMove.x, event.mouseMove.y);
+            viewMousePos = window.mapPixelToCoords(mousePos);
+            menuView->setMousePos(viewMousePos.x, viewMousePos.y);
+            break;
+        case sf::Event::MouseButtonPressed:
+            menuView->setMousePressed(true);
+            break;
+        case sf::Event::MouseButtonReleased:
+            menuView->setMouseReleased(true);
+            break;
         case sf::Event::KeyPressed:
             printDebug("Key " + std::to_string(event.key.code) + " Pressed");
 
             // If F1 is pressed
             if (event.key.code == sf::Keyboard::F1)
             {
-                // if wa have not open the Computer window
-                if (findSubWinByName(computerWindowName).empty())
-                {
-                    std::shared_ptr<graphic::ComputerWindow> subW = std::make_shared<graphic::ComputerWindow>(computer, computerWindowName, debug);
-                    addSubWindow(subW);
-                }
-                else
-                {
-                    printDebug("Computer window already open");
-                }
+                openSubWindow(computerWindowName);
             }
             break;
         default:
@@ -115,8 +135,30 @@ void graphic::MainWindow::loop()
 
         window.draw(rect);
         window.draw(text);
+        menuView->draw(window);
 
         // Update the window
         window.display();
+    }
+}
+
+void graphic::MainWindow::openSubWindow(std::string windowName)
+{
+    if(windowName.compare(computerWindowName) == 0)
+    {
+        // if we have not open the Computer window
+        if (findSubWinByName(computerWindowName).empty())
+        {
+            std::shared_ptr<graphic::ComputerWindow> subW = std::make_shared<graphic::ComputerWindow>(computer, computerWindowName, debug);
+            addSubWindow(subW);
+        }
+        else
+        {
+            printDebug("Computer window already open");
+        }
+    }else
+    {
+        std::string msg = "no window with name: " + windowName;
+        printDebug(msg);
     }
 }

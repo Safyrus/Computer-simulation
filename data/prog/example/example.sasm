@@ -1,0 +1,20 @@
+###################################
+# import some important variables #
+###################################
+@res/variables.sasm
+
+start: # a label
+
+    MOV $A 01
+    GET $B :VAR
+    CMP $A $B # compare register A and B
+    JMP $F :EQUAL
+
+# if $A and $B are not equal
+NOT_EQUAL:
+    MOV $B 01
+
+# continue
+EQUAL:
+
+    OFF # stop the program

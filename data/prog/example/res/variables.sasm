@@ -1,0 +1,6 @@
+# Very important variable
+
+    JMP $F :start
+
+VAR:
+    %123 00 00 00

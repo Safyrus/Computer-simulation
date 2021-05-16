@@ -24,6 +24,36 @@ This project try to follow the [Semantic Versioning](https://semver.org/spec/v2.
 
 -----------------
 
+## **[0.6.4]** - _2021-05-16_
+
+### **Added**
+
+- Assembly section in S257_info.md.
+- example program with it's variable file (the one that is in the sasm vscode extension).
+- run-test (bat and sh) to run some test and the verifCPU program.
+- a name to Device.
+- a Menu and MenuAction classes.
+- a MenuView class to display and interact with the menu.
+- a openSubWindow function to Window.
+- a menu and menuView to MainWindow.
+
+### **Changed**
+
+- S257_info.md location to data folder.
+- testTranslater2 to have the file to use in parameter.
+- main to pass the file to testTranslater2 and have a test argument.
+- gitignore.
+- MainWindow by sending mouse events to the menuView and overriding openSubWindow.
+- update timeline.
+
+### **Fixed**
+
+- Makefile when removing bin folder for Linux.
+- the bus and deleteBlocks in Translater.cpp.
+- performance by adding a frame limit to the Window.
+
+-----------------
+
 ## **[0.6.3]** - _2021-01-18_
 
 ### **Added**
@@ -49,8 +79,6 @@ This project try to follow the [Semantic Versioning](https://semver.org/spec/v2.
 ### **Removed**
 
 - the compile sasm files and both main_old and main_thread files.
-
-### **Added**
 
 -----------------
 

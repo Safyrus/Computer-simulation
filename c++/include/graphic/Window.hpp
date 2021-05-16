@@ -15,6 +15,7 @@ namespace graphic
         std::string windowName;
         int width;
         int height;
+        int fps;
 
         virtual void start() = 0;
         virtual void stop() = 0;
@@ -36,6 +37,7 @@ namespace graphic
         virtual ~Window();
 
         void display();
+        virtual void openSubWindow(std::string windowName);
     };
 } // namespace graphic
 
