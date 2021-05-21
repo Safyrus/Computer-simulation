@@ -4,14 +4,24 @@
 #include <iomanip>
 #include <sstream>
 
+#include "graphic/CPUWindow.hpp"
+
 #include "utils/console.hpp"
+
+#include "data/menu/MenuActionTest.hpp"
+#include "data/menu/MenuActionOpenWindow.hpp"
+#include "data/menu/MenuActionDoubleCPUHz.hpp"
+#include "data/menu/MenuActionComputerPwr.hpp"
+#include "data/menu/MenuActionHalfCPUHz.hpp"
+#include "data/menu/MenuActionComputerRst.hpp"
 
 graphic::ComputerWindow::ComputerWindow(std::shared_ptr<computer::Computer> computer)
 {
     this->computer = computer;
     windowName = "S257 Dynamic Recompiler - Computer Window";
-    width = 256;
-    height = 256;
+    cpuWindowName = "S257 Dynamic Recompiler - CPU Window";
+    width = 128;
+    height = 128;
     printDebug("Creation");
 }
 
@@ -19,8 +29,9 @@ graphic::ComputerWindow::ComputerWindow(std::shared_ptr<computer::Computer> comp
 {
     this->computer = computer;
     this->windowName = windowName;
-    width = 256;
-    height = 256;
+    cpuWindowName = "S257 Dynamic Recompiler - CPU Window";
+    width = 128;
+    height = 128;
     printDebug("Creation");
 }
 
@@ -29,8 +40,9 @@ graphic::ComputerWindow::ComputerWindow(std::shared_ptr<computer::Computer> comp
     this->debug = debug;
     this->computer = computer;
     this->windowName = windowName;
-    width = 256;
-    height = 256;
+    cpuWindowName = "S257 Dynamic Recompiler - CPU Window";
+    width = 128;
+    height = 128;
     printDebug("Creation");
 }
 
@@ -38,11 +50,33 @@ graphic::ComputerWindow::~ComputerWindow()
 {
 }
 
+void graphic::ComputerWindow::makeMenu()
+{
+    menu = std::make_shared<data::menu::Menu>();
+    menu->addItem("PWR", std::make_shared<data::menu::MenuActionComputerPwr>(computer));
+    menu->addItem("RST", std::make_shared<data::menu::MenuActionComputerRst>(computer));
+    menu->addItem("HZ+", std::make_shared<data::menu::MenuActionDoubleCPUHz>(computer->getCpu()));
+    menu->addItem("HZ-", std::make_shared<data::menu::MenuActionHalfCPUHz>(computer->getCpu()));
+    menu->addItem("CPU", std::make_shared<data::menu::MenuActionOpenWindow>(shared_from_this(), cpuWindowName));
+    menuView = std::make_shared<graphic::MenuView>(menu);
+    menuView->setPos(0, 0);
+    menuView->setSize(width, 6);
+}
+
+void graphic::ComputerWindow::openTexture(sf::Texture &texture, std::string file)
+{
+    if (!texture.loadFromFile(file))
+    {
+        printError("Cannot open texture " + file);
+    }
+    texture.setSmooth(false);
+}
+
 void graphic::ComputerWindow::start()
 {
     printDebug("Start");
 
-    window.create(sf::VideoMode(640, 480), windowName);
+    window.create(sf::VideoMode(512, 512), windowName);
     window.setFramerateLimit(60);
 
     if (!font.loadFromFile("pix46.ttf"))
@@ -50,6 +84,12 @@ void graphic::ComputerWindow::start()
         printError("Cannot open font");
     }
     const_cast<sf::Texture &>(font.getTexture(6)).setSmooth(false);
+
+    openTexture(com, "data/img/saphyr_I_case.png");
+    openTexture(pwrOff, "data/img/saphyr1_pwr_off.png");
+    openTexture(pwrOn, "data/img/saphyr1_pwr_on.png");
+    openTexture(buttonOff, "data/img/saphyr1_button_off.png");
+    openTexture(buttonOn, "data/img/saphyr1_button_on.png");
 
     text.setFont(font);
     text.setCharacterSize(6);
@@ -63,11 +103,14 @@ void graphic::ComputerWindow::start()
     rect.setFillColor(sf::Color::Black);
     rect.setSize(sf::Vector2f(width, height));
 
+    makeMenu();
+
     window.setView(fixRatioCenterView());
 }
 
 void graphic::ComputerWindow::stop()
 {
+    window.close();
     printDebug("Stop");
 }
 
@@ -76,16 +119,28 @@ void graphic::ComputerWindow::loop()
     sf::Event event;
     while (window.pollEvent(event))
     {
+        sf::Vector2i mousePos;
+        sf::Vector2f viewMousePos;
         switch (event.type)
         {
         case sf::Event::Closed:
             printDebug("Closing window");
-            window.close();
             run = false;
             break;
         case sf::Event::Resized:
             printDebug("Resize");
             window.setView(fixRatioCenterView());
+            break;
+        case sf::Event::MouseMoved:
+            mousePos = sf::Vector2i(event.mouseMove.x, event.mouseMove.y);
+            viewMousePos = window.mapPixelToCoords(mousePos);
+            menuView->setMousePos(viewMousePos.x, viewMousePos.y);
+            break;
+        case sf::Event::MouseButtonPressed:
+            menuView->setMousePressed(true);
+            break;
+        case sf::Event::MouseButtonReleased:
+            menuView->setMouseReleased(true);
             break;
         case sf::Event::KeyPressed:
             printDebug("Key " + std::to_string(event.key.code) + " Pressed");
@@ -104,6 +159,10 @@ void graphic::ComputerWindow::loop()
             {
                 computer->getCpu()->hz *= 2;
             }
+            else if (event.key.code == sf::Keyboard::F4)
+            {
+                computer->reset();
+            }
             break;
         default:
             break;
@@ -114,23 +173,59 @@ void graphic::ComputerWindow::loop()
 
     window.draw(rect);
 
-    // set the computer infos string
-    std::stringstream txt;
-    txt << "Computer:\n";
-    txt << "  PWR  : " << ((computer->getPower()) ? "ON" : "OFF") << "\n";
-    txt << "  HZ   : " << computer->getCpu()->hz << "\n";
-    txt << "  CYCLE: " << computer->getCpu()->cycle << "\n";
-    txt << "  ADR  : " << std::hex << std::setfill('0') << std::setw(4) << computer->getCpu()->pc << "\n";
-    txt << "  REG  : O  A  B  C  D  E  F  R  J1 J2 G0 G1 G2 G3 G4 G5\n         ";
-    for (unsigned int i = 0; i < 16; i++)
-    {
-        txt << std::hex << std::uppercase << std::setfill('0') << std::setw(2) << (int)computer->getCpu()->reg[i] << " ";
-    }
+    sf::Sprite caseSpr;
+    // draw case
+    caseSpr.setTexture(com);
+    caseSpr.setPosition(sf::Vector2f(0, 6));
+    window.draw(caseSpr);
 
-    // display the computer infos
-    text.setString(txt.str());
-    window.draw(text);
+    // draw light
+    sf::Sprite pwrLight;
+    if(computer->getPower())
+        pwrLight.setTexture(pwrOn);
+    else
+        pwrLight.setTexture(pwrOff);
+    pwrLight.setPosition(sf::Vector2f(16, 25));
+    window.draw(pwrLight);
+
+    // draw buttons
+    sf::Sprite buttonPwrSprite;
+    if(computer->getPower())
+        buttonPwrSprite.setTexture(buttonOn);
+    else
+        buttonPwrSprite.setTexture(buttonOff);
+    buttonPwrSprite.setPosition(sf::Vector2f(16, 13));
+    window.draw(buttonPwrSprite);
+    sf::Sprite buttonRstSprite;
+    buttonRstSprite.setTexture(buttonOff);
+    buttonRstSprite.setPosition(sf::Vector2f(48, 13));
+    window.draw(buttonRstSprite);
+
+    // display the menu
+    menuView->draw(window);
 
     // Update the window
     window.display();
+}
+
+void graphic::ComputerWindow::openSubWindow(std::string windowName)
+{
+    if(windowName.compare(cpuWindowName) == 0)
+    {
+        // if we have not open the CPU window
+        if (findSubWinByName(cpuWindowName).empty())
+        {
+            std::shared_ptr<graphic::CPUWindow> subW = std::make_shared<graphic::CPUWindow>(computer->getCpu(), cpuWindowName, debug);
+            addSubWindow(subW);
+        }
+        else
+        {
+            std::string str = cpuWindowName + " window already open";
+            printDebug(str);
+        }
+    }else
+    {
+        std::string msg = "no window with name: " + windowName;
+        printDebug(msg);
+    }
 }

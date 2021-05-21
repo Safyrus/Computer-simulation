@@ -2,6 +2,7 @@
 
 #include "graphic/MainWindow.hpp"
 #include "graphic/ComputerWindow.hpp"
+#include "graphic/ScreenSimpleView.hpp"
 
 #include "data/menu/MenuActionTest.hpp"
 #include "data/menu/MenuActionOpenWindow.hpp"
@@ -10,32 +11,35 @@
 
 graphic::MainWindow::MainWindow()
 {
-    computer = std::make_shared<computer::Computer>();
+    computer = std::make_shared<computer::Computer>(true);
     windowName = "S257 Dynamic Recompiler - Main Window";
     computerWindowName = "S257 Dynamic Recompiler - Computer Window";
     width = 128;
     height = 128;
+    showMenu = true;
     printDebug("Creation");
 }
 
 graphic::MainWindow::MainWindow(std::string windowName)
 {
-    computer = std::make_shared<computer::Computer>();
+    computer = std::make_shared<computer::Computer>(true);
     this->windowName = windowName;
     computerWindowName = "S257 Dynamic Recompiler - Computer Window";
     width = 128;
     height = 128;
+    showMenu = true;
     printDebug("Creation");
 }
 
 graphic::MainWindow::MainWindow(std::string windowName, bool debug)
 {
-    computer = std::make_shared<computer::Computer>();
+    computer = std::make_shared<computer::Computer>(true);
     this->windowName = windowName;
     this->debug = debug;
     computerWindowName = "S257 Dynamic Recompiler - Computer Window";
     width = 128;
     height = 128;
+    showMenu = true;
     printDebug("Creation");
 }
 
@@ -47,8 +51,9 @@ void graphic::MainWindow::makeMenu()
 {
     menu = std::make_shared<data::menu::Menu>();
     menu->addItem("COM", std::make_shared<data::menu::MenuActionOpenWindow>(shared_from_this(), computerWindowName));
-    menu->addItem("TEST", std::make_shared<data::menu::MenuActionTest>("TEST"));
-    menu->addItem("ANOTHER TEST", std::make_shared<data::menu::MenuActionTest>("ANOTHER TEST"));
+    menu->addItem("OPTION", std::make_shared<data::menu::MenuActionTest>("Not implemented yet"));
+    menu->addItem("SAVE", std::make_shared<data::menu::MenuActionTest>("Not implemented yet"));
+    menu->addItem("LOAD", std::make_shared<data::menu::MenuActionTest>("Not implemented yet"));
     menuView = std::make_shared<graphic::MenuView>(menu);
     menuView->setPos(0, 0);
     menuView->setSize(width, 6);
@@ -58,7 +63,7 @@ void graphic::MainWindow::start()
 {
     printDebug("Start");
 
-    window.create(sf::VideoMode(640, 480), windowName);
+    window.create(sf::VideoMode(512, 512), windowName);
     window.setFramerateLimit(60);
 
     if (!font.loadFromFile("pix46.ttf"))
@@ -70,9 +75,9 @@ void graphic::MainWindow::start()
     text.setFont(font);
     text.setCharacterSize(6);
 
-    text.setString("Placeholder for the futur screen\nPress F1 to show another window\nor the COM button on the top\nmenu");
+    text.setString("NO SCREEN FOUND");
     text.setFillColor(sf::Color::White);
-    sf::Vector2f pos(0, 32);
+    sf::Vector2f pos(4, 12);
     text.setPosition(pos);
 
     rect.setPosition(0, 0);
@@ -86,6 +91,7 @@ void graphic::MainWindow::start()
 
 void graphic::MainWindow::stop()
 {
+    window.close();
     printDebug("Stop");
 }
 
@@ -100,7 +106,6 @@ void graphic::MainWindow::loop()
         {
         case sf::Event::Closed:
             printDebug("Closing window");
-            window.close();
             run = false;
             break;
         case sf::Event::Resized:
@@ -126,25 +131,47 @@ void graphic::MainWindow::loop()
             {
                 openSubWindow(computerWindowName);
             }
+            // If F2 is pressed
+            else if (event.key.code == sf::Keyboard::F2)
+            {
+                showMenu = !showMenu;
+            }
             break;
         default:
             break;
         }
-        // Clear screen
-        window.clear(sf::Color(32, 32, 32));
+    }
+    // Clear screen
+    window.clear(sf::Color(32, 32, 32));
 
+    std::shared_ptr<computer::RAM> ram = std::static_pointer_cast<computer::RAM>(computer->getDevice("RAM", 0x8000, 0x8FFF));
+    if (ram != nullptr)
+    {
+        //draw screen
+        ScreenSimpleView screen(ram);
+        screen.setBackgroundColor(sf::Color(0, 32, 0));
+        screen.setColor(sf::Color(0, 170, 0));
+        screen.setPos(0, 0);
+        screen.draw(window);
+    }
+    else
+    {
+        // draw text
         window.draw(rect);
         window.draw(text);
+    }
+
+    // draw menu
+    if (showMenu)
         menuView->draw(window);
 
-        // Update the window
-        window.display();
-    }
+    // Update the window
+    window.display();
 }
 
 void graphic::MainWindow::openSubWindow(std::string windowName)
 {
-    if(windowName.compare(computerWindowName) == 0)
+    if (windowName.compare(computerWindowName) == 0)
     {
         // if we have not open the Computer window
         if (findSubWinByName(computerWindowName).empty())
@@ -154,9 +181,11 @@ void graphic::MainWindow::openSubWindow(std::string windowName)
         }
         else
         {
-            printDebug("Computer window already open");
+            std::string str = computerWindowName + " window already open";
+            printDebug(str);
         }
-    }else
+    }
+    else
     {
         std::string msg = "no window with name: " + windowName;
         printDebug(msg);

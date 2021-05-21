@@ -6,21 +6,13 @@
 typedef unsigned char uint8_t;
 typedef unsigned short uint16_t;
 
-enum DEVICE_TYPE{
-    NOVAL = 0,
-    CPU = 1,
-    BUS = 2,
-    RAM = 3,
-    ROM = 4
-};
-
 namespace computer
 {
     class Device
     {
     protected:
-        DEVICE_TYPE type;
         bool pwr;
+        std::string type;
         std::string name;
 
     public:
@@ -29,10 +21,10 @@ namespace computer
         Device();
         virtual ~Device();
 
-        DEVICE_TYPE getType();
         void setPwr(bool pwr);
         bool getPwr();
         void setName(std::string name);
+        std::string getType();
         std::string getName();
 
         virtual void reset() = 0;

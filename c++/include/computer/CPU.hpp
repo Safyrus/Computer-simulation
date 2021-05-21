@@ -22,6 +22,7 @@ namespace computer
         uint8_t rawBus[1024 * 64];
         std::shared_ptr<computer::Bus> bus;
         bool threadWanted;
+        bool hasReset;
 
     public:
         uint16_t pc;

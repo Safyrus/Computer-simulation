@@ -17,10 +17,31 @@ computer::Computer::Computer()
     cpu->hz = 10;
     runCPU = new RunnableDevice(cpu);
 
-    addDevice(DEVICE_TYPE::ROM, 0x0000, 0x1000);
-    addDevice(DEVICE_TYPE::RAM, 0x8000, 0x9000);
-    std::shared_ptr<computer::ROM> rom = std::static_pointer_cast<computer::ROM>(getDevice(DEVICE_TYPE::ROM, 0x0000, 0x1000));
-    rom->load("prog/verifCPU/verifCPU");
+    printDebug("Run CPU thread");
+    runCPU->run();
+
+    cpu->setPwr(false);
+}
+
+computer::Computer::Computer(bool test)
+{
+    printDebug("Create BUS");
+    bus = std::make_shared<computer::Bus>();
+
+    printDebug("Create CPU thread");
+    cpu = std::make_shared<computer::CPU>(bus, true);
+    cpu->hz = 10;
+    runCPU = new RunnableDevice(cpu);
+
+    if(test)
+    {
+        std::shared_ptr<computer::ROM> rom = std::make_shared<computer::ROM>(0x1000);
+        std::shared_ptr<computer::RAM> ram = std::make_shared<computer::RAM>(0x1000);
+        addDevice(rom, 0x0000, 0x0FFF);
+        addDevice(ram, 0x8000, 0x8FFF);
+        rom = std::static_pointer_cast<computer::ROM>(getDevice("ROM", 0x0000, 0x0FFF));
+        rom->load("prog/verifCPU/verifCPU");
+    }
 
     printDebug("Run CPU thread");
     runCPU->run();
@@ -72,22 +93,17 @@ std::shared_ptr<computer::Bus> computer::Computer::getBus()
     return bus;
 }
 
-void computer::Computer::addDevice(DEVICE_TYPE type, uint16_t startAdr, uint16_t endAdr)
+void computer::Computer::addDevice(std::shared_ptr<computer::Device> device, uint16_t startAdr, uint16_t endAdr)
 {
-    switch (type)
-    {
-    case DEVICE_TYPE::RAM:
-        addRAM(startAdr, endAdr);
-        break;
-    case DEVICE_TYPE::ROM:
-        addROM(startAdr, endAdr);
-        break;
-    default:
-        break;
-    }
+    printDebug("Add " + device->getType() + " at " + std::to_string(startAdr) + "  " + std::to_string(endAdr));
+    devices.push_back(device);
+    runnables.push_back(new computer::RunnableDevice(device));
+    runnables.back()->run();
+    device->setPwr(cpu->getPwr());
+    bus->addDevice(device, startAdr, endAdr);
 }
 
-void computer::Computer::removeDevice(DEVICE_TYPE type, uint16_t startAdr, uint16_t endAdr)
+void computer::Computer::removeDevice(std::string type, uint16_t startAdr, uint16_t endAdr)
 {
     for (unsigned int i = 0; i < devices.size(); i++)
     {
@@ -105,7 +121,7 @@ void computer::Computer::removeDevice(DEVICE_TYPE type, uint16_t startAdr, uint1
     }
 }
 
-std::shared_ptr<computer::Device> computer::Computer::getDevice(DEVICE_TYPE type, uint16_t startAdr, uint16_t endAdr)
+std::shared_ptr<computer::Device> computer::Computer::getDevice(std::string type, uint16_t startAdr, uint16_t endAdr)
 {
     for (unsigned int i = 0; i < devices.size(); i++)
     {
@@ -118,27 +134,4 @@ std::shared_ptr<computer::Device> computer::Computer::getDevice(DEVICE_TYPE type
         }
     }
     return nullptr;
-}
-
-void computer::Computer::addRAM(uint16_t startAdr, uint16_t endAdr)
-{
-    printDebug("Add RAM at " + std::to_string(startAdr) + "  " + std::to_string(endAdr));
-    std::shared_ptr<computer::RAM> ram = std::make_shared<computer::RAM>(0x1000, 0);
-    devices.push_back(ram);
-    runnables.push_back(new computer::RunnableDevice(ram));
-    runnables.back()->run();
-    //ram->load("prog/verifCPU/verifCPU");
-    ram->setPwr(cpu->getPwr());
-    bus->addDevice(ram, startAdr, endAdr);
-}
-
-void computer::Computer::addROM(uint16_t startAdr, uint16_t endAdr)
-{
-    printDebug("Add ROM at " + std::to_string(startAdr) + "  " + std::to_string(endAdr));
-    std::shared_ptr<computer::ROM> rom = std::make_shared<computer::ROM>(0x1000, 0);
-    devices.push_back(rom);
-    runnables.push_back(new computer::RunnableDevice(rom));
-    runnables.back()->run();
-    rom->setPwr(cpu->getPwr());
-    bus->addDevice(rom, startAdr, endAdr);
 }

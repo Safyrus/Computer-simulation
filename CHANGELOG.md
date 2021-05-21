@@ -24,18 +24,59 @@ This project try to follow the [Semantic Versioning](https://semver.org/spec/v2.
 
 -----------------
 
+## **[0.6.5]** - _2021-05-21_
+
+### **Added**
+
+- "Saphyr I" casing image (aseprite and png).
+- "saphyr_I" Aseprite file.
+- MenuActions to operate the computer (Hz+, Hz-, RST, PWR).
+- A "Resource used" section in README.
+- An abstract class View
+- A length function in RAM.
+- Scripts run.bat and run-debug.bat.
+- The CPUWindow class.
+- A menu in ComputerWindow to show the CPUWindow and have basic control on the computer.
+- A ScreenSimpleView (screen to show a RAM content with on/off pixels).
+- A Screen to MainWindow and a key (F2) to show/hide the menu.
+
+### **Changed**
+
+- README.
+- Devices type to a string.
+- Devices functions and constructor in Computer.
+- MenuView by changing the colors and extending View.
+- ROM to print a debug message if set() is called.
+- main function to not clear the terminal at the end in debug mode.
+- ComputerWindow to show information only about the computer (not the CPU) in a more graphical way.
+- Menu options in MainWindow.
+
+### **Fixed**
+
+- MainWindow not refreshing every frame.
+- Sub windows not working after the main window has been closed.
+- CPU not resetting.
+- RAM not resetting its memory.
+- Spell mistakes in CHANGELOG and README.
+
+### **Removed**
+
+- addROM and addRAM functions in Computer.
+
+-----------------
+
 ## **[0.6.4]** - _2021-05-16_
 
 ### **Added**
 
 - Assembly section in S257_info.md.
-- example program with it's variable file (the one that is in the sasm vscode extension).
-- run-test (bat and sh) to run some test and the verifCPU program.
-- a name to Device.
-- a Menu and MenuAction classes.
-- a MenuView class to display and interact with the menu.
-- a openSubWindow function to Window.
-- a menu and menuView to MainWindow.
+- Example program with its variable file (the one that is in the SASM VS-Code extension).
+- A script run-test (bat and sh) to run some test and the verifCPU program.
+- A name to Device.
+- A Menu and MenuAction classes.
+- A MenuView class to display and interact with the menu.
+- A openSubWindow function to Window.
+- A menu and its view to MainWindow.
 
 ### **Changed**
 
@@ -44,13 +85,13 @@ This project try to follow the [Semantic Versioning](https://semver.org/spec/v2.
 - main to pass the file to testTranslater2 and have a test argument.
 - gitignore.
 - MainWindow by sending mouse events to the menuView and overriding openSubWindow.
-- update timeline.
+- Update timeline.
 
 ### **Fixed**
 
 - Makefile when removing bin folder for Linux.
-- the bus and deleteBlocks in Translater.cpp.
-- performance by adding a frame limit to the Window.
+- The bus and deleteBlocks in Translater.cpp.
+- Performance by adding a frame limit to the Window.
 
 -----------------
 
@@ -58,27 +99,27 @@ This project try to follow the [Semantic Versioning](https://semver.org/spec/v2.
 
 ### **Added**
 
-- some print functions and a clear function to the console file.
-- a new Device: the ROM
-- some control keys to ComputerWindow to change the cpu frequency.
-- comments in hextxtToBin and Translater.
+- Some print functions and a clear function to the console file.
+- A new Device: the ROM
+- Some control keys to ComputerWindow to change the CPU frequency.
+- Comments in hextxtToBin and Translater.
 
 ### **Changed**
 
-- folders structure by moving progs and fonts to a data folder and conception.txt to the oldStuff.zip
-- the debugging display in many files (all the compiler files, main, ) to use functions in the console file.
-- global files functions location that are now in global.cpp.
+- Folders structure by moving progs and fonts to a data folder and conception.txt to the oldStuff.zip
+- The debugging display in many files (all the compiler files, main, etc) to use functions in the console file.
+- Global files functions location that are now in global.cpp.
 - Translater to have a less repetitive code.
 - verifCPU by changing the requirement for SET instructions.
-- the makefile to "install" file locate in the data folder.
+- The makefile to "install" file locate in the data folder.
 
 ### **Fixed**
 
-- a bug in the viewport ratio due to a loss of precision between an integer and a float.
+- A bug in the viewport ratio due to a loss of precision between an integer and a float.
 
 ### **Removed**
 
-- the compile sasm files and both main_old and main_thread files.
+- The compiled SASM files and both main_old and main_thread files.
 
 -----------------
 
@@ -86,22 +127,22 @@ This project try to follow the [Semantic Versioning](https://semver.org/spec/v2.
 
 ### **Added**
 
-- a Computer class to manage a configuration of Devices.
-- a abstract class Window to create a graphical interface.
-- multiples Window classes:
+- A Computer class to manage a configuration of Devices.
+- An abstract class Window to create a graphical interface.
+- Multiples Window classes:
   - BaseWindow: just a blank window.
-  - MainWindow: for now it is just use to contain the computer and open a ComputerWindow.
+  - MainWindow: for now it is just used to contain the computer and open a ComputerWindow.
   - ComputerWindow: displays some basic information about the computer and allows you to power it on or off.
-- a testGraphicDynarec to test if the Computer can be manage by multiple Window.
-- a handler for code RST to the Translater.
-- a initStep and runStep function that execute one block to the Translater.
-- a new constructor in the CPU.
+- A testGraphicDynarec to test if the Computer can be manage by multiple Window.
+- A handler for code RST to the Translater.
+- A initStep and runStep function that execute one block to the Translater.
+- A new constructor in the CPU.
 
 ### **Changed**
 
-- abstract Device class by adding a pwr and type variable and a reset function.
-- extended classes of Device to fit the new changes.
-- Bus by adding a getDeviceAdr fucntion.
+- Abstract Device class by adding a pwr and type variable and a reset function.
+- Extended classes of Device to fit the new changes.
+- Bus by adding a getDeviceAdr function.
 - RAM set and get functions to be use if the power is on.
 - CPU run function to use either the run or runStep function of the Translater and the reset function.
 - main case 2 to test the testGraphicDynarec and not testing anything else if the debug is false.
@@ -112,10 +153,10 @@ This project try to follow the [Semantic Versioning](https://semver.org/spec/v2.
 
 ### **Added**
 
-- a zip file containing old projects which are the "old version" of the current project.
-  It contains the logisim files of the BCM and its ressources, the old assembler in c++ and other things.
-- a timeline of old projects.
-- a README for the "old stuff".
+- A zip file containing old projects which are the "old version" of the current project.
+  It contains the Logisim files of the BCM and its resources, the old assembler in c++ and other things.
+- A timeline of old projects.
+- A README for the "old stuff".
 
 -----------------
 
@@ -125,24 +166,24 @@ The "_Dynamic Recompiler_" update.
 
 ### **Added**
 
-- an Emitter86 and Emitter64 class.
-- registers to the x86REG and x64REG enums.
-- a write64 function to the Buffer class.
+- An Emitter86 and Emitter64 class.
+- Registers to the x86REG and x64REG enums.
+- A write64 function to the Buffer class.
 - Hz to the CPU.
-- a limit to the size of blocks in the Translater.
+- A limit to the size of blocks in the Translater.
 
 ### **Changed**
 
-- the Emitter class which became abstract.
+- The Emitter class which became abstract.
 - testDynarec and Translater to use an Emitter class base on the OS.
-- the runS257Compiler and runS257Interpreter functions by defining them in cpp files.
-- the Translator to use the CPU hz frequency.
-- the TODO list in README.
+- The runS257Compiler and runS257Interpreter functions by defining them in cpp files.
+- The Translator to use the CPU Hz frequency.
+- The TODO list in README.
 - MAKEFILE.
 
 ### **Fixed**
 
-- the display of the Translater's address when jumping.
+- The display of the Translater's address when jumping.
 
 -----------------
 
@@ -150,8 +191,8 @@ The "_Dynamic Recompiler_" update.
 
 ### **Added**
 
-- missing instructions for Emitter and Translater.
-- additional tests in verifCPU to test the instructions :
+- Missing instructions for Emitter and Translater.
+- Additional tests in verifCPU to test the instructions :
   - SUB
   - SBB
   - MUL
@@ -166,12 +207,12 @@ The "_Dynamic Recompiler_" update.
 
 ### **Changed**
 
-- the RAM to have an instant write speed if wanted.
-- the printCPUState() function in Translater to print more registers.
+- The RAM to have an instant write speed if wanted.
+- The printCPUState() function in Translater to print more registers.
 
 ### **Fixed**
 
-- registers R, J1 and J2.
+- Registers R, J1 and J2.
 
 ### **Removed**
 
@@ -181,22 +222,22 @@ The "_Dynamic Recompiler_" update.
 
 ### **Added**
 
-- a verifCPU program to check if instructions of the CPU work. It can check for now:
+- A verifCPU program to check if instructions of the CPU work. It can check for now:
   - 1 type of MOV
   - 1 type of CMP
   - 4 type of ADD
   - 4 type of ADC
-- more emitter function (source and target).
-- a processing sketch FontImgToBin to transform a black and white image into a binary string.
-- some images to test the sketch.
-- more instructions to the translater and the emitter.
-- more x86 instructions to the emitter.
-- a function to use simple ansi escape code (mainly to change text color).
+- More emitter function (source and target).
+- A processing sketch FontImgToBin to transform a black and white image into a binary string.
+- Some images to test the sketch.
+- More instructions to the translater and the emitter.
+- More x86 instructions to the emitter.
+- A function to use simple ANSI escape code (mainly to change text color).
 
 ### **Changed**
 
-- the font in the tools program to be the pix46 font.
-- main and translater to use ansi escape code.
+- The font in the tools program to be the pix46 font.
+- main and translater to use ANSI escape code.
 - testDynarec to use a file given by parameter.
 
 -----------------
@@ -205,7 +246,7 @@ The "_Dynamic Recompiler_" update.
 
 ### **Added**
 
-- an extension for vscode to highlight the sasm language.
+- An extension for VS Code to highlight the SASM language.
 
 ### **Changed**
 
@@ -218,18 +259,18 @@ The "_Dynamic Recompiler_" update.
 
 ### **Added**
 
-- devices that are part of the computer. These devices are:
-  - the abstract Device class
-  - the CPU: was already there but is now a device.
-  - the RAM: store temporary data.
-  - the BUS: connect devices.
-  - the RunnableDevice class: create a thread to run the device.
-- a testDynarec program and function to test the dynamic recompiler.
+- Devices that are part of the computer. These devices are:
+  - The abstract Device class
+  - The CPU: was already there but is now a device.
+  - The RAM: store temporary data.
+  - The BUS: connect devices.
+  - The RunnableDevice class: create a thread to run the device.
+- A testDynarec program and function to test the dynamic recompiler.
 
 ### **Changed**
 
-- function locations from hpp to cpp files.
-- some files (mainly translater and CPU) to use the new devices.
+- Function locations from hpp to cpp files.
+- Some files (mainly translater and CPU) to use the new devices.
 - Makefile.
 - README.
 - gitignore.
@@ -240,8 +281,8 @@ The "_Dynamic Recompiler_" update.
 
 ### **Added**
 
-- the TOO LONG content of the changlog.
-- comments in main file write function
+- The TOO LONG content of the changelog.
+- Comments in main file write function.
 
 ### **Changed**
 
@@ -259,12 +300,12 @@ The "_Dynamic Recompiler_" update.
 
 ### **Changed**
 
-- makefile by adding the -fpermissive flag.
+- Makefile by adding the -fpermissive flag.
 - main function by splitting function into different files (runS257Compiler and runS257Interpreter).
 
 ### **Removed**
 
-- useless gitignore in c++ folder.
+- Useless gitignore in c++ folder.
 
 -----------------
 
@@ -272,8 +313,8 @@ The "_Dynamic Recompiler_" update.
 
 ### **Added**
 
-- a program name "screen" that fill the screen with random value indefinitely.
-- a new version of the custom font that is now name pix46
+- A program name "screen" that fill the screen with random value indefinitely.
+- A new version of the custom font that is now name pix46.
 
 ### **Changed**
 
@@ -288,28 +329,28 @@ The "_Refactor_" update.
 
 ### **Added**
 
-- a basic dynamic recompiler (can only do few instruction for now). It is compose of 3 level:
+- A basic dynamic recompiler (can only do few instructions for now). It is composed of 3 level:
   - The Buffer: that store instruction in the target assembler.
-  - The Emitter: that emite target instruction into the buffer with source instruction.
-  - The translater: that read compile source assembler and tell emitters what instruction to emite. It is also running different "blocks" and handle any interrupt.
-- a empty CHANGELOG.
+  - The Emitter: that emit target instruction into the buffer with source instruction.
+  - The Translater: that read compiled source assembler and tell emitters what instruction to emit. It is also running different "blocks" and handle any interrupt.
+- An empty CHANGELOG.
 
 ### **Changed**
 
-- rename computer folder in computer_old and change all class include with it.
-- update README.
+- Rename computer folder in computer_old and change all class include with it.
+- Update README.
 - main function in a number of way by:
-  - saying what argument is needed when there is none.
-  - changing cases, it is now:
-    - case 1: the Compiler/Assembler.
-    - case 2: the dynamic recompiler.
-    - case 3: the old AssemblerCompiler.
-    - case 4: the old computer/interpreter.
-  - other case have been removed.
+  - Saying what argument is needed when there is none.
+  - Changing cases, it is now:
+    - Case 1: the Compiler/Assembler.
+    - Case 2: the dynamic recompiler.
+    - Case 3: the old AssemblerCompiler.
+    - Case 4: the old computer/interpreter.
+  - Other case have been removed.
 
 ### **Removed**
 
-- the useless (and not very functionning) build.bat.
+- The useless (and not very functioning) build.bat.
 
 -----------------
 
@@ -317,7 +358,7 @@ The "_Refactor_" update.
 
 ### **Changed**
 
-- update tools program (change can be see in tools_version.txt)
+- update tools program (change can be seen in tools_version.txt)
 
 ### **Fixed**
 
@@ -329,7 +370,7 @@ The "_Refactor_" update.
 
 ### **Fixed**
 
-- a bug about hz in Computer and main.
+- A bug about Hz in Computer and main.
 
 -----------------
 
@@ -337,18 +378,18 @@ The "_Refactor_" update.
 
 ### **Added**
 
-- a reset function to all Devices.
-- buttons to change Hz while the program is running.
-- a Node type name NodeMov2L.
-- subdirectories to prog (example, test and toolsProg).
+- A reset function to all Devices.
+- Buttons to change Hz while the program is running.
+- A Node type name NodeMov2L.
+- Subdirectories to prog (example, test and toolsProg).
 - The "Device update" of the tools program.
-- a changelog of the tools program (tools_version.txt).
+- A changelog of the tools program (tools_version.txt).
 
 ### **Changed**
 
-- Error messages when compiling tell where the error occure in the source file.
-- update most of the assembler class to use the NodeMov2L and update error messages.
-- move each program to their respective subdirectory.
+- Error messages when compiling tell where the error occurs in the source file.
+- Update most of the assembler class to use the NodeMov2L and update error messages.
+- Move each program to their respective subdirectory.
 
 ### **Fixed**
 
@@ -358,18 +399,18 @@ The "_Refactor_" update.
 
 ## **[0.4.0]** - _2020-03-28_
 
-the "_New SASM Compiler_" update.
+The "_New SASM Compiler_" update.
 
 ### **Added**
 
-- a new and better SASM Compiler/Assembler and add new features to sasm language. This new Compiler work in 3 phase:
-  - Phase 1 (the Lexing phase): This phase will try to decompose the source code into token, words (not necessarely string of characters) that the language can understand. This phase use the classes:
+- A new and better SASM Compiler/Assembler and add new features to SASM language. This new Compiler work in 3 phases:
+  - Phase 1 (the Lexing phase): This phase will try to decompose the source code into token, words (not necessarily string of characters) that the language can understand. This phase uses the classes:
     - Token: represent a token.
     - Lexer: do the lexing part.
     - Position: represent a position in the source file.
-  - Phase 2 (the Parsing phase): This phase will use tokens and make "sentences" that have a "meaning". It will construct a tree like structure with different "nodes".This phase use the classes:
+  - Phase 2 (the Parsing phase): This phase will use tokens and make "sentences" that have a "meaning". It will construct a tree like structure with different "nodes". This phase uses the classes:
     - Parser: do the parsing.
-    - Node: an abstract class representing a node in the parsre tree.
+    - Node: an abstract class representing a node in the parser tree.
     - NodeBin: node for binary instruction.
     - NodeBinL: node for binary instruction with a label.
     - NodeMov: node for mov instruction.
@@ -377,19 +418,19 @@ the "_New SASM Compiler_" update.
     - NodeMovL: node for get instruction with a label.
     - NodeTri: node for trinary instructions.
     - NodeUni: node for unary instructions.
-  - Phase 3 (the Interpreting phase): This phase will use the "meaning" of the tree structure of the Parser to translate it to another language (in this case binary sasm). It will use the Interpreter class.
-- new programs "a" and "b" with new sasm functionality (like include) to test the new Compiler.
-- case 6 to main to test the new Compiler.
-- new functions to main named writeFile and openFile.
+  - Phase 3 (the Interpreting phase): This phase will use the "meaning" of the tree structure of the Parser to translate it to another language (in this case binary SASM). It will use the Interpreter class.
+- New programs "a" and "b" with new SASM functionality (like include) to test the new Compiler.
+- Case 6 to main to test the new Compiler.
+- New functions to main named writeFile and openFile.
 - openFile in global.hpp.
 
 ### **Changed**
 
-- all programs to fit the updated sasm langauge.
+- All programs to fit the updated SASM language.
 
 ### **Removed**
 
-- unused programs (test, test1, test2 and testCompiler).
+- Unused programs (test, test1, test2 and testCompiler).
 
 -----------------
 
@@ -397,8 +438,8 @@ the "_New SASM Compiler_" update.
 
 ### **Changed**
 
-- location of all classes about the computer in a folder name "computer".
-- update Makefile.
+- Location of all classes about the computer in a folder name "computer".
+- Update Makefile.
 
 -----------------
 
@@ -406,7 +447,7 @@ the "_New SASM Compiler_" update.
 
 ### **Added**
 
-- 16bits substract function in tools program.
+- 16bits subtract function in tools program.
 
 -----------------
 
@@ -416,18 +457,18 @@ the "_New SASM Compiler_" update.
 
 #### Tools program
 
-- functions that are now possible.
-- new functions:
+- Functions that are now possible.
+- New functions:
   - SYST_FCT1_PROLOGUE: to call when starting a function.
   - SYST_FCT1_EPILOGUE: to call when ending a function.
   - FUNC_TEST, FUNC_TEST_2 and FUNC_TEST_3 to test function call and callback.
-  - FUNC_RECURSIVE to test recurcivity.
+  - FUNC_RECURSIVE to test recursion.
 
 ### **Fixed**
 
-- display of rect and font in Keyboard, Computer and CPU.
-- a bug about adress in the CPU.
-- a bug with JMP instructions in the CU of the CPU.
+- Display of rect and font in Keyboard, Computer and CPU.
+- A bug about address in the CPU.
+- A bug with JMP instructions in the CU of the CPU.
 
 #### Tools program
 
@@ -439,24 +480,24 @@ the "_New SASM Compiler_" update.
 
 ### **Added**
 
-- registers (G0 to G5) in default AssemblerCompiler configuration.
-- a pause variable and functions (setPause and getPause) to the CPU.
-- a key to pause the Computer.
-- a new program call "tools.sasm" that can:
-  - call "function" and jump back (maybe).
-  - call "function one call" and jump back, the difference with "function" is thata they cannot call other "functions (one call or not)".
-  - add 2 16bits numbers.
-  - compare 2 16bits numbers.
-- display function to the DISK and the RAM.
+- Registers (G0 to G5) in default AssemblerCompiler configuration.
+- A pause variable and functions (setPause and getPause) to the CPU.
+- A key to pause the Computer.
+- A new program call "tools.sasm" that can:
+  - Call "function" and jump back (maybe).
+  - Call "function one call" and jump back, the difference with "function" is that they cannot call other "functions (one call or not)".
+  - Add 2 16bits numbers.
+  - Compare 2 16bits numbers.
+- Display function to the DISK and the RAM.
 
 ### **Changed**
 
-- display function of the CPU.
+- Display function of the CPU.
 
 ### **Fixed**
 
-- something in AssemblerCompiler.
-- the carry flag in the CPU.
+- Something in AssemblerCompiler.
+- The carry flag in the CPU.
 
 -----------------
 
@@ -464,18 +505,18 @@ the "_New SASM Compiler_" update.
 
 ### **Added**
 
-- control key to Keyboard with multiple function (setData, getControl and setControl).
-- a new Device ScreenSimple.
+- Control key to Keyboard with multiple function (setData, getControl and setControl).
+- A new Device ScreenSimple.
 
 ### **Changed**
 
-- case 5 in main to send control character from the user to the Keyboard and replace the Screen with a ScreenSimple.
+- Case 5 in main to send control character from the user to the Keyboard and replace the Screen with a ScreenSimple.
 - test_com_io to send keyboard input to the screen instead of random value.
 
 ### **Fixed**
 
-- a bug about the random register in CPU.
-- a bug about garbadge in the result of the ALU in CPU.
+- A bug about the random register in CPU.
+- A bug about garbage in the result of the ALU in CPU.
 
 -----------------
 
@@ -483,8 +524,8 @@ the "_New SASM Compiler_" update.
 
 ### **Fixed**
 
-- a bug about Computer cycle.
-- program test_com_io and program time.
+- A bug about Computer cycle.
+- Program test_com_io and program time.
 - getData and setData in Screen.
 
 -----------------
@@ -493,28 +534,28 @@ the "_New SASM Compiler_" update.
 
 ### **Added**
 
-- unsigned numbers mode to CPU.
-- program to test unsigned number.
+- Unsigned numbers mode to CPU.
+- Program to test unsigned number.
 - display function to CPU.
-- a new Timer Device.
-- a program to test the Timer Device.
-- a thread to run the Computer.
+- A new Timer Device.
+- A program to test the Timer Device.
+- A thread to run the Computer.
 
 ### **Changed**
 
-- update Makefile.
-- all sasm programs location to a new folder prog.
+- Update Makefile.
+- All SASM programs location to a new folder "prog".
 - Computer display function now display the CPU.
 
 ### **Fixed**
 
 - clk and stp count in halfCycle function in Computer.
-- a bug about signed number mode in CPU.
+- A bug about signed number mode in CPU.
 
 ### **Removed**
 
-- unused functions in AssemblerCompiler.
-- unused variables in Screen.
+- Unused functions in AssemblerCompiler.
+- Unused variables in Screen.
 
 -----------------
 
@@ -526,20 +567,20 @@ The "_SFML_" update.
 
 - jumpback registers (J1 and J2).
 - jumpback registers to default AssemblerCompiler configuration.
-- a display and setKey functions to Keyboard.
-- a halfCycle function to Computer.
-- a program function.sasm to test call and callback of "function".
+- A display and setKey functions to Keyboard.
+- A halfCycle function to Computer.
+- A program function.sasm to test call and callback of "function".
 
 ### **Changed**
 
-- case 5 to run the Computer and display it.
-- reformat files.
+- Case 5 to run the Computer and display it.
+- Reformat files.
 - architecture_info about jumpback registers.
 
 ### **Fixed**
 
-- a bug about step in Computer.
-- a bug when the cpu can't find a device.
+- A bug about step in Computer.
+- A bug when the CPU can't find a device.
 
 -----------------
 
@@ -547,7 +588,7 @@ The "_SFML_" update.
 
 ### **Added**
 
-- default constructor to Device.
+- Default constructor to Device.
 - display function to Screen.
 
 -----------------
@@ -556,10 +597,10 @@ The "_SFML_" update.
 
 ### **Added**
 
-- case 5 in main function to test SFML and show Computer information without running it.
-- a custom font test.ttf (4*6 pixel) with the ascii character set.
-- a baseFont global variable in global.hpp.
-- a display function in Computer that show on a window information about the state of the computer (Hz, cycleCount, pwr, adr, data, clk, stp, ld)
+- Case 5 in main function to test SFML and show Computer information without running it.
+- A custom font test.ttf (4*6 pixel) with the ASCII character set.
+- A baseFont global variable in global.hpp.
+- A display function in Computer that show on a window information about the state of the computer (Hz, cycleCount, pwr, adr, data, clk, stp, ld)
 
 ### **Changed**
 
@@ -573,20 +614,20 @@ The "_SFML_" update.
 ### **Added**
 
 - rawConsole function in console file to set the terminal in raw or not.
-- cycleCount and Hz in Computer class
+- cycleCount and Hz in Computer class.
 
 ### **Changed**
 
 - test_com_io can now quit when the escape key is pressed.
 - main to use rawConsole in case 2 and 4.
-- main function to clear terminal in the start, case 3, case 4 , and end of the program.
+- main function to clear terminal in the start, case 3, case 4, and end of the program.
 - main function to use Hz and cycleCount of Computer.
 
 ### **Fixed**
 
-- warning about unsigned integer comparaison.
-- use rawConsole to fix a bug about input in linux terminal.
-- Keyboard get_Key function for linux and changed return type from char to int.
+- Warning about unsigned integer comparison.
+- Use rawConsole to fix a bug about input in Linux terminal.
+- Keyboard get_Key function for Linux and changed return type from char to int.
 
 -----------------
 
@@ -596,27 +637,27 @@ The "_Basic Computer_" update.
 
 ### **Added**
 
-- new devices that are:
-  - the RAM to store temporary data used by the computer.
-  - the Keyboard to get user inputs.
-  - the Screen to send outputs to the user.
-- a program name test_com_io.sasm to test new devices.
+- New devices that are:
+  - The RAM to store temporary data used by the computer.
+  - The Keyboard to get user inputs.
+  - The Screen to send outputs to the user.
+- A program name test_com_io.sasm to test new devices.
 
 ### **Changed**
 
 - main file by adding new case:
-  - case 2 to test Keyboard class
-  - case 3 to test and Screen class.
-  - case 4 to test the Computer with all Devices with the test_com_io program.
+  - Case 2 to test Keyboard class
+  - Case 3 to test and Screen class.
+  - Case 4 to test the Computer with all Devices with the test_com_io program.
 
 ### **Fixed**
 
-- Computer class print function that caused previous information to be reprint.
-- a bug in Keyboard class that caused the keyboard to get and send wrong data.
-- a bug in AssemblerCompiler about empty string.
+- Computer class print function that caused previous information to be reprinted.
+- A bug in Keyboard class that caused the keyboard to get and send wrong data.
+- A bug in AssemblerCompiler about empty string.
 - print function of the CPU to display register correctly.
 - print function of the Screen to display the screen correctly.
-- a bug in Device to intitalize data correctly.
+- A bug in Device to initialize data correctly.
 
 -----------------
 
@@ -624,18 +665,18 @@ The "_Basic Computer_" update.
 
 ### **Added**
 
-- the Device abstract class.
-- a global.hpp file with a global variable to print debug messages.
-- a file (console.hpp and console.cpp) allowing the terminal/console to understand the ANSI escape code if it is not already the case.
-- a print function to CPU class and Computer class.
+- The Device abstract class.
+- A global.hpp file with a global variable to print debug messages.
+- A file (console.hpp and console.cpp) allowing the terminal/console to understand the ANSI escape code if it is not already the case.
+- A print function to CPU class and Computer class.
 
 ## **Changed**
 
 - Computer class to handle multiple Device classes.
 - DISK class to extend Device class.
 - main Computer case to test if the Computer work with multiple devices.
-- the test file into two parts to be able to test several disks in the main function.
-- all classes and the main file to print debug information when the global variable for this effect is set.
+- The test file into two parts to be able to test several disks in the main function.
+- All classes and the main file to print debug information when the global variable for this effect is set.
 - main function to use console.hpp
 
 -----------------
@@ -644,7 +685,7 @@ The "_Basic Computer_" update.
 
 ### **Added**
 
-- the Computer class.
+- The Computer class.
 
 ## **Changed**
 
@@ -656,7 +697,7 @@ The "_Basic Computer_" update.
 
 ### **Added**
 
-- the DISK class that is used to store informations.
+- The DISK class that is used to store informations.
 
 ### **Changed**
 
@@ -668,19 +709,19 @@ The "_Basic Computer_" update.
 
 ### **Added**
 
-- test file, a compile version of test_logisim.sasm.
+- test file, a compiled version of test_logisim.sasm.
 
 ### **Changed**
 
-- the CPU case in main function.
+- The CPU case in main function.
 
 ### **Fixed**
 
-- a bug about zero register and random register not correctly update at each cycle.
+- A bug about zero register and random register not correctly update at each cycle.
 
 ### **Removed**
 
-- registers G, H, I and J from default configuration of AssemblerCompiler.
+- Registers G, H, I and J from default configuration of AssemblerCompiler.
 
 -----------------
 
@@ -688,7 +729,7 @@ The "_Basic Computer_" update.
 
 ### **Added**
 
-- the CPU class that emulate the S257-01 CPU (note: need to be tested).
+- The CPU class that emulate the S257-01 CPU (note: need to be tested).
 
 ### **Changed**
 
@@ -697,7 +738,7 @@ The "_Basic Computer_" update.
 
 ### **Fixed**
 
-- some warning about unsigned interger comparaison.
+- Some warning about unsigned integer comparison.
 
 -----------------
 
@@ -706,11 +747,11 @@ The "_Basic Computer_" update.
 ### **Added**
 
 - JMP instructions to testCompilerAllInstruction.
-- more instructions to be tested in test_logisim and MEM_INS_TEST.
+- More instructions to be tested in test_logisim and MEM_INS_TEST.
 
 ### **Changed**
 
-- the SCA is now called S257-01 (for Safyrus cpu model 257 version 01) and so SCA.circ is renamed as S257-01.circ.
+- The SCA is now called S257-01 (for Safyrus CPU model 257 version 01) and so SCA.circ is renamed as S257-01.circ.
 - SCA files are renamed as SASM (Safyrus ASeMbler) files.
 - architecture_info.txt and conception.txt
 
@@ -724,21 +765,21 @@ The "_Basic Computer_" update.
 
 ### **Added**
 
-- an argument type to AssemblerCompiler named EMPTY.
-- in testCompiler an instruction to test the EMPTY type.
+- An argument type to AssemblerCompiler named EMPTY.
+- In testCompiler an instruction to test the EMPTY type.
 - test_logisim.sac that tests the different instructions.
-- MEM_INS_TEST that tests instructions in logisim's ram format.
+- MEM_INS_TEST that tests instructions in Logisim's ram format.
 
 ### **Changed**
 
-- main to get from the user the path of the source code and compile program
-- AssemblerCompiler default configuration (add registers, R, G, H, I, J)
+- main to get from the user the path of the source code and compile program.
+- AssemblerCompiler default configuration (add registers, R, G, H, I, J).
 
 ### **Fixed**
 
-- bugs when converting to binary.
-- PLA_CU opcodes
-- SCA circuit
+- Bugs when converting to binary.
+- PLA_CU opcodes.
+- SCA circuit.
 
 ### **Removed**
 
@@ -752,8 +793,8 @@ The "_AssemblerCompiler_" update.
 
 ### **Added**
 
-- in AssemblerCompiler the saving of sac file into text files representing the binaries values of the program (note: requires more tests and cannot save all the information of the source file, like a label)
-- default registers value (A, B, C, D, E, F) in AssemblerCompiler default configuration
+- In AssemblerCompiler the saving of sac file into text files representing the binaries values of the program (note: requires more tests and cannot save all the information of the source file, like a label)
+- Default registers value (A, B, C, D, E, F) in AssemblerCompiler default configuration
 
 ### **Changed**
 
@@ -765,9 +806,9 @@ The "_AssemblerCompiler_" update.
 
 ### **Added**
 
-- the AssemblerCompiler can now detect instructions , arguments and check if they are correct (note: will have to check all cases).
-- in testCompiler correct and wrong instructions.
-- a file named testCompilerAllInstruction.sac to test if the compiler recognizes all correct instructions.
+- The AssemblerCompiler can now detect instructions, arguments and check if they are correct (note: will have to check all cases).
+- In testCompiler correct and wrong instructions.
+- A file named testCompilerAllInstruction.sac to test if the compiler recognizes all correct instructions.
 
 -----------------
 
@@ -775,11 +816,11 @@ The "_AssemblerCompiler_" update.
 
 ### **Added**
 
-- a default configuration (name of instructions, arguments and opcode values).
+- A default configuration (name of instructions, arguments and opcode values).
 
 ### **Changed**
 
-- data structure of AssemblerCompiler.
+- Data structure of AssemblerCompiler.
 
 -----------------
 
@@ -787,17 +828,17 @@ The "_AssemblerCompiler_" update.
 
 ### **Added**
 
-- in AssemblerCompiler comments detection.
-- multiple correct and wrong comments in testCompiler.
+- In AssemblerCompiler comments detection.
+- Multiple correct and wrong comments in testCompiler.
 
 ### **Changed**
 
-- data structure in AssemblerCompiler.
+- Data structure in AssemblerCompiler.
 
 ### **Fixed**
 
-- label detection in AssemblerCompiler.
-- comments detection in AssemblerCompiler.
+- Label detection in AssemblerCompiler.
+- Comments detection in AssemblerCompiler.
 
 -----------------
 
@@ -805,8 +846,8 @@ The "_AssemblerCompiler_" update.
 
 ### **Added**
 
-- in AssemblerCompiler the detection of labels, wrong labels.
-- in testCompiler correct and wrong labels.
+- In AssemblerCompiler the detection of labels, wrong labels.
+- In testCompiler correct and wrong labels.
 
 -----------------
 
@@ -814,8 +855,8 @@ The "_AssemblerCompiler_" update.
 
 ### **Added**
 
-- a gitignore to the c++ folder.
-- in AssemblerCompiler the opening, reading and closing of files.
+- A gitignore to the c++ folder.
+- In AssemblerCompiler the opening, reading and closing of files.
 
 ### **Changed**
 
@@ -829,7 +870,7 @@ The "_AssemblerCompiler_" update.
 
 ### **Changed**
 
-- rename AssemblerTranslate to AssemblerCompiler.
+- Rename AssemblerTranslate to AssemblerCompiler.
 - main message to "_Nothing here for now, just press enter and leave_".
 
 ### **Fixed**
@@ -846,20 +887,20 @@ The "_Logisim_" update.
 
 #### General
 
-- a LICENCE (GNU GENERAL PUBLIC LICENSE).
-- a .gitignore.
+- A LICENCE (GNU GENERAL PUBLIC LICENSE).
+- A .gitignore.
 
 #### Logisim
 
-- a SCA (Safyrus Computer Architecture) Logisim circuit.
-- a PLA_CU (Control Unit PLA configuration) file.
-- some test programs (MEM_TEST, MEM_TEST_BASE_INS).
-- notes about SCA (architecture_info.txt and conception.txt)
+- An SCA (Safyrus Computer Architecture) Logisim circuit.
+- A PLA_CU (Control Unit PLA configuration) file.
+- Some test programs (MEM_TEST, MEM_TEST_BASE_INS).
+- Notes about SCA (architecture_info.txt and conception.txt)
 
 #### C++
 
-- a build.bat.
-- a MAKEFILE.
-- a AssemblerTranslate class base structure. This class can convert (not for now) SAC (Safyrus Assembler Code) files to compile SAC files.
-- a basic hello world main file.
-- a testCompiler SAC program to test if the AssemblerTranslate will work.
+- A build.bat.
+- A MAKEFILE.
+- A AssemblerTranslate class base structure. This class can convert (not for now) SAC (Safyrus Assembler Code) files to compile SAC files.
+- A basic hello world main file.
+- A testCompiler SAC program to test if the AssemblerTranslate will work.

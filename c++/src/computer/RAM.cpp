@@ -12,7 +12,7 @@
 
 computer::RAM::RAM()
 {
-    type = DEVICE_TYPE::RAM;
+    type = "RAM";
     len = 0x0400;
     this->data = new uint8_t[len];
     this->hz = 0;
@@ -20,7 +20,7 @@ computer::RAM::RAM()
 
 computer::RAM::RAM(uint16_t size)
 {
-    type = DEVICE_TYPE::RAM;
+    type = "RAM";
     len = size;
     this->data = new uint8_t[len];
     this->hz = 0;
@@ -28,7 +28,7 @@ computer::RAM::RAM(uint16_t size)
 
 computer::RAM::RAM(uint16_t size, uint32_t hz)
 {
-    type = DEVICE_TYPE::RAM;
+    type = "RAM";
     len = size;
     this->data = new uint8_t[len];
     this->hz = hz;
@@ -43,6 +43,11 @@ void computer::RAM::reset()
 {
     delete[] this->data;
     this->data = new uint8_t[len];
+    for (uint16_t i = 0; i < len; i++)
+    {
+        data[i] = 0;
+    }
+    
 }
 
 
@@ -98,4 +103,9 @@ void computer::RAM::load(std::string filePath)
     {
         this->data[i % len] = vals[i];
     }
+}
+
+uint16_t computer::RAM::length()
+{
+    return len;
 }

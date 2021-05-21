@@ -1,6 +1,7 @@
 #include "computer/ROM.hpp"
 
 #include "utils/hexTxtToBin.hpp"
+#include "utils/console.hpp"
 
 #include <iostream>
 
@@ -12,7 +13,7 @@
 
 computer::ROM::ROM()
 {
-    type = DEVICE_TYPE::ROM;
+    type = "ROM";
     len = 0x0400;
     this->data = new uint8_t[len];
     this->hz = 0;
@@ -20,7 +21,7 @@ computer::ROM::ROM()
 
 computer::ROM::ROM(uint16_t size)
 {
-    type = DEVICE_TYPE::ROM;
+    type = "ROM";
     len = size;
     this->data = new uint8_t[len];
     this->hz = 0;
@@ -28,7 +29,7 @@ computer::ROM::ROM(uint16_t size)
 
 computer::ROM::ROM(uint16_t size, uint32_t hz)
 {
-    type = DEVICE_TYPE::ROM;
+    type = "ROM";
     len = size;
     this->data = new uint8_t[len];
     this->hz = hz;
@@ -49,6 +50,10 @@ void computer::ROM::run()
 
 void computer::ROM::set(uint16_t adr, uint8_t data)
 {
+    std::string str = "Can't set data " + data;
+    str += " at adr " + adr;
+    str += ". Reason: it is a READ ONLY Memory";
+    printDebug(str);
 }
 
 uint8_t computer::ROM::get(uint16_t adr)

@@ -13,7 +13,7 @@
 computer::CPU::CPU(std::shared_ptr<computer::Bus> bus) : Device()
 {
     threadWanted = false;
-    type = DEVICE_TYPE::CPU;
+    type = "CPU";
     this->bus = bus;
     cycle = 0;
     pc = 0;
@@ -31,7 +31,7 @@ computer::CPU::CPU(std::shared_ptr<computer::Bus> bus) : Device()
 computer::CPU::CPU(std::shared_ptr<computer::Bus> bus, bool threadWanted) : Device()
 {
     this->threadWanted = threadWanted;
-    type = DEVICE_TYPE::CPU;
+    type = "CPU";
     this->bus = bus;
     cycle = 0;
     pc = 0;
@@ -64,10 +64,17 @@ void computer::CPU::run()
         {
             if (pwr)
             {
-                if (!start)
+                if (!start || hasReset)
                 {
                     start = true;
-                    resetReg();
+                    if(!hasReset)
+                    {
+                        reset();
+                    }else
+                    {
+                        resetReg();
+                    }
+                    hasReset = false;
                     t.initStep(pc);
                 }
                 t.runStep();
@@ -98,6 +105,7 @@ void computer::CPU::set(uint16_t adr, uint8_t data)
 void computer::CPU::reset()
 {
     resetReg();
+    hasReset = true;
     if(bus != nullptr)
     {
         bus->reset();

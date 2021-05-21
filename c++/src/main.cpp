@@ -143,6 +143,7 @@ int main(int argc, char const *argv[])
     std::cin.ignore();
 
     // restore console
-    clearConsole();
+    if(!print_debug)
+        clearConsole();
     restoreConsole();
 }

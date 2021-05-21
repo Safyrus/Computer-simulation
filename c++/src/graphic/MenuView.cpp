@@ -11,68 +11,23 @@ graphic::MenuView::MenuView(std::shared_ptr<data::menu::Menu> menu)
         printError("MenuView: Cannot open font");
     }
     const_cast<sf::Texture &>(font.getTexture(6)).setSmooth(false);
-    x = 0;
-    y = 0;
-    w = 1;
-    h = 1;
-    scale = 1;
-    released = false;
-    pressed = false;
 }
 
 graphic::MenuView::~MenuView()
 {
 }
 
-void graphic::MenuView::setPos(int x, int y)
-{
-    this->x = x;
-    this->y = y;
-}
-
-void graphic::MenuView::setSize(int w, int h)
-{
-    if (w < 2)
-        w = 2;
-    if (h < 2)
-        h = 2;
-    this->w = w;
-    this->h = h;
-}
-
-void graphic::MenuView::setScale(float s)
-{
-    if(s <= 0)
-        s = 1;
-    this->scale = s;
-}
-
-void graphic::MenuView::setMousePos(int x, int y)
-{
-    mx = x;
-    my = y;
-    //std::cout << x << "  " << y << std::endl;
-}
-
-void graphic::MenuView::setMousePressed(bool pressed)
-{
-    this->pressed = pressed;
-    released = false;
-    //std::cout << "pressed" << std::endl;
-}
-
-void graphic::MenuView::setMouseReleased(bool released)
-{
-    this->released = released;
-    pressed = false;
-    //std::cout << "released" << std::endl;
-}
-
 void graphic::MenuView::draw(sf::RenderWindow &window)
 {
+    sf::Color textColor = sf::Color(0x56, 0x6c, 0x86);
+    sf::Color selectTextColor = sf::Color(0xf4, 0xf4, 0xf4);
+    sf::Color backColor = sf::Color(0xf4, 0xf4, 0xf4);
+    sf::Color selectColor = sf::Color(0x94, 0xb0, 0xc2);
+    sf::Color activeColor = sf::Color(0x56, 0x6c, 0x86);
+
     sf::RectangleShape rect;
     rect.setPosition(x, y);
-    rect.setFillColor(sf::Color(0xff, 0xec, 0x80));
+    rect.setFillColor(backColor);
     rect.setSize(sf::Vector2f(w, h));
 
     int fontHeight = 6;
@@ -80,10 +35,11 @@ void graphic::MenuView::draw(sf::RenderWindow &window)
     sf::Text text;
     text.setFont(font);
     text.setPosition(x, y);
-    text.setFillColor(sf::Color(0xff, 0xff, 0xff));
+    text.setFillColor(textColor);
     text.setCharacterSize(fontHeight);
 
     std::string str;
+    std::string strSelect;
     int nbChar = 0;
     int lastNbChar = 0;
     int x1 = x + (lastNbChar*fontWidth);
@@ -100,26 +56,35 @@ void graphic::MenuView::draw(sf::RenderWindow &window)
         {
             x1 = x + (lastNbChar*fontWidth);
             x2 = x + (nbChar*fontWidth);
-            cursorOnMenu = (mx >= x1 && mx <= x2 && mx <= w && my >= y && my <= y+h);
+            cursorOnMenu = (mx >= x && mx >= x1-(fontWidth/2) && mx < x2-(fontWidth/2) && mx < w && my >= y && my < y+h);
             selectedIndex = i;
+            strSelect = menu->getName(i);
         }
     }
     text.setString(str);
 
     window.draw(rect);
+    window.draw(text);
 
     if(cursorOnMenu)
     {
         //std::cout << "mouseOnMenu: " << x1 << " " << x2-x1 << std::endl;
-        rect.setPosition(x1, y);
-        rect.setFillColor(sf::Color(0xff, 0x80, 0x00));
-        rect.setSize(sf::Vector2f(x2-x1, h));
+        int posX = std::max(x, x1-(fontWidth/2));
+        int sizeW = (posX == x)?x2-x1-(fontWidth/2):x2-x1;
+        rect.setPosition(posX, y);
+        rect.setFillColor(selectColor);
+        rect.setSize(sf::Vector2f(sizeW, h));
+
+        text.setPosition(x1, y);
+        text.setFillColor(selectTextColor);
+        text.setString(strSelect);
         if(pressed)
         {
             menu->select(menu->getName(selectedIndex));
-            rect.setFillColor(sf::Color(0x60, 0x1b, 0x00));
+            rect.setFillColor(activeColor);
         }
         window.draw(rect);
+        window.draw(text);
     }
     if(released)
     {
@@ -129,6 +94,4 @@ void graphic::MenuView::draw(sf::RenderWindow &window)
         }
         released = false;
     }
-
-    window.draw(text);
 }

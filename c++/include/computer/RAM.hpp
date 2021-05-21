@@ -33,6 +33,7 @@ namespace computer
         void set(uint16_t adr, uint8_t data);
         uint8_t get(uint16_t adr);
         void load(std::string filePath);
+        uint16_t length();
     };
 } // namespace computer
 

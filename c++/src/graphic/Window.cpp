@@ -99,6 +99,35 @@ sf::View graphic::Window::fixRatioCenterView()
     return view;
 }
 
+void graphic::Window::loopSubWindows()
+{
+    for (unsigned int i = 0; i < subWindows.size(); i++)
+    {
+        std::shared_ptr<graphic::Window> subW = subWindows[i];
+        if (subW->run)
+        {
+            subW->loop();
+            subW->loopSubWindows();
+        }
+        else
+        {
+            subW->stopSubWindows();
+            subW->stop();
+            subWindows.erase(subWindows.begin() + i);
+        }
+    }
+}
+
+void graphic::Window::stopSubWindows()
+{
+    for (unsigned int i = 0; i < subWindows.size(); i++)
+    {
+        std::shared_ptr<graphic::Window> subW = subWindows[i];
+        subW->stopSubWindows();
+        subW->stop();
+    }
+}
+
 void graphic::Window::display()
 {
     run = true;
@@ -116,19 +145,7 @@ void graphic::Window::display()
     {
         std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
         loop();
-        for (unsigned int i = 0; i < subWindows.size(); i++)
-        {
-            std::shared_ptr<graphic::Window> subW = subWindows[i];
-            if (subW->run)
-            {
-                subW->loop();
-            }
-            else
-            {
-                subW->stop();
-                subWindows.erase(subWindows.begin() + i);
-            }
-        }
+        loopSubWindows();
         std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
         int delta = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
         int sleepFor = std::max(0, (1000/fps)-delta);
@@ -136,11 +153,7 @@ void graphic::Window::display()
     }
 
     // stoping
-    for (unsigned int i = 0; i < subWindows.size(); i++)
-    {
-        std::shared_ptr<graphic::Window> subW = subWindows[i];
-        subW->stop();
-    }
+    stopSubWindows();
     stop();
 
     run = false;

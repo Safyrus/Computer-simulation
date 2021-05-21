@@ -4,7 +4,7 @@
 
 computer::Bus::Bus()
 {
-    type = DEVICE_TYPE::BUS;
+    type = "BUS";
 }
 
 computer::Bus::~Bus()

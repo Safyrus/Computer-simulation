@@ -4,17 +4,12 @@ computer::Device::Device()
 {
     running = false;
     pwr = false;
-    type = DEVICE_TYPE::NOVAL;
+    type = "NO_VAL";
     name = "NO_NAME";
 }
 
 computer::Device::~Device()
 {
-}
-
-DEVICE_TYPE computer::Device::getType()
-{
-    return type;
 }
 
 void computer::Device::setPwr(bool pwr)
@@ -35,4 +30,9 @@ void computer::Device::setName(std::string name)
 std::string computer::Device::getName()
 {
     return name;
+}
+
+std::string computer::Device::getType()
+{
+    return type;
 }

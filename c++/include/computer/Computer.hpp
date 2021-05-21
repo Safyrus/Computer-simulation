@@ -19,12 +19,9 @@ namespace computer
 
         std::vector<computer::RunnableDevice*> runnables;
         computer::RunnableDevice* runCPU;
-
-        void addRAM(uint16_t startAdr, uint16_t endAdr);
-        void addROM(uint16_t startAdr, uint16_t endAdr);
-
     public:
         Computer();
+        Computer(bool test);
         ~Computer();
 
         void power();
@@ -34,9 +31,9 @@ namespace computer
         std::shared_ptr<computer::CPU> getCpu();
         std::shared_ptr<computer::Bus> getBus();
 
-        void addDevice(DEVICE_TYPE type, uint16_t startAdr, uint16_t endAdr);
-        void removeDevice(DEVICE_TYPE type, uint16_t startAdr, uint16_t endAdr);
-        std::shared_ptr<computer::Device> getDevice(DEVICE_TYPE type, uint16_t startAdr, uint16_t endAdr);
+        void addDevice(std::shared_ptr<computer::Device> device, uint16_t startAdr, uint16_t endAdr);
+        void removeDevice(std::string type, uint16_t startAdr, uint16_t endAdr);
+        std::shared_ptr<computer::Device> getDevice(std::string type, uint16_t startAdr, uint16_t endAdr);
     };
 } // namespace computer
 

@@ -26,6 +26,8 @@ namespace graphic
         void printDebug(std::string msg);
         void printError(std::string msg);
         sf::View fixRatioCenterView();
+        void loopSubWindows();
+        void stopSubWindows();
 
     public:
         bool run;

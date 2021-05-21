@@ -5,8 +5,8 @@
 
 #include "computer/Computer.hpp"
 #include "graphic/Window.hpp"
-#include "data/menu/Menu.hpp"
 #include "graphic/MenuView.hpp"
+#include "data/menu/Menu.hpp"
 
 namespace graphic
 {
@@ -21,8 +21,8 @@ namespace graphic
 
         std::shared_ptr<data::menu::Menu> menu;
         std::shared_ptr<MenuView> menuView;
-
         void makeMenu();
+        bool showMenu;
 
         void start();
         void stop();
