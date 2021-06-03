@@ -4,7 +4,7 @@
 #
 # part of the verifCPU program that test SET instructions
 #
-# need data space at 8008
+# need data space at 1808
 #
 ##############################
 
@@ -13,12 +13,13 @@
 # test SET REG REG REG
 ##############################
 
-    MOV $A 80
+    MOV $A 18
     MOV $B 08
     MOV $C 64
     SET $C $A $B
-    GET $A 80 08
+    GET $A 18 08
     CMP $A 64
+    AND $F $F FE
     JMP $D :SET_1_YES
     JMP $F :SET_1_NOP
 
@@ -35,9 +36,10 @@ SET_1_YES:
 
     MOV $B 08
     MOV $C 65
-    SET $C 80 $B
-    GET $A 80 08
+    SET $C 18 $B
+    GET $A 18 08
     CMP $A 65
+    AND $F $F FE
     JMP $D :SET_2_YES
     JMP $F :SET_2_NOP
 
@@ -52,11 +54,12 @@ SET_2_YES:
 # test SET REG REG VAL
 ##############################
 
-    MOV $A 80
+    MOV $A 18
     MOV $C 66
     SET $C $A 08
-    GET $A 80 08
+    GET $A 18 08
     CMP $A 66
+    AND $F $F FE
     JMP $D :SET_3_YES
     JMP $F :SET_3_NOP
 
@@ -72,9 +75,10 @@ SET_3_YES:
 ##############################
 
     MOV $C 67
-    SET $C 80 08
-    GET $A 80 08
+    SET $C 18 08
+    GET $A 18 08
     CMP $A 67
+    AND $F $F FE
     JMP $D :SET_4_YES
     JMP $F :SET_4_NOP
 
@@ -89,11 +93,12 @@ SET_4_YES:
 # test SET VAL REG REG
 ##############################
 
-    MOV $A 80
+    MOV $A 18
     MOV $B 08
     SET 68 $A $B
-    GET $A 80 08
+    GET $A 18 08
     CMP $A 68
+    AND $F $F FE
     JMP $D :SET_5_YES
     JMP $F :SET_5_NOP
 
@@ -109,9 +114,10 @@ SET_5_YES:
 ##############################
 
     MOV $B 08
-    SET 69 80 $B
-    GET $A 80 08
+    SET 69 18 $B
+    GET $A 18 08
     CMP $A 69
+    AND $F $F FE
     JMP $D :SET_6_YES
     JMP $F :SET_6_NOP
 
@@ -126,10 +132,11 @@ SET_6_YES:
 # test SET VAL REG VAL
 ##############################
 
-    MOV $A 80
+    MOV $A 18
     SET 6A $A 08
-    GET $A 80 08
+    GET $A 18 08
     CMP $A 6A
+    AND $F $F FE
     JMP $D :SET_7_YES
     JMP $F :SET_7_NOP
 
@@ -144,9 +151,10 @@ SET_7_YES:
 # test SET VAL VAL VAL
 ##############################
 
-    SET 6B 80 08
-    GET $A 80 08
+    SET 6B 18 08
+    GET $A 18 08
     CMP $A 6B
+    AND $F $F FE
     JMP $D :SET_8_YES
     JMP $F :SET_8_NOP
 

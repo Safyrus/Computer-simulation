@@ -18,6 +18,7 @@ MOV $A A
 MOV $B 3
 MOD $C $A $B
 CMP $C 1
+AND $F $F FE
 JMP $D :MOD_1_YES
 JMP $F :MOD_1_NOP
 
@@ -37,6 +38,7 @@ MOV $C 00
 MOV $B 3
 MOD $C A $B
 CMP $C 1
+AND $F $F FE
 JMP $D :MOD_2_YES
 JMP $F :MOD_2_NOP
 
@@ -56,6 +58,7 @@ MOV $C 00
 MOV $A A
 MOD $C $A 3
 CMP $C 1
+AND $F $F FE
 JMP $D :MOD_3_YES
 JMP $F :MOD_3_NOP
 
@@ -74,6 +77,7 @@ MOV $C 00
 
 MOD $C A 3
 CMP $C 1
+AND $F $F FE
 JMP $D :MOD_4_YES
 JMP $F :MOD_4_NOP
 

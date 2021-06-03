@@ -1,6 +1,6 @@
 #include "computer/Bus.hpp"
 
-#include <iostream>
+#include "utils/console.hpp"
 
 computer::Bus::Bus()
 {
@@ -41,18 +41,24 @@ uint8_t computer::Bus::get(uint16_t adr)
             return devices[i].get()->get(adr - startAdrs[i]);
         }
     }
-    std::cout << "no device found\n";
+    printError("Bus(get): no device found");
     return 0;
 }
 
 void computer::Bus::set(uint16_t adr, uint8_t data)
 {
+    bool set = false;
     for (unsigned int i = 0; i < devices.size(); i++)
     {
         if (startAdrs[i] <= adr && endAdrs[i] >= adr)
         {
             devices[i].get()->set(adr - startAdrs[i], data);
+            set = true;
         }
+    }
+    if(!set)
+    {
+        printError("Bus(set):no device found");
     }
 }
 

@@ -1,10 +1,16 @@
 #include "dynarecs/Buffer.hpp"
 
+#ifndef _WIN32
+#include <sys/mman.h>
+#include <stdio.h>
+#include <stdlib.h>
+#endif
+
 dynarec::Buffer::Buffer(uint16_t startAdr, uint16_t insCount)
 {
     this->startAdr = startAdr;
     this->insCount = insCount;
-}
+    }
 
 dynarec::Buffer::~Buffer()
 {
@@ -51,7 +57,21 @@ void dynarec::Buffer::write64(uint64_t data)
 
 int dynarec::Buffer::execute()
 {
+#ifndef _WIN32
+    unsigned char mya[mem.size()];
+    std::copy(mem.begin(), mem.end(), mya);
+    void *addr = (void*)((unsigned long)mya & ((0UL - 1UL) ^ 0xfff));/*get memory page*/
+    int ans = mprotect(addr, 1, PROT_READ|PROT_WRITE|PROT_EXEC);/*set page attributes*/
+    if (ans)
+    {
+        perror("mprotect");
+        exit(EXIT_FAILURE);
+    }
+
+    int (*func)(void) = ((int(*)(void))mya);
+#else
     int (*func)(void) = (int (*)(void)) & mem[0];
+#endif
     return func();
 }
 

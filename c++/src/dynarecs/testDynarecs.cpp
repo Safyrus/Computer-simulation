@@ -216,7 +216,7 @@ void testDeviceThread(std::string filePath, uint32_t hz)
 void testGraphicDynarec(std::string filePath, bool debug)
 {
     printDebug("Create MainWindow");
-    std::shared_ptr<graphic::MainWindow> app = std::make_shared<graphic::MainWindow>("S257 Dynamic Recompiler - Main Window", debug);
+    std::shared_ptr<graphic::MainWindow> app = std::make_shared<graphic::MainWindow>("S257 Dynamic Recompiler - Main Window", debug, filePath);
 
     //std::cout << "Load ComWinManager config" << std::endl;
     //app->loadConfig(filePath);

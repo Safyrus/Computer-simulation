@@ -6,7 +6,7 @@ ifeq ($(OS), Windows_NT)
     LIB        := lib/win
     BIN        := bin/Windows
 else
-    CXX_FLAGS  += -z execstack -fpermissive
+    CXX_FLAGS  += -fpermissive
     LIB        := lib/linux
     BIN        := bin/Linux
 endif

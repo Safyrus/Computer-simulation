@@ -11,7 +11,7 @@
 
 graphic::MainWindow::MainWindow()
 {
-    computer = std::make_shared<computer::Computer>(true);
+    computer = std::make_shared<computer::Computer>(true, "prog/verifCPU/verifCPU");
     windowName = "S257 Dynamic Recompiler - Main Window";
     computerWindowName = "S257 Dynamic Recompiler - Computer Window";
     width = 128;
@@ -22,7 +22,7 @@ graphic::MainWindow::MainWindow()
 
 graphic::MainWindow::MainWindow(std::string windowName)
 {
-    computer = std::make_shared<computer::Computer>(true);
+    computer = std::make_shared<computer::Computer>(true, "prog/verifCPU/verifCPU");
     this->windowName = windowName;
     computerWindowName = "S257 Dynamic Recompiler - Computer Window";
     width = 128;
@@ -31,9 +31,9 @@ graphic::MainWindow::MainWindow(std::string windowName)
     printDebug("Creation");
 }
 
-graphic::MainWindow::MainWindow(std::string windowName, bool debug)
+graphic::MainWindow::MainWindow(std::string windowName, bool debug, std::string prog)
 {
-    computer = std::make_shared<computer::Computer>(true);
+    computer = std::make_shared<computer::Computer>(true, prog);
     this->windowName = windowName;
     this->debug = debug;
     computerWindowName = "S257 Dynamic Recompiler - Computer Window";
@@ -144,7 +144,7 @@ void graphic::MainWindow::loop()
     // Clear screen
     window.clear(sf::Color(32, 32, 32));
 
-    std::shared_ptr<computer::RAM> ram = std::static_pointer_cast<computer::RAM>(computer->getDevice("RAM", 0x8000, 0x8FFF));
+    std::shared_ptr<computer::RAM> ram = std::static_pointer_cast<computer::RAM>(computer->getDevice("RAM", 0x1800, 0x1BFF));
     if (ram != nullptr)
     {
         //draw screen

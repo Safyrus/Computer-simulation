@@ -214,11 +214,13 @@ void dynarec::Emitter86::cmpToF()
     x86AND_Rimm(EDX, 0xfb);
     x86PopF();
     // lesser
-    x86JL(0x06);
+    x86JL(0x08);
+    x86PushF();
     x86AND_Rimm(EDX, 0xf7);
+    x86PopF();
     // carry
-    x86ADD_RtR(EAX, ECX);
-    x86JC(0x06);
+    //x86ADD_RtR(EAX, ECX);
+    x86JNC(0x06);
     x86AND_Rimm(EDX, 0xfe);
 
     // update F

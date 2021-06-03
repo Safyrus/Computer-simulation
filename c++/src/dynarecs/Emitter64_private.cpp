@@ -255,11 +255,13 @@ void dynarec::Emitter64::cmpToF()
     x64AND_Rimm(RDX, 0xfb);
     x64PopF();
     // lesser
-    x64JL(0x0d);
+    x64JL(0x0f);
+    x64PushF();
     x64AND_Rimm(RDX, 0xf7);
+    x64PopF();
     // carry
-    x64ADD_RtR(RAX, RCX);
-    x64JC(0x0d);
+    //x64ADD_RtR(RAX, RCX);
+    x64JNC(0x0d);
     x64AND_Rimm(RDX, 0xfe);
 
     // update F

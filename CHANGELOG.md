@@ -24,6 +24,37 @@ This project try to follow the [Semantic Versioning](https://semver.org/spec/v2.
 
 -----------------
 
+## **[0.6.6]** - _2021-06-03_
+
+### **Added**
+
+- asssemble.bat
+- A pins section in S257_info.
+- An updated version of the S257-01 Logisim CPU with it's PLA file.
+
+### **Changed**
+
+- run.bat to pass the file as an argument.
+- verifCPU to remove carry flag when not needed and SET at 1808h instead of 8008h.
+- The name of S257-01.circ to S257-01_old.circ
+- The name of PLA_CU.txt to PLA_CU_old.txt
+- Computer constructor to choose which file to load into the ROM.
+- The RAM size to 1Kb and address to 1800h.
+- The Bus error messages when communicating with nothing.
+
+### **Fixed**
+
+- The carry flag when using CMP to be set when src(unsigned) >= val(unsigned).
+- Translater SET and GET end block messages.
+- A wrong index for register C in S257_info.
+- Buffer execution not working for Linux.
+
+### **Removed**
+
+- Execstack flag in Makefile.
+
+-----------------
+
 ## **[0.6.5]** - _2021-05-21_
 
 ### **Added**

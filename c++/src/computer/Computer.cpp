@@ -23,7 +23,7 @@ computer::Computer::Computer()
     cpu->setPwr(false);
 }
 
-computer::Computer::Computer(bool test)
+computer::Computer::Computer(bool test, std::string prog)
 {
     printDebug("Create BUS");
     bus = std::make_shared<computer::Bus>();
@@ -36,11 +36,11 @@ computer::Computer::Computer(bool test)
     if(test)
     {
         std::shared_ptr<computer::ROM> rom = std::make_shared<computer::ROM>(0x1000);
-        std::shared_ptr<computer::RAM> ram = std::make_shared<computer::RAM>(0x1000);
+        std::shared_ptr<computer::RAM> ram = std::make_shared<computer::RAM>(0x0400);
         addDevice(rom, 0x0000, 0x0FFF);
-        addDevice(ram, 0x8000, 0x8FFF);
+        addDevice(ram, 0x1800, 0x1BFF);
         rom = std::static_pointer_cast<computer::ROM>(getDevice("ROM", 0x0000, 0x0FFF));
-        rom->load("prog/verifCPU/verifCPU");
+        rom->load(prog);
     }
 
     printDebug("Run CPU thread");

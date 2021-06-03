@@ -18,6 +18,7 @@ MOV $A 7
 MOV $B 6
 MUL $C $A $B
 CMP $C 2A
+AND $F $F FE
 JMP $D :MUL_1_YES
 JMP $F :MUL_1_NOP
 
@@ -37,6 +38,7 @@ MOV $C 00
 MOV $B 6
 MUL $C 7 $B
 CMP $C 2A
+AND $F $F FE
 JMP $D :MUL_2_YES
 JMP $F :MUL_2_NOP
 
@@ -56,6 +58,7 @@ MOV $C 00
 MOV $A 7
 MUL $C $A 6
 CMP $C 2A
+AND $F $F FE
 JMP $D :MUL_3_YES
 JMP $F :MUL_3_NOP
 
@@ -74,6 +77,7 @@ MOV $C 00
 
 MUL $C 7 6
 CMP $C 2A
+AND $F $F FE
 JMP $D :MUL_4_YES
 JMP $F :MUL_4_NOP
 

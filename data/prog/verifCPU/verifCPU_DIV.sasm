@@ -18,6 +18,7 @@ MOV $A A
 MOV $B 3
 DIV $C $A $B
 CMP $C 3
+AND $F $F FE
 JMP $D :DIV_1_YES
 JMP $F :DIV_1_NOP
 
@@ -37,6 +38,7 @@ MOV $C 00
 MOV $B 3
 DIV $C A $B
 CMP $C 3
+AND $F $F FE
 JMP $D :DIV_2_YES
 JMP $F :DIV_2_NOP
 
@@ -56,6 +58,7 @@ MOV $C 00
 MOV $A A
 DIV $C $A 3
 CMP $C 3
+AND $F $F FE
 JMP $D :DIV_3_YES
 JMP $F :DIV_3_NOP
 
@@ -74,6 +77,7 @@ MOV $C 00
 
 DIV $C A 3
 CMP $C 3
+AND $F $F FE
 JMP $D :DIV_4_YES
 JMP $F :DIV_4_NOP
 

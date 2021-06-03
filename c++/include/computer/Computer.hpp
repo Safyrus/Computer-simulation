@@ -21,7 +21,7 @@ namespace computer
         computer::RunnableDevice* runCPU;
     public:
         Computer();
-        Computer(bool test);
+        Computer(bool test, std::string prog);
         ~Computer();
 
         void power();

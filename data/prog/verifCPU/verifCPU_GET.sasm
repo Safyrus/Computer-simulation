@@ -20,6 +20,7 @@
     MOV $B 08
     GET $C $A $B
     CMP $C 1D
+    AND $F $F FE
     JMP $D :GET_1_YES
     JMP $F :GET_1_NOP
 
@@ -40,6 +41,7 @@ GET_1_YES:
     MOV $B 08
     GET $C 00 $B
     CMP $C 1D
+    AND $F $F FE
     JMP $D :GET_2_YES
     JMP $F :GET_2_NOP
 
@@ -60,6 +62,7 @@ GET_2_YES:
     MOV $A 00
     GET $C $A 08
     CMP $C 1D
+    AND $F $F FE
     JMP $D :GET_3_YES
     JMP $F :GET_3_NOP
 
@@ -79,6 +82,7 @@ GET_3_YES:
 
     GET $C 00 08
     CMP $C 1D
+    AND $F $F FE
     JMP $D :GET_4_YES
     JMP $F :GET_4_NOP
 

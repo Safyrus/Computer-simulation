@@ -92,7 +92,7 @@ dynarec::Emitter *dynarec::Translater::handlerEndBlock(int ret)
         return getBlock(cpu->pc);
 
     case CODE_SET: // execute SET instruction
-        debugStr << ansi(YELLOW_FG) << "|     CODE_SET: " << std::hex << ret << "set val at " << std::hex << std::setfill('0') << std::setw(4) << adrJmp << " to " << std::hex << std::setfill('0') << std::setw(2) << val << ansi(RESET);
+        debugStr << ansi(YELLOW_FG) << "|     CODE_SET: set val at " << std::hex << std::setfill('0') << std::setw(4) << adrJmp << " to " << std::hex << std::setfill('0') << std::setw(2) << (int)val << ansi(RESET);
         printDebug(debugStr.str());
 
         if (rawBus)
@@ -107,7 +107,7 @@ dynarec::Emitter *dynarec::Translater::handlerEndBlock(int ret)
         return getBlock(cpu->pc);
 
     case CODE_GET: // execute GET instruction
-        debugStr << ansi(YELLOW_FG) << "|     CODE_GET: get val at " << std::hex << std::setfill('0') << std::setw(4) << adrJmp << " to reg[" << std::hex << (int)val << "]" << ansi(RESET);
+        debugStr << ansi(YELLOW_FG) << "|     CODE_GET: get val " << std::hex << std::setfill('0') << std::setw(2) << (int)val << " at " << std::hex << std::setfill('0') << std::setw(4) << adrJmp << " to reg[" << std::hex << (int)val << "]" << ansi(RESET);
         printDebug(debugStr.str());
 
         if (rawBus)
