@@ -19,6 +19,4 @@ void testTranslater2(std::string filePath);
 
 void testDeviceThread(std::string filePath, uint32_t hz);
 
-void testGraphicDynarec(std::string filePath, bool debug);
-
 #endif // TESTDYNARECS_HPP

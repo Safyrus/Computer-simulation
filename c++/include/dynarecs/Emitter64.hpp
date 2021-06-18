@@ -21,6 +21,7 @@ namespace dynarec
         void x64DIV_R(x64REG src);
 
         void x64SHL(x64REG reg, uint8_t val, bool mode8 = true);
+        void x64SHR(x64REG reg, uint8_t val, bool mode8 = true);
         void x64OR_Rimm(x64REG reg, uint64_t val);
         void x64OR_RtR(x64REG dst, x64REG src, bool mode8 = true, bool extendBase = false, bool extendReg = false);
         void x64AND_Rimm(x64REG reg, uint64_t val);

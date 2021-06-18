@@ -12,11 +12,13 @@ namespace graphic
     private:
         std::shared_ptr<data::menu::Menu> menu;
         sf::Font font;
+        int scale;
     public:
         MenuView(std::shared_ptr<data::menu::Menu> menu);
         ~MenuView();
         
         void draw(sf::RenderWindow &window);
+        void setScale(int scale);
     };
 } // namespace graphic
 

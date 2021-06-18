@@ -1,6 +1,7 @@
 #include "computer/Computer.hpp"
 #include "computer/RAM.hpp"
 #include "computer/ROM.hpp"
+#include "computer/VPU.hpp"
 #include "computer/RunnableDevice.hpp"
 
 #include "utils/console.hpp"
@@ -35,12 +36,20 @@ computer::Computer::Computer(bool test, std::string prog)
 
     if(test)
     {
-        std::shared_ptr<computer::ROM> rom = std::make_shared<computer::ROM>(0x1000);
-        std::shared_ptr<computer::RAM> ram = std::make_shared<computer::RAM>(0x0400);
-        addDevice(rom, 0x0000, 0x0FFF);
-        addDevice(ram, 0x1800, 0x1BFF);
-        rom = std::static_pointer_cast<computer::ROM>(getDevice("ROM", 0x0000, 0x0FFF));
-        rom->load(prog);
+        std::shared_ptr<computer::ROM> rom4k = std::make_shared<computer::ROM>(0x1000);
+        std::shared_ptr<computer::ROM> rom2k = std::make_shared<computer::ROM>(0x0800);
+        std::shared_ptr<computer::RAM> ram1k = std::make_shared<computer::RAM>(0x0400);
+        std::shared_ptr<computer::RAM> ram8k = std::make_shared<computer::RAM>(0x2000);
+        std::shared_ptr<computer::RAM> ram16k = std::make_shared<computer::RAM>(0x4000);
+        std::shared_ptr<computer::VPU> vpu = std::make_shared<computer::VPU>(ram8k);
+        addDevice(rom4k, 0x0000, 0x0FFF);
+        addDevice(rom2k, 0x1000, 0x17FF);
+        addDevice(ram1k, 0x1800, 0x1BFF);
+        addDevice(ram8k, 0x2000, 0x3FFF);
+        addDevice(ram16k, 0x4000, 0x7FFF);
+        addDevice(vpu, 0x1C18, 0x1C1F);
+        rom4k = std::static_pointer_cast<computer::ROM>(getDevice("ROM", 0x0000, 0x0FFF));
+        rom4k->load(prog);
     }
 
     printDebug("Run CPU thread");

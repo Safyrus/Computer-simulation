@@ -21,6 +21,44 @@ This project try to follow the [Semantic Versioning](https://semver.org/spec/v2.
 ### **Work on**
 
 - graphics
+- hardware emulation
+
+-----------------
+
+## **[0.6.7]** - _2021-06-18_
+
+### **Added**
+
+- In FontImgToBin, a prefix for hex number.
+- A screen_fill program.
+- Some sh scripts (run, run-debug, assemble) for Linux.
+- The VPU device with its 4 display modes.
+- The VPU View.
+- A runMainWindow function in main.
+- A scale option for MenuView.
+- SHR instruction for x86 and x64 emitters.
+
+### **Changed**
+
+- TODO in README.
+- Logisim Saphyr-1 (added EXT chip and updated architecture).
+- S257_info flag information.
+- Computer test architecture.
+- Registers reset in CPU.
+- Default screen in MainWindow to the VPU screen.
+
+### **Fixed**
+
+- Makefile install for Linux.
+- Registers display in CPUWindow.
+- R register random value, to be more accurate with the 'RNG' of the S257-01.
+- Debug string made even when not printing.
+- Translater blocks not deleting when SET data.
+
+### **Removed**
+
+- In run.sh useless cd.
+- The testGraphicDynarec function.
 
 -----------------
 

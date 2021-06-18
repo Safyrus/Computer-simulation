@@ -119,6 +119,12 @@ void dynarec::Emitter86::x86SHL(x86REG reg, uint8_t val, bool mode8)
     buf.write8(val);
 }
 
+void dynarec::Emitter86::x86SHR(x86REG reg, uint8_t val, bool mode8)
+{
+    buf.write8(0xC1 - mode8);
+    buf.write8(x86ModRM(3, (x86REG)5, reg));
+    buf.write8(val);
+}
 
 /**************************************************/
 
@@ -174,14 +180,17 @@ void dynarec::Emitter86::x86RET()
 
 void dynarec::Emitter86::x86RAND()
 {
-    x86MOV_MtR((uint32_t)&cpu->reg[R], EAX);
-    x86MOV_Rimm(ECX, 1103515245);
-    x86MUL_R(ECX);
-    x86MOV_Rimm(ECX, 12345);
-    x86ADD_RtR(EAX, ECX);
-    x86AND_Rimm(EAX, 0xff);
-    x86MOV_RtM(EAX, (uint32_t)&cpu->reg[R]);
-
+    x86MOV_Rimm(EAX, 0);
+    x86MOV_RtM(EAX, (uint32_t)&cpu->reg[O]);
+    x86MOV_MtR((uint32_t)&cpu->reg[R], EAX, false);
+    x86MOV_RtR(EAX, ECX, false);
+    x86SHL(ECX, 5, false);
+    x86XOR_RtR(ECX, EAX, false);
+    x86AND_Rimm(ECX, 0x0020);
+    x86SHL(ECX, 4, false);
+    x86OR_RtR(EAX, ECX, false);
+    x86SHR(EAX, 1, false);
+    x86MOV_RtM(EAX, (uint32_t)&cpu->reg[R], false);
 }
 
 

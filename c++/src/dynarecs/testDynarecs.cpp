@@ -19,8 +19,6 @@
 #include "utils/hexTxtToBin.hpp"
 #include "utils/console.hpp"
 
-#include "graphic/MainWindow.hpp"
-
 void printCPU(std::shared_ptr<computer::CPU> cpu)
 {
     std::cout << ansi(CYAN_FG) << "cpu:\n  cycle=" << std::dec << std::setfill('0') << std::setw(8) << cpu->cycle << "  pc=" << std::hex << std::setfill('0') << std::setw(4) << cpu->pc << std::endl;
@@ -211,18 +209,4 @@ void testDeviceThread(std::string filePath, uint32_t hz)
     runRAM.stop();
     runRAM.join();
     std::cout << "RAM thread stop" << std::endl;
-}
-
-void testGraphicDynarec(std::string filePath, bool debug)
-{
-    printDebug("Create MainWindow");
-    std::shared_ptr<graphic::MainWindow> app = std::make_shared<graphic::MainWindow>("S257 Dynamic Recompiler - Main Window", debug, filePath);
-
-    //std::cout << "Load ComWinManager config" << std::endl;
-    //app->loadConfig(filePath);
-
-    printDebug("Run MainWindow");
-    app->display();
-
-    printDebug("End MainWindow");
 }

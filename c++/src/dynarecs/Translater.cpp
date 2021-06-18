@@ -39,7 +39,10 @@ void dynarec::Translater::deleteBlocks()
     {
         if (blocks[i] != nullptr)
         {
-            printDebug(ansi(WHITE_FG) + "delete block " + std::to_string(i));
+            if (print)
+            {
+                printDebug(ansi(WHITE_FG) + "delete block " + std::to_string(i));
+            }
             delete blocks[i];
             blocks[i] = nullptr;
         }
@@ -48,13 +51,49 @@ void dynarec::Translater::deleteBlocks()
 
 void dynarec::Translater::deleteBlocks(uint16_t adr)
 {
-    // TODO
+    if (print)
+    {
+        for (uint16_t i = 0; i < blockSize; i++)
+        {
+            uint16_t index = adr - i;
+            if(blocks[index] != nullptr)
+            {
+                printDebug(ansi(WHITE_FG) + "delete block " + std::to_string(index));
+                delete blocks[index];
+                blocks[index] = nullptr;
+            }
+        }
+    }
+    else
+    {
+        for (uint16_t i = 0; i < blockSize; i++)
+        {
+            int index = (uint16_t)(adr - i);
+            delete blocks[index];
+            blocks[index] = nullptr;
+        }
+    }
+
+    /*
+    for (unsigned int i = 0; i < blocks.size(); i++)
+    {
+        if (blocks[i] != nullptr && adr >= i && adr <= (uint16_t)(i+(blocks[i]->getInsCount()*4)))
+        {
+            if (print)
+            {
+                printDebug(ansi(WHITE_FG) + "delete block " + std::to_string(i));
+            }
+            delete blocks[i];
+            blocks[i] = nullptr;
+        }
+    }*/
 }
 
 dynarec::Emitter *dynarec::Translater::handlerEndBlock(int ret)
 {
     // print debug msg
-    printDebug(ansi(YELLOW_FG) + "| handler end block" + ansi(RESET));
+    if (print)
+        printDebug(ansi(YELLOW_FG) + "| handler end block" + ansi(RESET));
     std::stringstream debugStr;
 
     // decode value return from the block
@@ -66,54 +105,70 @@ dynarec::Emitter *dynarec::Translater::handlerEndBlock(int ret)
     switch (code)
     {
     case CODE_RET: // end of the program
-        printDebug(ansi(YELLOW_FG) + "|     CODE_RET: stopping cpu" + ansi(RESET));
+        if (print)
+            printDebug(ansi(YELLOW_FG) + "|     CODE_RET: stopping cpu" + ansi(RESET));
         running = false;
         cpu->setPwr(false);
         break;
 
     case CODE_RST: // reset the cpu
-        printDebug(ansi(YELLOW_FG) + "|     CODE_RST: resetting cpu" + ansi(RESET));
+        if (print)
+            printDebug(ansi(YELLOW_FG) + "|     CODE_RST: resetting cpu" + ansi(RESET));
         cpu->reset();
         return getBlock(cpu->pc);
         break;
 
     case CODE_JMP: // jump to an adress
-        debugStr << ansi(YELLOW_FG) << "|     CODE_JMP: jump to " << std::hex << std::setfill('0') << std::setw(4) << adrJmp << ansi(RESET);
-        printDebug(debugStr.str());
+        if (print)
+        {
+            debugStr << ansi(YELLOW_FG) << "|     CODE_JMP: jump to " << std::hex << std::setfill('0') << std::setw(4) << adrJmp << ansi(RESET);
+            printDebug(debugStr.str());
+        }
         cpu->reg[J1] = ((cpu->pc & 0xff00) >> 8);
         cpu->reg[J2] = (cpu->pc & 0xff);
         cpu->pc = adrJmp;
         return getBlock(cpu->pc);
 
     case CODE_NXT: // executing the next block
-        debugStr << ansi(YELLOW_FG) << "|     CODE_NXT: procede to next block at " << std::hex << std::setfill('0') << std::setw(4) << cpu->pc << ansi(RESET);
-        printDebug(debugStr.str());
+        if (print)
+        {
+            debugStr << ansi(YELLOW_FG) << "|     CODE_NXT: procede to next block at " << std::hex << std::setfill('0') << std::setw(4) << cpu->pc << ansi(RESET);
+            printDebug(debugStr.str());
+        }
 
         return getBlock(cpu->pc);
 
     case CODE_SET: // execute SET instruction
-        debugStr << ansi(YELLOW_FG) << "|     CODE_SET: set val at " << std::hex << std::setfill('0') << std::setw(4) << adrJmp << " to " << std::hex << std::setfill('0') << std::setw(2) << (int)val << ansi(RESET);
-        printDebug(debugStr.str());
+        if (print)
+        {
+            debugStr << ansi(YELLOW_FG) << "|     CODE_SET: set val at " << std::hex << std::setfill('0') << std::setw(4) << adrJmp << " to " << std::hex << std::setfill('0') << std::setw(2) << (int)val << ansi(RESET);
+            printDebug(debugStr.str());
+        }
 
         if (rawBus)
         {
             cpu->setBusData(adrJmp, val);
-        }else
+        }
+        else
         {
             cpu->set(adrJmp, val);
         }
 
-        // TODO erase blocks with the adrJmp
+        deleteBlocks(adrJmp);
         return getBlock(cpu->pc);
 
     case CODE_GET: // execute GET instruction
-        debugStr << ansi(YELLOW_FG) << "|     CODE_GET: get val " << std::hex << std::setfill('0') << std::setw(2) << (int)val << " at " << std::hex << std::setfill('0') << std::setw(4) << adrJmp << " to reg[" << std::hex << (int)val << "]" << ansi(RESET);
-        printDebug(debugStr.str());
+        if (print)
+        {
+            debugStr << ansi(YELLOW_FG) << "|     CODE_GET: get val " << std::hex << std::setfill('0') << std::setw(2) << (int)val << " at " << std::hex << std::setfill('0') << std::setw(4) << adrJmp << " to reg[" << std::hex << (int)val << "]" << ansi(RESET);
+            printDebug(debugStr.str());
+        }
 
         if (rawBus)
         {
             cpu->reg[val] = cpu->getBusData(adrJmp);
-        }else
+        }
+        else
         {
             cpu->reg[val] = cpu->get(adrJmp);
         }
@@ -152,10 +207,11 @@ void dynarec::Translater::waitInst()
 
     if (cpu->hz != 0)
     {
-        // if the cpu frequency had change
+        // if the cpu frequency has change
         if (lastHz != cpu->hz)
         {
-            printDebug(ansi(WHITE_FG) + "reset time");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "reset time");
 
             // reset blocks
             startTime = std::chrono::steady_clock::now();
@@ -176,9 +232,12 @@ void dynarec::Translater::waitInst()
         uint64_t nbInstTime = (timeSinceStart.count()) / (1000000000 / cpu->hz);
 
         // print debug the isntructions time
-        debugStr.str("");
-        debugStr << ansi(WHITE_FG) << "nbInstTime: " << std::dec << nbInstTime << "  cycle:" << cpu->cycle;
-        printDebug(debugStr.str());
+        if (print)
+        {
+            debugStr.str("");
+            debugStr << ansi(WHITE_FG) << "nbInstTime: " << std::dec << nbInstTime << "  cycle:" << cpu->cycle;
+            printDebug(debugStr.str());
+        }
 
         // if we had execute too many instruction compare to the total "instruction time"
         if (cpu->cycle > nbInstTime)
@@ -187,9 +246,12 @@ void dynarec::Translater::waitInst()
             std::chrono::nanoseconds waiting((cpu->cycle - nbInstTime) * (1000000000 / cpu->hz));
 
             // print debug how many nansecond we wait
-            debugStr.str("");
-            debugStr << ansi(WHITE_FG) << "wait: " << waiting.count() << "ns";
-            printDebug(debugStr.str());
+            if (print)
+            {
+                debugStr.str("");
+                debugStr << ansi(WHITE_FG) << "wait: " << waiting.count() << "ns";
+                printDebug(debugStr.str());
+            }
 
             // wait
             std::this_thread::sleep_for(waiting);
@@ -207,27 +269,39 @@ int dynarec::Translater::runStep()
     std::stringstream debugStr;
     int res = 0;
 
+    auto t1 = std::chrono::high_resolution_clock::now();
     // timing to wait between each block
     waitInst();
 
+    auto t2 = std::chrono::high_resolution_clock::now();
+    auto ns_int = std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1);
+    //std::cout << ns_int.count() << std::endl;
+
     // print debug what adr we will run
-    debugStr.str("");
-    debugStr << ansi(WHITE_FG) << "| run adr " << std::hex << std::setfill('0') << std::setw(4) << cpu->pc << " ...";
-    printDebug(debugStr.str());
+    if (print)
+    {
+        debugStr.str("");
+        debugStr << ansi(WHITE_FG) << "| run adr " << std::hex << std::setfill('0') << std::setw(4) << cpu->pc << " ...";
+        printDebug(debugStr.str());
+    }
 
     if (e != nullptr)
     {
         // print debug what block we execute
-        debugStr.str("");
-        debugStr << ansi(WHITE_FG) << "|     Execute block adr " << std::hex << std::setfill('0') << std::setw(4) << e->getStartAdr() << " with " << e->getInsCount() << " ins";
-        printDebug(debugStr.str());
+        if (print)
+        {
+            debugStr.str("");
+            debugStr << ansi(WHITE_FG) << "|     Execute block adr " << std::hex << std::setfill('0') << std::setw(4) << e->getStartAdr() << " with " << e->getInsCount() << " ins";
+            printDebug(debugStr.str());
+        }
 
         //execute the block
         res = e->execute();
 
         // update cpu registers
-        cpu->pc += (e->getInsCount()) * 4;
-        cpu->cycle += e->getInsCount();
+        uint16_t insCount = e->getInsCount();
+        cpu->pc += insCount * 4;
+        cpu->cycle += insCount;
     }
     else
     {
@@ -235,11 +309,13 @@ int dynarec::Translater::runStep()
         res = CODE_ERR;
 
         // print debug that we have no Emitter
-        printDebug(ansi(RED_FG) + "| /!\\ ERROR: Emitter null" + ansi(RESET));
+        if (print)
+            printDebug(ansi(RED_FG) + "| /!\\ ERROR: Emitter null" + ansi(RESET));
     }
 
     // print the cpu state after the block execution
-    printCPUState();
+    if (print)
+        printCPUState();
 
     // handle the response of the block
     e = handlerEndBlock(res);

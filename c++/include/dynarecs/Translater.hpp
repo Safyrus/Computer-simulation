@@ -40,6 +40,8 @@ namespace dynarec
         static const uint8_t CODE_GET = 6;
         static const uint8_t CODE_RST = 7;
 
+        bool print;
+
         Translater(std::shared_ptr<computer::CPU> cpu, bool rawBus);
         ~Translater();
 

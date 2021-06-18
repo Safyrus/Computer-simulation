@@ -164,6 +164,16 @@ void dynarec::Emitter64::x64SHL(x64REG reg, uint8_t val, bool mode8)
     buf.write8(val);
 }
 
+void dynarec::Emitter64::x64SHR(x64REG reg, uint8_t val, bool mode8)
+{
+    if(!mode8)
+    {
+        buf.write8(0x48);
+    }
+    buf.write8(0xC1 - mode8);
+    buf.write8(x64ModRM(3, (x64REG)5, reg));
+    buf.write8(val);
+}
 
 /**************************************************/
 
@@ -219,13 +229,17 @@ void dynarec::Emitter64::x64RET()
 
 void dynarec::Emitter64::x64RAND()
 {
-    x64MOV_MtR((uint64_t)&cpu->reg[R], RAX);
-    x64MOV_Rimm(RCX, 1103515245);
-    x64MUL_R(RCX);
-    x64MOV_Rimm(RCX, 12345);
-    x64ADD_RtR(RAX, RCX);
-    x64AND_Rimm(RAX, 0xff);
-    x64MOV_RtM(RAX, (uint64_t)&cpu->reg[R]);
+    x64MOV_Rimm(RAX, 0);
+    x64MOV_RtM(RAX, (uint64_t)&cpu->reg[O]);
+    x64MOV_MtR((uint64_t)&cpu->reg[R], RAX, false);
+    x64MOV_RtR(RAX, RCX, false);
+    x64SHL(RCX, 5, false);
+    x64XOR_RtR(RCX, RAX, false);
+    x64AND_Rimm(RCX, 0x0020);
+    x64SHL(RCX, 4, false);
+    x64OR_RtR(RAX, RCX, false);
+    x64SHR(RAX, 1, false);
+    x64MOV_RtM(RAX, (uint64_t)&cpu->reg[R], false);
 }
 
 

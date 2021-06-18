@@ -6,6 +6,7 @@
 #include "computer/Computer.hpp"
 #include "graphic/Window.hpp"
 #include "graphic/MenuView.hpp"
+#include "graphic/ScreenVPUView.hpp"
 #include "data/menu/Menu.hpp"
 
 namespace graphic
@@ -23,6 +24,8 @@ namespace graphic
         std::shared_ptr<MenuView> menuView;
         void makeMenu();
         bool showMenu;
+
+        std::shared_ptr<graphic::ScreenVPUView> screenVpu;
 
         void start();
         void stop();

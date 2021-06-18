@@ -45,10 +45,11 @@ To learn about the custom architecture of the S257 CPU go into the note folder a
 - More verification in verifCPU.
 - Correct any grammar or spelling mistake in CHANGELOG and other files.
 - Add comments.
+- Optimize cycles.
+- Some assembler features.
+- Finish Saphyr-I architecture.
 
 - Graphics 2.0 with multiple things:
-  - menu
-  - run
   - help
   - a new window for each device
   - action to change computer

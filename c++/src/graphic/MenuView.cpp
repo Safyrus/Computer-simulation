@@ -6,6 +6,7 @@
 graphic::MenuView::MenuView(std::shared_ptr<data::menu::Menu> menu)
 {
     this->menu = menu;
+    scale = 1;
     if (!font.loadFromFile("pix46.ttf"))
     {
         printError("MenuView: Cannot open font");
@@ -25,13 +26,15 @@ void graphic::MenuView::draw(sf::RenderWindow &window)
     sf::Color selectColor = sf::Color(0x94, 0xb0, 0xc2);
     sf::Color activeColor = sf::Color(0x56, 0x6c, 0x86);
 
+    int width = w*scale;
+    int height = h*scale;
     sf::RectangleShape rect;
     rect.setPosition(x, y);
     rect.setFillColor(backColor);
-    rect.setSize(sf::Vector2f(w, h));
+    rect.setSize(sf::Vector2f(width, height));
 
-    int fontHeight = 6;
-    int fontWidth = 4;
+    int fontHeight = 6*scale;
+    int fontWidth = 4*scale;
     sf::Text text;
     text.setFont(font);
     text.setPosition(x, y);
@@ -56,7 +59,7 @@ void graphic::MenuView::draw(sf::RenderWindow &window)
         {
             x1 = x + (lastNbChar*fontWidth);
             x2 = x + (nbChar*fontWidth);
-            cursorOnMenu = (mx >= x && mx >= x1-(fontWidth/2) && mx < x2-(fontWidth/2) && mx < w && my >= y && my < y+h);
+            cursorOnMenu = (mx >= x && mx >= x1-(fontWidth/2) && mx < x2-(fontWidth/2) && mx < width && my >= y && my < y+height);
             selectedIndex = i;
             strSelect = menu->getName(i);
         }
@@ -73,7 +76,7 @@ void graphic::MenuView::draw(sf::RenderWindow &window)
         int sizeW = (posX == x)?x2-x1-(fontWidth/2):x2-x1;
         rect.setPosition(posX, y);
         rect.setFillColor(selectColor);
-        rect.setSize(sf::Vector2f(sizeW, h));
+        rect.setSize(sf::Vector2f(sizeW, height));
 
         text.setPosition(x1, y);
         text.setFillColor(selectTextColor);
@@ -93,5 +96,14 @@ void graphic::MenuView::draw(sf::RenderWindow &window)
             menu->execute();
         }
         released = false;
+    }
+}
+
+void graphic::MenuView::setScale(int scale)
+{
+    if(scale > 0)
+    {
+        this->scale = scale;
+        const_cast<sf::Texture &>(font.getTexture(6*scale)).setSmooth(false);
     }
 }

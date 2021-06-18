@@ -104,10 +104,15 @@ void graphic::CPUWindow::loop()
     txt << "  HZ   : " << cpu->hz << "\n";
     txt << "  CYCLE: " << cpu->cycle << "\n";
     txt << "  ADR  : " << std::hex << std::setfill('0') << std::setw(4) << cpu->pc << "\n";
-    txt << "  REG  : O  A  B  C  D  E  F  R  J1 J2 G0 G1 G2 G3 G4 G5\n         ";
-    for (unsigned int i = 0; i < 16; i++)
+    txt << "  REG  : O  A  B  C  D  E  F  R\n         ";
+    for (unsigned int i = 0; i < 8; i++)
     {
-        txt << std::hex << std::uppercase << std::setfill('0') << std::setw(2) << (int)cpu->reg[i] << " ";
+        txt << std::hex << std::uppercase << std::setfill('0') << std::setw(2) << (int)(cpu->reg[i]&0xFF) << " ";
+    }
+    txt << "\n         J1 J2 G0 G1 G2 G3 G4 G5\n         ";
+    for (unsigned int i = 0; i < 8; i++)
+    {
+        txt << std::hex << std::uppercase << std::setfill('0') << std::setw(2) << (int)(cpu->reg[i+8]&0xFF) << " ";
     }
 
     // display the cpu infos

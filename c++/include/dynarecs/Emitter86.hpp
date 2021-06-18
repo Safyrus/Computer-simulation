@@ -21,6 +21,7 @@ namespace dynarec
         void x86DIV_R(x86REG src);
 
         void x86SHL(x86REG reg, uint8_t val, bool mode8 = true);
+        void x86SHR(x86REG reg, uint8_t val, bool mode8 = true);
         void x86OR_Rimm(x86REG reg, uint32_t val);
         void x86OR_RtR(x86REG dst, x86REG src, bool mode8 = true);
         void x86AND_Rimm(x86REG reg, uint32_t val);

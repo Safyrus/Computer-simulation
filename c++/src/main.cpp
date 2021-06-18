@@ -27,7 +27,18 @@
 
 #include "dynarecs/testDynarecs.hpp"
 
+#include "graphic/MainWindow.hpp"
 
+void runMainWindow(bool print_debug, std::string filePath)
+{
+    printDebug("Create MainWindow");
+    std::shared_ptr<graphic::MainWindow> app = std::make_shared<graphic::MainWindow>("S257 Dynamic Recompiler - Main Window", print_debug, filePath);
+    //std::cout << "Load ComWinManager config" << std::endl;
+    //app->loadConfig(filePath);
+    printDebug("Run MainWindow");
+    app->display();
+    printDebug("End MainWindow");
+}
 
 int main(int argc, char const *argv[])
 {
@@ -104,7 +115,8 @@ int main(int argc, char const *argv[])
             testDeviceThread(filePath, hz);
             std::cout << "\n###########################\n";
         }
-        testGraphicDynarec(filePath, print_debug);
+
+        runMainWindow(print_debug, filePath);
         break;
 
     case 3: // old sasm compiler
@@ -143,7 +155,7 @@ int main(int argc, char const *argv[])
     std::cin.ignore();
 
     // restore console
-    if(!print_debug)
+    if (!print_debug)
         clearConsole();
     restoreConsole();
 }

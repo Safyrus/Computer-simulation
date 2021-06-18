@@ -1,0 +1,30 @@
+# ####################
+# # For the Saphyr I #
+# ####################
+#
+# Fill the VRAM with random value
+# and change VPU mode each time
+
+MOV $A 00
+MOV $B 20
+MOV $C 00
+SET 03 00 01
+SCREEN_FILL:
+    SET $R $B $A
+    ADD $A $A 01
+    CMP $A 01
+    AND $F $F 01
+    JMP 01 :SCREEN_FILL
+    ADD $B $B 01
+    # CMP $B 25
+    CMP $B 40
+    AND $F $F FE
+    JMP 08 :SCREEN_FILL
+    MOV $B 20
+    SET $C 1C 18
+    ADD $C $C 01
+    CMP $C 04
+    AND $F $F FE
+    JMP 08 :SCREEN_FILL
+    MOV $C 00
+    JMP $F :SCREEN_FILL

@@ -127,10 +127,10 @@ flag: xxxxLEGC
 meaning:
 
 - x : nothing
-- L : Lesser than
+- L : Lesser than (signed)
 - E : Equal to
-- G : Greater than
-- C : Carry
+- G : Greater than (signed)
+- C : Carry | Greater or equal to (unsigned)
 
 <br/>
 

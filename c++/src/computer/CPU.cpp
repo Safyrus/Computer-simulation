@@ -10,18 +10,15 @@
 #include "mingw.thread.h"
 #endif
 
+#include "global.hpp"
+
 computer::CPU::CPU(std::shared_ptr<computer::Bus> bus) : Device()
 {
     threadWanted = false;
     type = "CPU";
     this->bus = bus;
-    cycle = 0;
-    pc = 0;
     hz = 0;
-    for (unsigned int i = 0; i < 16; i++)
-    {
-        reg[i] = 0;
-    }
+    resetReg();
     for (unsigned int i = 0; i < 1024 * 64; i++)
     {
         rawBus[i] = 0;
@@ -33,13 +30,8 @@ computer::CPU::CPU(std::shared_ptr<computer::Bus> bus, bool threadWanted) : Devi
     this->threadWanted = threadWanted;
     type = "CPU";
     this->bus = bus;
-    cycle = 0;
-    pc = 0;
     hz = 0;
-    for (unsigned int i = 0; i < 16; i++)
-    {
-        reg[i] = 0;
-    }
+    resetReg();
     for (unsigned int i = 0; i < 1024 * 64; i++)
     {
         rawBus[i] = 0;
@@ -53,6 +45,7 @@ computer::CPU::~CPU()
 void computer::CPU::run()
 {
     dynarec::Translater t(shared_from_this(), false);
+    t.print = print_debug;
     if (!threadWanted)
     {
         t.run(pc);
@@ -120,7 +113,7 @@ void computer::CPU::resetReg()
     {
         reg[i] = 0;
     }
-    reg[R] = rand();
+    reg[R] = 0x100;
 }
 
 void computer::CPU::setPwr(bool pwr)

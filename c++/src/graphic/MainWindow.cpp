@@ -2,7 +2,7 @@
 
 #include "graphic/MainWindow.hpp"
 #include "graphic/ComputerWindow.hpp"
-#include "graphic/ScreenSimpleView.hpp"
+//#include "graphic/ScreenSimpleView.hpp"
 
 #include "data/menu/MenuActionTest.hpp"
 #include "data/menu/MenuActionOpenWindow.hpp"
@@ -14,8 +14,8 @@ graphic::MainWindow::MainWindow()
     computer = std::make_shared<computer::Computer>(true, "prog/verifCPU/verifCPU");
     windowName = "S257 Dynamic Recompiler - Main Window";
     computerWindowName = "S257 Dynamic Recompiler - Computer Window";
-    width = 128;
-    height = 128;
+    width = 256;
+    height = 256;
     showMenu = true;
     printDebug("Creation");
 }
@@ -25,8 +25,8 @@ graphic::MainWindow::MainWindow(std::string windowName)
     computer = std::make_shared<computer::Computer>(true, "prog/verifCPU/verifCPU");
     this->windowName = windowName;
     computerWindowName = "S257 Dynamic Recompiler - Computer Window";
-    width = 128;
-    height = 128;
+    width = 256;
+    height = 256;
     showMenu = true;
     printDebug("Creation");
 }
@@ -37,8 +37,8 @@ graphic::MainWindow::MainWindow(std::string windowName, bool debug, std::string 
     this->windowName = windowName;
     this->debug = debug;
     computerWindowName = "S257 Dynamic Recompiler - Computer Window";
-    width = 128;
-    height = 128;
+    width = 256;
+    height = 256;
     showMenu = true;
     printDebug("Creation");
 }
@@ -57,6 +57,7 @@ void graphic::MainWindow::makeMenu()
     menuView = std::make_shared<graphic::MenuView>(menu);
     menuView->setPos(0, 0);
     menuView->setSize(width, 6);
+    menuView->setScale(2);
 }
 
 void graphic::MainWindow::start()
@@ -85,6 +86,10 @@ void graphic::MainWindow::start()
     rect.setSize(sf::Vector2f(width, height));
 
     makeMenu();
+
+    std::shared_ptr<computer::VPU> vpu = std::static_pointer_cast<computer::VPU>(computer->getDevice("VPU", 0x1C18, 0x1C1F));
+    screenVpu = std::make_shared<graphic::ScreenVPUView>(vpu);
+    screenVpu->setSize(256, 256);
 
     window.setView(fixRatioCenterView());
 }
@@ -144,7 +149,8 @@ void graphic::MainWindow::loop()
     // Clear screen
     window.clear(sf::Color(32, 32, 32));
 
-    std::shared_ptr<computer::RAM> ram = std::static_pointer_cast<computer::RAM>(computer->getDevice("RAM", 0x1800, 0x1BFF));
+    /*
+    std::shared_ptr<computer::RAM> ram = std::static_pointer_cast<computer::RAM>(computer->getDevice("RAM", 0x2000, 0x3FFF));
     if (ram != nullptr)
     {
         //draw screen
@@ -160,6 +166,10 @@ void graphic::MainWindow::loop()
         window.draw(rect);
         window.draw(text);
     }
+    */
+    //draw vpu screen
+    screenVpu->setPos(0, 0);
+    screenVpu->draw(window);
 
     // draw menu
     if (showMenu)

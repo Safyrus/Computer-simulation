@@ -26,7 +26,7 @@ namespace computer
 
     public:
         uint16_t pc;
-        uint8_t reg[16];
+        uint16_t reg[16];
         uint32_t hz;
         uint64_t cycle;
 

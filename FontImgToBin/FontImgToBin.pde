@@ -10,6 +10,7 @@ int size = ((sizeX*fileX) * (sizeY*fileY))/8;
 int line = 3;
 String data[] = new String[size];
 int count = 0;
+boolean ox = true;
 
 void settings()
 {
@@ -77,8 +78,15 @@ void setup()
       print("  ");
       s += "  ";
     }
-    print(data[i] + " ");
-    s += data[i] + " ";
+    if(ox)
+    {
+      print("0x" + data[i] + ", ");
+      s += "0x" + data[i] + ", ";
+    }else
+    {
+      print(data[i] + " ");
+      s += data[i] + " ";
+    }
   }
   newData[count] = s;
 
