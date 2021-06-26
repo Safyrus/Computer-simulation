@@ -1,10 +1,13 @@
 #include "computer/Bus.hpp"
 
+#include <iomanip>
+
 #include "utils/console.hpp"
 
 computer::Bus::Bus()
 {
     type = "BUS";
+    name = "BUS";
 }
 
 computer::Bus::~Bus()
@@ -41,7 +44,9 @@ uint8_t computer::Bus::get(uint16_t adr)
             return devices[i].get()->get(adr - startAdrs[i]);
         }
     }
-    printError("Bus(get): no device found");
+    std::stringstream err;
+    err << "Bus(get): no device found at " << std::hex << std::setfill('0') << std::setw(4) << adr;
+    printError(err.str());
     return 0;
 }
 
@@ -56,9 +61,11 @@ void computer::Bus::set(uint16_t adr, uint8_t data)
             set = true;
         }
     }
-    if(!set)
+    if (!set)
     {
-        printError("Bus(set):no device found");
+        std::stringstream err;
+        err << "Bus(set): no device found at " << std::hex << std::setfill('0') << std::setw(4) << adr;
+        printError(err.str());
     }
 }
 

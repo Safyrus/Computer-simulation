@@ -3,7 +3,7 @@
 
 #include "graphic/Window.hpp"
 
-#include "computer/Computer.hpp"
+#include "computer/CPU.hpp"
 
 namespace graphic
 {
@@ -18,6 +18,7 @@ namespace graphic
         void start();
         void stop();
         void loop();
+
     public:
         CPUWindow(std::shared_ptr<computer::CPU> cpu);
         CPUWindow(std::shared_ptr<computer::CPU> cpu, std::string windowName);

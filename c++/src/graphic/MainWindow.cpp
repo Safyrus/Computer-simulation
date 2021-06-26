@@ -49,11 +49,20 @@ graphic::MainWindow::~MainWindow()
 
 void graphic::MainWindow::makeMenu()
 {
+    std::shared_ptr<data::menu::Menu> subSubMenu = std::make_shared<data::menu::Menu>();
+    subSubMenu->addItem("789", std::make_shared<data::menu::MenuActionTest>("789"));
+    subSubMenu->addItem("456", std::make_shared<data::menu::MenuActionTest>("456"));
+
+    std::shared_ptr<data::menu::Menu> subMenu = std::make_shared<data::menu::Menu>();
+    subMenu->addItem("123", std::make_shared<data::menu::MenuActionTest>("123"));
+    subMenu->addItem("MENU", subSubMenu);
+
     menu = std::make_shared<data::menu::Menu>();
-    menu->addItem("COM", std::make_shared<data::menu::MenuActionOpenWindow>(shared_from_this(), computerWindowName));
+    menu->addItem("FILE", std::make_shared<data::menu::MenuActionTest>("Not implemented yet"));
     menu->addItem("OPTION", std::make_shared<data::menu::MenuActionTest>("Not implemented yet"));
-    menu->addItem("SAVE", std::make_shared<data::menu::MenuActionTest>("Not implemented yet"));
-    menu->addItem("LOAD", std::make_shared<data::menu::MenuActionTest>("Not implemented yet"));
+    menu->addItem("COM", std::make_shared<data::menu::MenuActionOpenWindow>(shared_from_this(), computerWindowName));
+    menu->addItem("SUBMENU", subMenu);
+
     menuView = std::make_shared<graphic::MenuView>(menu);
     menuView->setPos(0, 0);
     menuView->setSize(width, 6);

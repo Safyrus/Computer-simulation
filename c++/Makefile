@@ -1,5 +1,5 @@
 CXX        := g++
-CXX_FLAGS  := -Wall -Wextra -std=c++17 -ggdb -pthread
+CXX_FLAGS  := -Wall -Wextra -std=c++17 -ggdb -pthread -O1
 
 ifeq ($(OS), Windows_NT)
     CXX_FLAGS  += -D _WIN32_WINNT=0x0A00

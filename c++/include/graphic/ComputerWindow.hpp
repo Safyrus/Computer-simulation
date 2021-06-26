@@ -21,6 +21,7 @@ namespace graphic
         sf::Texture pwrOff;
         sf::Texture buttonOn;
         sf::Texture buttonOff;
+        uint32_t lastDeviceNumer;
 
         std::shared_ptr<data::menu::Menu> menu;
         std::shared_ptr<MenuView> menuView;
@@ -30,6 +31,7 @@ namespace graphic
         void start();
         void stop();
         void loop();
+
     public:
         ComputerWindow(std::shared_ptr<computer::Computer> computer);
         ComputerWindow(std::shared_ptr<computer::Computer> computer, std::string windowName);

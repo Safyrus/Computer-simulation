@@ -16,6 +16,9 @@
 		},
 		{
 			"include": "#comments"
+		},
+		{
+			"include": "#strings"
 		}
 	],
 	"repository": {
@@ -56,6 +59,17 @@
 			},{
 				"name": "entity.name.tag.import.sasm",
 				"match": "\\@(.)+"
+			}]
+		},
+		"strings": {
+			"patterns": [{
+				"name": "string.quoted.single.sasm",
+				"begin": "\\'",
+				"end": "\\'"
+			},{
+				"name": "string.quoted.double.sasm",
+				"begin": "\\\"",
+				"end": "\\\""
 			}]
 		}
 	},

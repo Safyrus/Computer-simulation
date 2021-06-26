@@ -8,7 +8,7 @@
 MOV $A 00
 MOV $B 20
 MOV $C 00
-SET 03 00 01
+SET 03 1C 18
 SCREEN_FILL:
     SET $R $B $A
     ADD $A $A 01

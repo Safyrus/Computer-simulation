@@ -25,6 +25,7 @@
 # - reduce nessecary instructions
 ##############################
 
+@origin 0000
     JMP $F :INIT
 
 JMP_BACK:
@@ -32,26 +33,29 @@ JMP_BACK:
 
 DATA:
     1D %123 :DATA
+    ~10100101 'A' :DATA:l :DATA:h
+    "TEST"
+    ADD $A ~10110 'A'
 
 INIT:
     NOP
     MOV $D 04
 
-@prog/verifCPU/verifCPU_MOV.sasm
-@prog/verifCPU/verifCPU_CMP.sasm
-@prog/verifCPU/verifCPU_ADD.sasm
-@prog/verifCPU/verifCPU_ADC.sasm
-@prog/verifCPU/verifCPU_SUB.sasm
-@prog/verifCPU/verifCPU_SBB.sasm
-@prog/verifCPU/verifCPU_MUL.sasm
-@prog/verifCPU/verifCPU_DIV.sasm
-@prog/verifCPU/verifCPU_MOD.sasm
-@prog/verifCPU/verifCPU_AND.sasm
-@prog/verifCPU/verifCPU_OR.sasm
-@prog/verifCPU/verifCPU_XOR.sasm
-@prog/verifCPU/verifCPU_JMP.sasm
-@prog/verifCPU/verifCPU_GET.sasm
-@prog/verifCPU/verifCPU_SET.sasm
+@import prog/verifCPU/verifCPU_MOV.sasm
+@import prog/verifCPU/verifCPU_CMP.sasm
+@import prog/verifCPU/verifCPU_ADD.sasm
+@import prog/verifCPU/verifCPU_ADC.sasm
+@import prog/verifCPU/verifCPU_SUB.sasm
+@import prog/verifCPU/verifCPU_SBB.sasm
+@import prog/verifCPU/verifCPU_MUL.sasm
+@import prog/verifCPU/verifCPU_DIV.sasm
+@import prog/verifCPU/verifCPU_MOD.sasm
+@import prog/verifCPU/verifCPU_AND.sasm
+@import prog/verifCPU/verifCPU_OR.sasm
+@import prog/verifCPU/verifCPU_XOR.sasm
+@import prog/verifCPU/verifCPU_JMP.sasm
+@import prog/verifCPU/verifCPU_GET.sasm
+@import prog/verifCPU/verifCPU_SET.sasm
 
 
 END:

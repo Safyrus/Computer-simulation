@@ -46,6 +46,7 @@ int main(int argc, char const *argv[])
     std::string filePath = "";
     int hz = 8;
     bool test = false;
+    bool error = false;
     int choice = 0;
     AssemblerCompiler *compiler;
 
@@ -98,7 +99,7 @@ int main(int argc, char const *argv[])
     switch (choice)
     {
     case 1: // sasm Compiler
-        runS257Compiler(filePath);
+        error = !runS257Compiler(filePath);
         break;
 
     case 2: // S257 dynamic recompiler
@@ -155,7 +156,7 @@ int main(int argc, char const *argv[])
     std::cin.ignore();
 
     // restore console
-    if (!print_debug)
+    if (!print_debug && !error)
         clearConsole();
     restoreConsole();
 }

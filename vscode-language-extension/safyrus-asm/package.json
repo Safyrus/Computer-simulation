@@ -2,7 +2,7 @@
     "name": "safyrus-asm",
     "displayName": "Safyrus ASM",
     "description": "Syntax highlighting for Safyrus ASM(sasm) language",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "engines": {
         "vscode": "^1.52.0"
     },

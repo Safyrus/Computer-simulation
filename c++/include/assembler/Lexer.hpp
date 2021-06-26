@@ -12,23 +12,36 @@ private:
     Position pos;
     char current_char;
 
-    static const char CHAR_IMPORT = '@';
+    static const char CHAR_ASSEMBLER = '@';
     static const char CHAR_DEC = '%';
+    static const char CHAR_BIN = '~';
+    static const char CHAR_CHAR = '\'';
+    static const char CHAR_STRING = '"';
     static const char CHAR_REG = '$';
     static const char CHAR_COMMENT = '#';
     static const char CHAR_LABEL = ':';
+    static const char CHAR_LABEL_LOW = 'l';
+    static const char CHAR_LABEL_HIGH = 'h';
     static const std::vector<std::string> CMDS;
 
     void next();
 
     Token makeComment();
     Token makeDecimal();
+    Token makeBinary();
+    Token makeChar();
+    Token makeString();
     Token makeImport();
+    Token makeOrigin();
     Token makeLabel();
     Token makeReg();
     Token findToken();
+    Token findAssemblerCmd();
 
     std::string findWord();
+    std::string findChar();
+    std::string findStr();
+
 public:
     Lexer(std::string text, std::string fileName);
     ~Lexer();

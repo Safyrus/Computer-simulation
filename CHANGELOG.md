@@ -25,6 +25,45 @@ This project try to follow the [Semantic Versioning](https://semver.org/spec/v2.
 
 -----------------
 
+## **[0.6.8]** - _2021-06-26_
+
+### **Added**
+
+- New functionalities in SASM assembler:
+  - New types (binary (use '~'), char, string).
+  - Assembler command (command start with a "@")
+  - a new command "origin" to set the current address.
+  - Import are now done by using the command "import".
+  - Write the low/high address of a label (e.g. "label:l" for low address, "label:h" for high address).
+- A VRAM device (like a RAM but with a lock, mainly use with a VPU).
+- A drawState register to the VPU.
+- An HardwareStates device (for now it is only used to see if other devices are connected).
+- Submenu to graphical menu.
+- Vertical graphical menu.
+- A RamView and a RamWindow.
+- Device views in the menu of ComputerWindow (only RAMs for now).
+
+### **Changed**
+
+- Update the SASM language highlight extension.
+- Update the verifCPU program to be in line with the new syntax.
+- The VPU RAM to a VRAM.
+- The VPU draw cycle by adding a V-blank period which unlock the VRAM.
+- Bus errors now telling the address when set/get at an unconnected location.
+- Default frequency to 15625 Hz.
+- Computer test architecture by adding an HardwareStates device.
+- MainWindow and ComputerWindow menu.
+
+### **Fixed**
+
+- Performance by declaring string only when necessary and by using the "-01" flag.
+- Random number generation for register R overwriting register J1.
+- Devices having no names.
+- Assembler cleaning the terminal when error occurred.
+- The screen_fill program not setting the VPU mode at the start.
+
+-----------------
+
 ## **[0.6.7]** - _2021-06-18_
 
 ### **Added**

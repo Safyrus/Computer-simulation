@@ -2,7 +2,7 @@
 #define VPU_HPP
 
 #include "computer/Device.hpp"
-#include "computer/RAM.hpp"
+#include "computer/VRAM.hpp"
 
 #include <memory>
 
@@ -39,8 +39,9 @@ namespace computer
             0x22, 0x23, 0x00, 0x22, 0x2F, 0x00, 0x22, 0x2E, 0x00, 0x66, 0x77, 0x00, 0x66, 0xFF, 0x00, 0x66, 0xEE, 0x00, 0x66, 0x67, 0x00, 0x66, 0x6F, 0x00, 0x66, 0x6E, 0x00, 0x22, 0x33, 0x00, 0x22, 0xFF, 0x00, 0x22, 0xEE, 0x00, 0x88, 0x43, 0x00, 0x11, 0x2C, 0x00, 0xF7, 0x31, 0x00, 0xFE, 0xC8, 0x00};
 
         uint8_t pixArray[256 * 256 * 4];
-        std::shared_ptr<computer::RAM> ram;
+        std::shared_ptr<computer::VRAM> vram;
         uint8_t mode;
+        uint8_t drawStates;
 
         void color2Mode();
         void color16Mode();
@@ -50,9 +51,10 @@ namespace computer
         void setBigPix(uint8_t x, uint8_t y, uint8_t c);
         void setCharPix(uint8_t x, uint8_t y, uint8_t character, uint8_t color);
         void setCharBigPix(uint8_t x, uint8_t y, uint8_t character, uint8_t color);
+        void resetDraw();
 
     public:
-        VPU(std::shared_ptr<computer::RAM> ram);
+        VPU(std::shared_ptr<computer::VRAM> vram);
         ~VPU();
 
         void reset();

@@ -5,6 +5,7 @@
 #include <sstream>
 
 #include "graphic/CPUWindow.hpp"
+#include "graphic/RamWindow.hpp"
 
 #include "utils/console.hpp"
 
@@ -22,6 +23,7 @@ graphic::ComputerWindow::ComputerWindow(std::shared_ptr<computer::Computer> comp
     cpuWindowName = "S257 Dynamic Recompiler - CPU Window";
     width = 128;
     height = 128;
+    lastDeviceNumer = 0;
     printDebug("Creation");
 }
 
@@ -32,6 +34,7 @@ graphic::ComputerWindow::ComputerWindow(std::shared_ptr<computer::Computer> comp
     cpuWindowName = "S257 Dynamic Recompiler - CPU Window";
     width = 128;
     height = 128;
+    lastDeviceNumer = 0;
     printDebug("Creation");
 }
 
@@ -43,6 +46,7 @@ graphic::ComputerWindow::ComputerWindow(std::shared_ptr<computer::Computer> comp
     cpuWindowName = "S257 Dynamic Recompiler - CPU Window";
     width = 128;
     height = 128;
+    lastDeviceNumer = 0;
     printDebug("Creation");
 }
 
@@ -52,12 +56,34 @@ graphic::ComputerWindow::~ComputerWindow()
 
 void graphic::ComputerWindow::makeMenu()
 {
+    std::shared_ptr<data::menu::Menu> actionMenu = std::make_shared<data::menu::Menu>();
+    actionMenu->addItem("PWR(F1)", std::make_shared<data::menu::MenuActionComputerPwr>(computer));
+    actionMenu->addItem("HZ+(F3)", std::make_shared<data::menu::MenuActionDoubleCPUHz>(computer->getCpu()));
+    actionMenu->addItem("HZ-(F2)", std::make_shared<data::menu::MenuActionHalfCPUHz>(computer->getCpu()));
+    actionMenu->addItem("RST(F4)", std::make_shared<data::menu::MenuActionComputerRst>(computer));
+
+    std::shared_ptr<data::menu::Menu> deviceMenu = std::make_shared<data::menu::Menu>();
+    std::vector<std::shared_ptr<computer::Device>> devices = computer->getAllDevice();
+    for (uint32_t i = 0; i < devices.size(); i++)
+    {
+        std::string name = devices[i]->getName();
+        std::string type = devices[i]->getType();
+        if (type.compare("RAM") == 0 || type.compare("VRAM") == 0)
+        {
+            std::stringstream indexStr;
+            indexStr << std::dec << std::setfill('0') << std::setw(2) << i;
+            deviceMenu->addItem(name, std::make_shared<data::menu::MenuActionOpenWindow>(shared_from_this(), "CMPWINDEV" + indexStr.str() + type));
+        }
+        else
+        {
+            deviceMenu->addItem(name, std::make_shared<data::menu::MenuActionTest>("Not implemented yet"));
+        }
+    }
+
     menu = std::make_shared<data::menu::Menu>();
-    menu->addItem("PWR", std::make_shared<data::menu::MenuActionComputerPwr>(computer));
-    menu->addItem("RST", std::make_shared<data::menu::MenuActionComputerRst>(computer));
-    menu->addItem("HZ+", std::make_shared<data::menu::MenuActionDoubleCPUHz>(computer->getCpu()));
-    menu->addItem("HZ-", std::make_shared<data::menu::MenuActionHalfCPUHz>(computer->getCpu()));
+    menu->addItem("ACTION", actionMenu);
     menu->addItem("CPU", std::make_shared<data::menu::MenuActionOpenWindow>(shared_from_this(), cpuWindowName));
+    menu->addItem("DEVICE", deviceMenu);
     menuView = std::make_shared<graphic::MenuView>(menu);
     menuView->setPos(0, 0);
     menuView->setSize(width, 6);
@@ -150,7 +176,7 @@ void graphic::ComputerWindow::loop()
             }
             else if (event.key.code == sf::Keyboard::F2)
             {
-                if(computer->getCpu()->hz / 2 > 0)
+                if (computer->getCpu()->hz / 2 > 0)
                 {
                     computer->getCpu()->hz /= 2;
                 }
@@ -181,7 +207,7 @@ void graphic::ComputerWindow::loop()
 
     // draw light
     sf::Sprite pwrLight;
-    if(computer->getPower())
+    if (computer->getPower())
         pwrLight.setTexture(pwrOn);
     else
         pwrLight.setTexture(pwrOff);
@@ -190,7 +216,7 @@ void graphic::ComputerWindow::loop()
 
     // draw buttons
     sf::Sprite buttonPwrSprite;
-    if(computer->getPower())
+    if (computer->getPower())
         buttonPwrSprite.setTexture(buttonOn);
     else
         buttonPwrSprite.setTexture(buttonOff);
@@ -206,11 +232,17 @@ void graphic::ComputerWindow::loop()
 
     // Update the window
     window.display();
+
+    if (computer->getAllDevice().size() != lastDeviceNumer)
+    {
+        lastDeviceNumer = computer->getAllDevice().size();
+        makeMenu();
+    }
 }
 
 void graphic::ComputerWindow::openSubWindow(std::string windowName)
 {
-    if(windowName.compare(cpuWindowName) == 0)
+    if (windowName.compare(cpuWindowName) == 0)
     {
         // if we have not open the CPU window
         if (findSubWinByName(cpuWindowName).empty())
@@ -220,12 +252,29 @@ void graphic::ComputerWindow::openSubWindow(std::string windowName)
         }
         else
         {
-            std::string str = cpuWindowName + " window already open";
-            printDebug(str);
+            printDebug(cpuWindowName + " window already open");
         }
-    }else
+    }
+    else if (windowName.substr(0, 9).compare("CMPWINDEV") == 0)
     {
-        std::string msg = "no window with name: " + windowName;
-        printDebug(msg);
+        printDebug("try open device window " + windowName);
+        uint16_t i = stoi(windowName.substr(9, 2), NULL, 10);
+        windowName = windowName.substr(11);
+        if (windowName.compare("RAM") == 0 || windowName.compare("VRAM") == 0)
+        {
+            std::shared_ptr<computer::RAM> ram = std::dynamic_pointer_cast<computer::RAM>(computer->getAllDevice()[i]);
+            std::string devWinName = "S257 Dynamic Recompiler - " + ram->getName() + " Window";
+            std::shared_ptr<graphic::RamWindow> subW = std::make_shared<graphic::RamWindow>(ram, devWinName, debug);
+            printDebug("open ram");
+            addSubWindow(subW);
+        }
+        else
+        {
+            printDebug("no device window with name: " + windowName);
+        }
+    }
+    else
+    {
+        printDebug("no window with name: " + windowName);
     }
 }

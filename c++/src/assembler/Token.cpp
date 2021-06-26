@@ -4,14 +4,19 @@
 
 const std::string Token::HEX = "HEX";
 const std::string Token::DEC = "DEC";
+const std::string Token::BIN = "BIN";
+const std::string Token::CHAR = "CHAR";
+const std::string Token::STRING = "STRING";
 const std::string Token::CMD = "CMD";
 const std::string Token::REG = "REG";
 const std::string Token::LABEL = "LABEL";
+const std::string Token::LABEL_LOW = "LABEL_LOW";
+const std::string Token::LABEL_HIGH = "LABEL_HIGH";
 const std::string Token::LABEL_DECLARE = "LABEL_DECLARE";
 const std::string Token::COMMENT = "COMMENT";
 const std::string Token::IMPORT = "IMPORT";
+const std::string Token::ORIGIN = "ORIGIN";
 const std::string Token::ERR = "ERROR";
-
 
 Token::Token()
 {

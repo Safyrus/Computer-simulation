@@ -89,7 +89,15 @@ std::string Interpreter::interprete()
             {
                 index += 2;
             }
-            else if (t.getType().compare(Token::HEX) == 0 || t.getType().compare(Token::DEC) == 0 || t.getType().compare(Token::REG) == 0)
+            else if (t.getType().compare(Token::LABEL_LOW) == 0 || t.getType().compare(Token::LABEL_HIGH) == 0)
+            {
+                index += 1;
+            }
+            else if (t.getType().compare(Token::STRING) == 0)
+            {
+                index += t.getValue().size();
+            }
+            else if (t.getType().compare(Token::HEX) == 0 || t.getType().compare(Token::DEC) == 0 || t.getType().compare(Token::REG) == 0 || t.getType().compare(Token::BIN) == 0 || t.getType().compare(Token::CHAR) == 0)
             {
                 index += 1;
             }
@@ -120,8 +128,12 @@ std::string Interpreter::interprete()
                 }
                 nodes.insert(nodes.begin() + i + 1, importNodes.begin(), importNodes.end());
             }
+            else if (t.getType().compare(Token::ORIGIN) == 0)
+            {
+                index = strtol(t.getValue().c_str(), NULL, 16) & 0xFFFF;
+            }
         }
-        else if(nodes[i]->getType() == Node::NODE_MOV2L)
+        else if (nodes[i]->getType() == Node::NODE_MOV2L)
         {
             index += 8;
         }
@@ -191,7 +203,7 @@ std::string Interpreter::nodeUni(Node *n)
         }
         res << import(impName);*/
     }
-    else if (t.getType().compare(Token::COMMENT) == 0 || t.getType().compare(Token::LABEL_DECLARE) == 0)
+    else if (t.getType().compare(Token::COMMENT) == 0 || t.getType().compare(Token::LABEL_DECLARE) == 0 || t.getType().compare(Token::ORIGIN) == 0)
     {
     }
     else if (t.getType().compare(Token::CMD) == 0)
@@ -207,31 +219,29 @@ std::string Interpreter::nodeUni(Node *n)
         }
         res << std::uppercase << std::setfill('0') << std::setw(2) << CMDS_CODE[cmdCode][0] << " 00 00 00 ";
     }
-    else if (t.getType().compare(Token::LABEL) == 0)
+    else if (t.getType().compare(Token::LABEL) == 0 || t.getType().compare(Token::LABEL_LOW) == 0 || t.getType().compare(Token::LABEL_HIGH) == 0)
     {
-        bool find = false;
-        for (unsigned int i = 0; i < labels.size(); i++)
+        std::string labelVal = getLabelVal(t);
+        if (labelVal == "FFFFFFFF ")
         {
-            if (t.getValue().compare(labels[i]->getToken(0).getValue()) == 0)
-            {
-                res << std::uppercase << std::setfill('0') << std::setw(2) << (labels_adr[i] / 256) << " ";
-                res << std::uppercase << std::setfill('0') << std::setw(2) << (labels_adr[i] % 256) << " ";
-                find = true;
-                break;
-            }
+            return labelVal;
         }
-        if (!find)
-        {
-            std::stringstream debugStr;
-            debugStr << "[ASSEMBLER ERROR]: can't find label in file " << t.getPos().getFileName() << " at " << t.getPos().getLine() << ":" << t.getPos().getCol();
-            printError(debugStr.str());
-            return "FFFFFFFF ";
-        }
+        res << labelVal;
     }
-    else if (t.getType().compare(Token::HEX) == 0 || t.getType().compare(Token::DEC) == 0 || t.getType().compare(Token::REG) == 0)
+    else if (t.getType().compare(Token::HEX) == 0 || t.getType().compare(Token::DEC) == 0 || t.getType().compare(Token::REG) == 0 || t.getType().compare(Token::BIN) == 0 || t.getType().compare(Token::CHAR) == 0)
     {
         int valCode = getValCode(t);
         res << std::uppercase << std::setfill('0') << std::setw(2) << valCode << " ";
+    }
+    else if (t.getType().compare(Token::STRING) == 0)
+    {
+        std::string str = t.getValue();
+        for (unsigned int i = 0; i < str.size(); i++)
+        {
+            int valStr = str[i];
+            res << std::uppercase << std::setfill('0') << std::setw(2) << valStr << " ";
+        }
+        res << std::uppercase << std::setfill('0') << std::setw(2) << 0 << " ";
     }
     else
     {
@@ -379,24 +389,12 @@ std::string Interpreter::nodeBinL(Node *n)
     res << std::uppercase << std::setfill('0') << std::setw(2) << valCode << " ";
 
     //find label code
-    bool find = false;
-    for (unsigned int i = 0; i < labels.size(); i++)
+    std::string labelVal = getLabelVal(label);
+    if (labelVal == "FFFFFFFF ")
     {
-        if (label.getValue().compare(labels[i]->getToken(0).getValue()) == 0)
-        {
-            res << std::uppercase << std::setfill('0') << std::setw(2) << (labels_adr[i] / 256) << " ";
-            res << std::uppercase << std::setfill('0') << std::setw(2) << (labels_adr[i] % 256) << " ";
-            find = true;
-            break;
-        }
+        return labelVal;
     }
-    if (!find)
-    {
-        std::stringstream debugStr;
-        debugStr << "[ASSEMBLER ERROR]: can't find label in file " << label.getPos().getFileName() << " at " << label.getPos().getLine() << ":" << label.getPos().getCol();
-        printError(debugStr.str());
-        return "FFFFFFFF ";
-    }
+    res << labelVal;
 
     return res.str();
 }
@@ -432,24 +430,12 @@ std::string Interpreter::nodeMovL(Node *n)
     res << std::uppercase << std::setfill('0') << std::setw(2) << regCode << " ";
 
     //find label code
-    bool find = false;
-    for (unsigned int i = 0; i < labels.size(); i++)
+    std::string labelVal = getLabelVal(label);
+    if (labelVal == "FFFFFFFF ")
     {
-        if (label.getValue().compare(labels[i]->getToken(0).getValue()) == 0)
-        {
-            res << std::uppercase << std::setfill('0') << std::setw(2) << (labels_adr[i] / 256) << " ";
-            res << std::uppercase << std::setfill('0') << std::setw(2) << (labels_adr[i] % 256) << " ";
-            find = true;
-            break;
-        }
+        return labelVal;
     }
-    if (!find)
-    {
-        std::stringstream debugStr;
-        debugStr << "[ASSEMBLER ERROR]: can't find label in file " << label.getPos().getFileName() << " at " << label.getPos().getLine() << ":" << label.getPos().getCol();
-        printError(debugStr.str());
-        return "FFFFFFFF ";
-    }
+    res << labelVal;
 
     return res.str();
 }
@@ -593,11 +579,30 @@ int Interpreter::getValCode(Token val)
             return -1;
         }
     }
+    else if (val.getType().compare(Token::CHAR) == 0)
+    {
+        valCode = val.getValue()[0];
+    }
+    else if (val.getType().compare(Token::LABEL_LOW) == 0 || val.getType().compare(Token::LABEL_HIGH) == 0)
+    {
+        std::string labelVal = getLabelVal(val);
+        if (labelVal == "FFFFFFFF ")
+        {
+            return -1;
+        }
+        //printDebug("\n*"+labelVal+"\n");
+        valCode = stoi(labelVal, NULL, 16);
+        //printDebug("\n**"+std::to_string(valCode)+"\n");
+    }
     else
     {
         if (val.getType().compare(Token::HEX) == 0)
         {
             valCode = stoi(val.getValue(), NULL, 16);
+        }
+        else if (val.getType().compare(Token::BIN) == 0)
+        {
+            valCode = stoi(val.getValue(), NULL, 2);
         }
         else
         {
@@ -605,6 +610,41 @@ int Interpreter::getValCode(Token val)
         }
     }
     return valCode;
+}
+
+std::string Interpreter::getLabelVal(Token lab)
+{
+    std::stringstream res;
+    bool find = false;
+    for (unsigned int i = 0; i < labels.size(); i++)
+    {
+        if (lab.getValue().compare(labels[i]->getToken(0).getValue()) == 0)
+        {
+            if (lab.getType().compare(Token::LABEL) == 0)
+            {
+                res << std::hex << std::uppercase << std::setfill('0') << std::setw(2) << (labels_adr[i] / 256) << " ";
+                res << std::hex << std::uppercase << std::setfill('0') << std::setw(2) << (labels_adr[i] % 256) << " ";
+            }
+            else if (lab.getType().compare(Token::LABEL_LOW) == 0)
+            {
+                res << std::hex << std::uppercase << std::setfill('0') << std::setw(2) << (labels_adr[i] % 256) << " ";
+            }
+            else if (lab.getType().compare(Token::LABEL_HIGH) == 0)
+            {
+                res << std::hex << std::uppercase << std::setfill('0') << std::setw(2) << (labels_adr[i] / 256) << " ";
+            }
+            find = true;
+            break;
+        }
+    }
+    if (!find)
+    {
+        std::stringstream debugStr;
+        debugStr << "[ASSEMBLER ERROR]: can't find label in file " << lab.getPos().getFileName() << " at " << lab.getPos().getLine() << ":" << lab.getPos().getCol();
+        printError(debugStr.str());
+        return "FFFFFFFF ";
+    }
+    return res.str();
 }
 
 std::vector<Node *> Interpreter::import(std::string fileName)

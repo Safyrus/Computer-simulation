@@ -6,7 +6,21 @@ This project try to follow the [Semantic Versioning](https://semver.org/spec/v2.
 
 -----------------
 
-## **[0.1.0]** - _2020-12-27_
+## **[0.0.2]** - _2021-06-19_
+
+### **Added**
+
+- synthax highlight for:
+  - char
+  - string
+
+### **Fixed**
+
+- wrong version number in Changelog
+
+-----------------
+
+## **[0.0.1]** - _2020-12-27_
 
 ### **Added**
 

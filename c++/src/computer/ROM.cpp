@@ -14,6 +14,7 @@
 computer::ROM::ROM()
 {
     type = "ROM";
+    name = "ROM";
     len = 0x0400;
     this->data = new uint8_t[len];
     this->hz = 0;
@@ -22,6 +23,7 @@ computer::ROM::ROM()
 computer::ROM::ROM(uint16_t size)
 {
     type = "ROM";
+    name = "ROM";
     len = size;
     this->data = new uint8_t[len];
     this->hz = 0;
@@ -30,6 +32,7 @@ computer::ROM::ROM(uint16_t size)
 computer::ROM::ROM(uint16_t size, uint32_t hz)
 {
     type = "ROM";
+    name = "ROM";
     len = size;
     this->data = new uint8_t[len];
     this->hz = hz;
@@ -58,7 +61,7 @@ void computer::ROM::set(uint16_t adr, uint8_t data)
 
 uint8_t computer::ROM::get(uint16_t adr)
 {
-    if(!pwr)
+    if (!pwr)
     {
         return 0;
     }

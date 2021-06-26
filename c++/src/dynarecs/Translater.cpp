@@ -56,7 +56,7 @@ void dynarec::Translater::deleteBlocks(uint16_t adr)
         for (uint16_t i = 0; i < blockSize; i++)
         {
             uint16_t index = adr - i;
-            if(blocks[index] != nullptr)
+            if (blocks[index] != nullptr)
             {
                 printDebug(ansi(WHITE_FG) + "delete block " + std::to_string(index));
                 delete blocks[index];
@@ -94,7 +94,6 @@ dynarec::Emitter *dynarec::Translater::handlerEndBlock(int ret)
     // print debug msg
     if (print)
         printDebug(ansi(YELLOW_FG) + "| handler end block" + ansi(RESET));
-    std::stringstream debugStr;
 
     // decode value return from the block
     uint8_t val = ((ret & 0xff000000) >> 24);
@@ -121,6 +120,7 @@ dynarec::Emitter *dynarec::Translater::handlerEndBlock(int ret)
     case CODE_JMP: // jump to an adress
         if (print)
         {
+            std::stringstream debugStr;
             debugStr << ansi(YELLOW_FG) << "|     CODE_JMP: jump to " << std::hex << std::setfill('0') << std::setw(4) << adrJmp << ansi(RESET);
             printDebug(debugStr.str());
         }
@@ -132,6 +132,7 @@ dynarec::Emitter *dynarec::Translater::handlerEndBlock(int ret)
     case CODE_NXT: // executing the next block
         if (print)
         {
+            std::stringstream debugStr;
             debugStr << ansi(YELLOW_FG) << "|     CODE_NXT: procede to next block at " << std::hex << std::setfill('0') << std::setw(4) << cpu->pc << ansi(RESET);
             printDebug(debugStr.str());
         }
@@ -141,6 +142,7 @@ dynarec::Emitter *dynarec::Translater::handlerEndBlock(int ret)
     case CODE_SET: // execute SET instruction
         if (print)
         {
+            std::stringstream debugStr;
             debugStr << ansi(YELLOW_FG) << "|     CODE_SET: set val at " << std::hex << std::setfill('0') << std::setw(4) << adrJmp << " to " << std::hex << std::setfill('0') << std::setw(2) << (int)val << ansi(RESET);
             printDebug(debugStr.str());
         }
@@ -160,6 +162,7 @@ dynarec::Emitter *dynarec::Translater::handlerEndBlock(int ret)
     case CODE_GET: // execute GET instruction
         if (print)
         {
+            std::stringstream debugStr;
             debugStr << ansi(YELLOW_FG) << "|     CODE_GET: get val " << std::hex << std::setfill('0') << std::setw(2) << (int)val << " at " << std::hex << std::setfill('0') << std::setw(4) << adrJmp << " to reg[" << std::hex << (int)val << "]" << ansi(RESET);
             printDebug(debugStr.str());
         }
@@ -203,8 +206,6 @@ void dynarec::Translater::initStep(uint16_t pc)
 
 void dynarec::Translater::waitInst()
 {
-    std::stringstream debugStr;
-
     if (cpu->hz != 0)
     {
         // if the cpu frequency has change
@@ -234,6 +235,7 @@ void dynarec::Translater::waitInst()
         // print debug the isntructions time
         if (print)
         {
+            std::stringstream debugStr;
             debugStr.str("");
             debugStr << ansi(WHITE_FG) << "nbInstTime: " << std::dec << nbInstTime << "  cycle:" << cpu->cycle;
             printDebug(debugStr.str());
@@ -248,6 +250,7 @@ void dynarec::Translater::waitInst()
             // print debug how many nansecond we wait
             if (print)
             {
+                std::stringstream debugStr;
                 debugStr.str("");
                 debugStr << ansi(WHITE_FG) << "wait: " << waiting.count() << "ns";
                 printDebug(debugStr.str());
@@ -266,7 +269,6 @@ int dynarec::Translater::runStep()
         return 0;
 
     // setup variables
-    std::stringstream debugStr;
     int res = 0;
 
     auto t1 = std::chrono::high_resolution_clock::now();
@@ -280,6 +282,7 @@ int dynarec::Translater::runStep()
     // print debug what adr we will run
     if (print)
     {
+        std::stringstream debugStr;
         debugStr.str("");
         debugStr << ansi(WHITE_FG) << "| run adr " << std::hex << std::setfill('0') << std::setw(4) << cpu->pc << " ...";
         printDebug(debugStr.str());
@@ -290,6 +293,7 @@ int dynarec::Translater::runStep()
         // print debug what block we execute
         if (print)
         {
+            std::stringstream debugStr;
             debugStr.str("");
             debugStr << ansi(WHITE_FG) << "|     Execute block adr " << std::hex << std::setfill('0') << std::setw(4) << e->getStartAdr() << " with " << e->getInsCount() << " ins";
             printDebug(debugStr.str());

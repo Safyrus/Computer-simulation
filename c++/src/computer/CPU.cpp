@@ -16,6 +16,7 @@ computer::CPU::CPU(std::shared_ptr<computer::Bus> bus) : Device()
 {
     threadWanted = false;
     type = "CPU";
+    name = "S257-01";
     this->bus = bus;
     hz = 0;
     resetReg();
@@ -29,6 +30,7 @@ computer::CPU::CPU(std::shared_ptr<computer::Bus> bus, bool threadWanted) : Devi
 {
     this->threadWanted = threadWanted;
     type = "CPU";
+    name = "S257-01";
     this->bus = bus;
     hz = 0;
     resetReg();
@@ -60,10 +62,11 @@ void computer::CPU::run()
                 if (!start || hasReset)
                 {
                     start = true;
-                    if(!hasReset)
+                    if (!hasReset)
                     {
                         reset();
-                    }else
+                    }
+                    else
                     {
                         resetReg();
                     }
@@ -74,7 +77,7 @@ void computer::CPU::run()
             }
             else
             {
-                if(start)
+                if (start)
                 {
                     start = false;
                 }
@@ -99,7 +102,7 @@ void computer::CPU::reset()
 {
     resetReg();
     hasReset = true;
-    if(bus != nullptr)
+    if (bus != nullptr)
     {
         bus->reset();
     }
@@ -119,7 +122,7 @@ void computer::CPU::resetReg()
 void computer::CPU::setPwr(bool pwr)
 {
     this->pwr = pwr;
-    if(bus != nullptr)
+    if (bus != nullptr)
     {
         bus->setPwr(pwr);
     }

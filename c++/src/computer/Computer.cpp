@@ -15,8 +15,11 @@ computer::Computer::Computer()
 
     printDebug("Create CPU thread");
     cpu = std::make_shared<computer::CPU>(bus, true);
-    cpu->hz = 10;
+    cpu->hz = 15625;
     runCPU = new RunnableDevice(cpu);
+
+    hwStats = std::make_shared<computer::HardwareStates>();
+    addDevice(hwStats, 0x1C00, 0x1C08);
 
     printDebug("Run CPU thread");
     runCPU->run();
@@ -31,25 +34,41 @@ computer::Computer::Computer(bool test, std::string prog)
 
     printDebug("Create CPU thread");
     cpu = std::make_shared<computer::CPU>(bus, true);
-    cpu->hz = 10;
+    cpu->hz = 15625;
     runCPU = new RunnableDevice(cpu);
 
-    if(test)
+    if (test)
     {
         std::shared_ptr<computer::ROM> rom4k = std::make_shared<computer::ROM>(0x1000);
+        rom4k->setName("ROM4K");
         std::shared_ptr<computer::ROM> rom2k = std::make_shared<computer::ROM>(0x0800);
+        rom2k->setName("ROM2K");
         std::shared_ptr<computer::RAM> ram1k = std::make_shared<computer::RAM>(0x0400);
-        std::shared_ptr<computer::RAM> ram8k = std::make_shared<computer::RAM>(0x2000);
+        ram1k->setName("RAM1K");
+        std::shared_ptr<computer::VRAM> vram = std::make_shared<computer::VRAM>(0x2000);
+        vram->setName("VRAM8K");
         std::shared_ptr<computer::RAM> ram16k = std::make_shared<computer::RAM>(0x4000);
-        std::shared_ptr<computer::VPU> vpu = std::make_shared<computer::VPU>(ram8k);
+        ram16k->setName("RAM16K");
+        std::shared_ptr<computer::VPU> vpu = std::make_shared<computer::VPU>(vram);
+        vpu->setName("VPU");
+        hwStats = std::make_shared<computer::HardwareStates>();
+        hwStats->setName("HWSTATS");
+
+        addDevice(hwStats, 0x1C00, 0x1C08);
+        addDevice(vpu, 0x1C18, 0x1C1F);
         addDevice(rom4k, 0x0000, 0x0FFF);
         addDevice(rom2k, 0x1000, 0x17FF);
         addDevice(ram1k, 0x1800, 0x1BFF);
-        addDevice(ram8k, 0x2000, 0x3FFF);
+        addDevice(vram, 0x2000, 0x3FFF);
         addDevice(ram16k, 0x4000, 0x7FFF);
-        addDevice(vpu, 0x1C18, 0x1C1F);
+
         rom4k = std::static_pointer_cast<computer::ROM>(getDevice("ROM", 0x0000, 0x0FFF));
         rom4k->load(prog);
+    }
+    else
+    {
+        hwStats = std::make_shared<computer::HardwareStates>();
+        addDevice(hwStats, 0x1C00, 0x1C08);
     }
 
     printDebug("Run CPU thread");
@@ -110,6 +129,7 @@ void computer::Computer::addDevice(std::shared_ptr<computer::Device> device, uin
     runnables.back()->run();
     device->setPwr(cpu->getPwr());
     bus->addDevice(device, startAdr, endAdr);
+    hwStats->connect(device, startAdr, endAdr);
 }
 
 void computer::Computer::removeDevice(std::string type, uint16_t startAdr, uint16_t endAdr)
@@ -125,6 +145,7 @@ void computer::Computer::removeDevice(std::string type, uint16_t startAdr, uint1
             runnables[i]->join();
             delete runnables[i];
             runnables.erase(runnables.begin() + i);
+            hwStats->disconnect(devices[i], startAdr, endAdr);
             devices.erase(devices.begin() + i);
         }
     }
@@ -143,4 +164,9 @@ std::shared_ptr<computer::Device> computer::Computer::getDevice(std::string type
         }
     }
     return nullptr;
+}
+
+std::vector<std::shared_ptr<computer::Device>> computer::Computer::getAllDevice()
+{
+    return std::vector<std::shared_ptr<computer::Device>>(devices);
 }

@@ -13,6 +13,7 @@
 computer::RAM::RAM()
 {
     type = "RAM";
+    name = "RAM";
     len = 0x0400;
     this->data = new uint8_t[len];
     this->hz = 0;
@@ -21,6 +22,7 @@ computer::RAM::RAM()
 computer::RAM::RAM(uint16_t size)
 {
     type = "RAM";
+    name = "RAM";
     len = size;
     this->data = new uint8_t[len];
     this->hz = 0;
@@ -47,9 +49,7 @@ void computer::RAM::reset()
     {
         data[i] = 0;
     }
-    
 }
-
 
 void computer::RAM::run()
 {
@@ -65,7 +65,8 @@ void computer::RAM::run()
             adrBuf.clear();
             dataBuf.clear();
             std::this_thread::sleep_for(timePercycle);
-        }else
+        }
+        else
         {
             std::chrono::nanoseconds timeWait(1000000);
             std::this_thread::sleep_for(timeWait);
@@ -75,12 +76,13 @@ void computer::RAM::run()
 
 void computer::RAM::set(uint16_t adr, uint8_t data)
 {
-    if(!pwr)
+    if (!pwr)
         return;
     if (hz == 0)
     {
         this->data[adr] = data;
-    }else
+    }
+    else
     {
         adrBuf.push_back(adr);
         dataBuf.push_back(data);
@@ -89,7 +91,7 @@ void computer::RAM::set(uint16_t adr, uint8_t data)
 
 uint8_t computer::RAM::get(uint16_t adr)
 {
-    if(!pwr)
+    if (!pwr)
     {
         return 0;
     }
