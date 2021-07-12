@@ -4,6 +4,7 @@
 #include <memory>
 
 #include "computer/Computer.hpp"
+#include "computer/Keyboard.hpp"
 #include "graphic/Window.hpp"
 #include "graphic/MenuView.hpp"
 #include "graphic/ScreenVPUView.hpp"
@@ -26,6 +27,7 @@ namespace graphic
         bool showMenu;
 
         std::shared_ptr<graphic::ScreenVPUView> screenVpu;
+        std::shared_ptr<computer::Keyboard> keyboard;
 
         void start();
         void stop();

@@ -21,9 +21,16 @@ void computer::HardwareStates::run()
 void computer::HardwareStates::set(uint16_t adr, uint8_t data)
 {
     uint16_t adrTo = adr / 8;
+    uint8_t reg = adr % 8;
     switch (adrTo)
     {
     case 0:
+        break;
+    case 2:
+        if(ioCtrl)
+        {
+            ioCtrl->set(reg+32, data);
+        }
         break;
     default:
         break;
@@ -33,6 +40,7 @@ void computer::HardwareStates::set(uint16_t adr, uint8_t data)
 uint8_t computer::HardwareStates::get(uint16_t adr)
 {
     uint16_t adrTo = adr / 8;
+    uint8_t reg = adr % 8;
     uint8_t ret = 0;
     switch (adrTo)
     {
@@ -44,6 +52,12 @@ uint8_t computer::HardwareStates::get(uint16_t adr)
             break;
         default:
             break;
+        }
+        break;
+    case 2:
+        if(ioCtrl)
+        {
+            ret = ioCtrl->get(reg+32);
         }
         break;
     default:
@@ -84,6 +98,14 @@ void computer::HardwareStates::connect(std::shared_ptr<computer::Device> device,
             connected |= 0x10;
         }
     }
+    else if (type.compare("IOCTRL") == 0)
+    {
+        connected |= 0x40;
+        ioCtrl = std::dynamic_pointer_cast<computer::IOController>(device);
+    }else if (startAdr >= 0x8000)
+    {
+        connected |= 0x80;
+    }
 }
 
 void computer::HardwareStates::disconnect(std::shared_ptr<computer::Device> device, uint16_t startAdr, uint16_t endAdr)
@@ -117,5 +139,13 @@ void computer::HardwareStates::disconnect(std::shared_ptr<computer::Device> devi
         {
             connected &= 0xEF;
         }
+    }
+    else if (type.compare("IOCTRL") == 0)
+    {
+        ioCtrl = nullptr;
+        connected &= 0xBF;
+    }else if (startAdr >= 0x8000)
+    {
+        connected &= 0x7F;
     }
 }

@@ -25,6 +25,53 @@ This project try to follow the [Semantic Versioning](https://semver.org/spec/v2.
 
 -----------------
 
+## **[0.6.9]** - _2021-07-12_
+
+### **Added**
+
+#### Computer
+
+- A new type of Device called IODevice.
+- An IOController IO Device to communicate with IO Devices.
+- A Keyboard as an IO Device.
+- Functions to the computer to connect/disconnect IO devices.
+- A keyboard to port 0 of the computer.
+- A length function to the ROM.
+- A refreshCycle function to devices.
+- IO hardware states.
+
+#### Graphics
+
+- A Rom view and a Rom window.
+- A IOController view and a IOController window.
+
+#### Others
+
+- A test program named test_io.
+
+### **Changed**
+
+#### Others
+
+- "TEST" to "TESTING" in verifCPU.
+- Remove some useless lines of comment/code.
+
+### **Fixed**
+
+#### Assembler
+
+- Non ASCII character are now reduced to 8bit hex value (and not 32bit hex number).
+
+#### Computer
+
+- Device not able to redefined base functions.
+
+#### Graphics
+
+- Ram view page are now limited to the ram size.
+
+-----------------
+
 ## **[0.6.8]** - _2021-06-26_
 
 ### **Added**

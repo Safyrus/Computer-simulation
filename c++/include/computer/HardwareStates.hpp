@@ -4,6 +4,7 @@
 #include <memory>
 
 #include "computer/Device.hpp"
+#include "computer/IOController.hpp"
 
 namespace computer
 {
@@ -11,6 +12,7 @@ namespace computer
     {
     private:
         uint8_t connected;
+        std::shared_ptr<computer::IOController> ioCtrl;
 
     public:
         HardwareStates();

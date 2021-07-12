@@ -10,6 +10,7 @@
 #include <iomanip>
 #include <sstream>
 #include <iostream>
+#include <codecvt>
 
 std::vector<std::string> Interpreter::importName;
 
@@ -95,7 +96,7 @@ std::string Interpreter::interprete()
             }
             else if (t.getType().compare(Token::STRING) == 0)
             {
-                index += t.getValue().size();
+                index += t.getValue().size()+1;
             }
             else if (t.getType().compare(Token::HEX) == 0 || t.getType().compare(Token::DEC) == 0 || t.getType().compare(Token::REG) == 0 || t.getType().compare(Token::BIN) == 0 || t.getType().compare(Token::CHAR) == 0)
             {
@@ -235,11 +236,12 @@ std::string Interpreter::nodeUni(Node *n)
     }
     else if (t.getType().compare(Token::STRING) == 0)
     {
-        std::string str = t.getValue();
+        std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+        std::wstring str = converter.from_bytes(t.getValue());
         for (unsigned int i = 0; i < str.size(); i++)
         {
-            int valStr = str[i];
-            res << std::uppercase << std::setfill('0') << std::setw(2) << valStr << " ";
+            uint8_t valStr = str[i];
+            res << std::uppercase << std::setfill('0') << std::setw(2) << (uint32_t)valStr << " ";
         }
         res << std::uppercase << std::setfill('0') << std::setw(2) << 0 << " ";
     }

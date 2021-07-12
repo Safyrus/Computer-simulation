@@ -32,6 +32,7 @@ namespace computer
         void addDevice(std::shared_ptr<computer::Device> device, uint16_t startAdr, uint16_t endAdr);
         void removeDevice(std::shared_ptr<computer::Device> device);
         uint32_t getDeviceAdr(std::shared_ptr<computer::Device> device);
+        void refreshCycle(uint64_t cycle);
     };
 } // namespace computer
 

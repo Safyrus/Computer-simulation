@@ -8,6 +8,7 @@
 #include "computer/CPU.hpp"
 #include "computer/HardwareStates.hpp"
 #include "computer/RunnableDevice.hpp"
+#include "computer/IODevice.hpp"
 
 namespace computer
 {
@@ -38,6 +39,9 @@ namespace computer
         void removeDevice(std::string type, uint16_t startAdr, uint16_t endAdr);
         std::shared_ptr<computer::Device> getDevice(std::string type, uint16_t startAdr, uint16_t endAdr);
         std::vector<std::shared_ptr<computer::Device>> getAllDevice();
+
+        void connectIODevice(std::shared_ptr<computer::IODevice> device , uint8_t port);
+        void removeIODevvice(uint8_t port);
     };
 } // namespace computer
 

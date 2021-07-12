@@ -1,0 +1,15 @@
+#SET FF 1C 11
+
+LOOP:
+# get device output on port 0
+GET $B 1D 00
+
+# ignore if it is zero
+CMP $B 00
+AND $F $F 0E
+JMP 04 :LOOP
+
+# move output to register A
+MOV $A $B
+# loop
+JMP $F :LOOP

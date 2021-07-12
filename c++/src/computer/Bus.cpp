@@ -103,3 +103,12 @@ uint32_t computer::Bus::getDeviceAdr(std::shared_ptr<computer::Device> device)
     }
     return res;
 }
+
+void computer::Bus::refreshCycle(uint64_t cycle)
+{
+    cycleCPU = cycle;
+    for (unsigned int i = 0; i < devices.size(); i++)
+    {
+        devices[i]->refreshCycle(cycle);
+    }
+}

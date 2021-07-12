@@ -6,6 +6,8 @@
 
 #include "graphic/CPUWindow.hpp"
 #include "graphic/RamWindow.hpp"
+#include "graphic/RomWindow.hpp"
+#include "graphic/IOControllerWindow.hpp"
 
 #include "utils/console.hpp"
 
@@ -68,7 +70,7 @@ void graphic::ComputerWindow::makeMenu()
     {
         std::string name = devices[i]->getName();
         std::string type = devices[i]->getType();
-        if (type.compare("RAM") == 0 || type.compare("VRAM") == 0)
+        if (type.compare("RAM") == 0 || type.compare("VRAM") == 0 || type.compare("ROM") == 0 || type.compare("IOCTRL") == 0)
         {
             std::stringstream indexStr;
             indexStr << std::dec << std::setfill('0') << std::setw(2) << i;
@@ -266,6 +268,22 @@ void graphic::ComputerWindow::openSubWindow(std::string windowName)
             std::string devWinName = "S257 Dynamic Recompiler - " + ram->getName() + " Window";
             std::shared_ptr<graphic::RamWindow> subW = std::make_shared<graphic::RamWindow>(ram, devWinName, debug);
             printDebug("open ram");
+            addSubWindow(subW);
+        }
+        else if (windowName.compare("ROM") == 0)
+        {
+            std::shared_ptr<computer::ROM> rom = std::dynamic_pointer_cast<computer::ROM>(computer->getAllDevice()[i]);
+            std::string devWinName = "S257 Dynamic Recompiler - " + rom->getName() + " Window";
+            std::shared_ptr<graphic::RomWindow> subW = std::make_shared<graphic::RomWindow>(rom, devWinName, debug);
+            printDebug("open rom");
+            addSubWindow(subW);
+        }
+        else if (windowName.compare("IOCTRL") == 0)
+        {
+            std::shared_ptr<computer::IOController> io = std::dynamic_pointer_cast<computer::IOController>(computer->getAllDevice()[i]);
+            std::string devWinName = "S257 Dynamic Recompiler - " + io->getName() + " Window";
+            std::shared_ptr<graphic::IOControllerWindow> subW = std::make_shared<graphic::IOControllerWindow>(io, devWinName, debug);
+            printDebug("open ioCtrl");
             addSubWindow(subW);
         }
         else

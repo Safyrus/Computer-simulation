@@ -1,26 +1,26 @@
-#include "graphic/RamView.hpp"
+#include "graphic/RomView.hpp"
 #include "utils/console.hpp"
 
 #include <sstream>
 #include <iomanip>
 
-graphic::RamView::RamView(std::shared_ptr<computer::RAM> ram)
+graphic::RomView::RomView(std::shared_ptr<computer::ROM> rom)
 {
-    this->ram = ram;
+    this->rom = rom;
     page = 0;
     // setup font
     if (!font.loadFromFile("pix46.ttf"))
     {
-        printError("RamView: Cannot open font");
+        printError("RomView: Cannot open font");
     }
     const_cast<sf::Texture &>(font.getTexture(6)).setSmooth(false);
 }
 
-graphic::RamView::~RamView()
+graphic::RomView::~RomView()
 {
 }
 
-void graphic::RamView::draw(sf::RenderWindow &window)
+void graphic::RomView::draw(sf::RenderWindow &window)
 {
     // draw the background
     sf::RectangleShape rect;
@@ -29,7 +29,7 @@ void graphic::RamView::draw(sf::RenderWindow &window)
     rect.setSize(sf::Vector2f(w, h));
     window.draw(rect);
 
-    // get ram data
+    // get rom data
     std::stringstream str;
     uint8_t max = 8;
     std::string strChar = "";
@@ -51,11 +51,11 @@ void graphic::RamView::draw(sf::RenderWindow &window)
                 << std::hex << std::uppercase << std::setfill('0') << std::setw(4) << i << ": ";
         }
         cntX++;
-        str << std::hex << std::uppercase << std::setfill('0') << std::setw(2) << (uint16_t)ram->get(i) << " ";
-        uint8_t chr = ram->get(i);
+        str << std::hex << std::uppercase << std::setfill('0') << std::setw(2) << (uint16_t)rom->get(i) << " ";
+        uint8_t chr = rom->get(i);
         if ((chr > 0x1F && chr < 0x7F) || chr > 0x9F)
         {
-            strChar += (char)ram->get(i);
+            strChar += (char)rom->get(i);
         }
         else
         {
@@ -64,7 +64,7 @@ void graphic::RamView::draw(sf::RenderWindow &window)
     }
     str << strChar;
 
-    // draw ram content
+    // draw rom content
     sf::Text text;
     text.setFont(font);
     text.setCharacterSize(6);
@@ -75,13 +75,13 @@ void graphic::RamView::draw(sf::RenderWindow &window)
     window.draw(text);
 }
 
-void graphic::RamView::setPage(uint8_t page)
+void graphic::RomView::setPage(uint8_t page)
 {
-    page %= ram->length()/256;
+    page %= rom->length()/256;
     this->page = page;
 }
 
-uint8_t graphic::RamView::getPage()
+uint8_t graphic::RomView::getPage()
 {
     return page;
 }

@@ -45,6 +45,7 @@ namespace computer
         uint8_t getBusData(uint16_t adr);
         void setBusData(uint16_t adr, uint8_t data);
         void loadOnBus(uint16_t start, std::vector<uint8_t> data);
+        void refreshCycle(uint64_t cycle);
     };
 } // namespace computer
 

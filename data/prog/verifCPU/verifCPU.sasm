@@ -34,7 +34,7 @@ JMP_BACK:
 DATA:
     1D %123 :DATA
     ~10100101 'A' :DATA:l :DATA:h
-    "TEST"
+    "TESTING"
     ADD $A ~10110 'A'
 
 INIT:

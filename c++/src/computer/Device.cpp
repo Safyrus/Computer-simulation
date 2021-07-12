@@ -36,3 +36,8 @@ std::string computer::Device::getType()
 {
     return type;
 }
+
+void computer::Device::refreshCycle(uint64_t cycle)
+{
+    cycleCPU = cycle;
+}

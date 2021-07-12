@@ -94,6 +94,9 @@ void graphic::MainWindow::start()
     rect.setFillColor(sf::Color::Black);
     rect.setSize(sf::Vector2f(width, height));
 
+    keyboard = std::make_shared<computer::Keyboard>();
+    computer->connectIODevice(keyboard, 0);
+
     makeMenu();
 
     std::shared_ptr<computer::VPU> vpu = std::static_pointer_cast<computer::VPU>(computer->getDevice("VPU", 0x1C18, 0x1C1F));
@@ -150,32 +153,14 @@ void graphic::MainWindow::loop()
             {
                 showMenu = !showMenu;
             }
-            break;
         default:
             break;
         }
+        keyboard->inputEvent(event);
     }
     // Clear screen
     window.clear(sf::Color(32, 32, 32));
 
-    /*
-    std::shared_ptr<computer::RAM> ram = std::static_pointer_cast<computer::RAM>(computer->getDevice("RAM", 0x2000, 0x3FFF));
-    if (ram != nullptr)
-    {
-        //draw screen
-        ScreenSimpleView screen(ram);
-        screen.setBackgroundColor(sf::Color(0, 32, 0));
-        screen.setColor(sf::Color(0, 170, 0));
-        screen.setPos(0, 0);
-        screen.draw(window);
-    }
-    else
-    {
-        // draw text
-        window.draw(rect);
-        window.draw(text);
-    }
-    */
     //draw vpu screen
     screenVpu->setPos(0, 0);
     screenVpu->draw(window);

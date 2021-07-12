@@ -271,13 +271,8 @@ int dynarec::Translater::runStep()
     // setup variables
     int res = 0;
 
-    auto t1 = std::chrono::high_resolution_clock::now();
     // timing to wait between each block
     waitInst();
-
-    auto t2 = std::chrono::high_resolution_clock::now();
-    auto ns_int = std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1);
-    //std::cout << ns_int.count() << std::endl;
 
     // print debug what adr we will run
     if (print)
@@ -306,6 +301,7 @@ int dynarec::Translater::runStep()
         uint16_t insCount = e->getInsCount();
         cpu->pc += insCount * 4;
         cpu->cycle += insCount;
+        cpu->refreshCycle(0);
     }
     else
     {

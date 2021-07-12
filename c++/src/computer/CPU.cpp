@@ -145,3 +145,9 @@ void computer::CPU::loadOnBus(uint16_t start, std::vector<uint8_t> data)
         rawBus[start + i] = data[i];
     }
 }
+
+void computer::CPU::refreshCycle(uint64_t cycle)
+{
+    cycleCPU = this->cycle;
+    bus->refreshCycle(this->cycle);
+}

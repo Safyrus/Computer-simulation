@@ -76,3 +76,8 @@ void computer::ROM::load(std::string filePath)
         this->data[i % len] = vals[i];
     }
 }
+
+uint16_t computer::ROM::length()
+{
+    return len;
+}
