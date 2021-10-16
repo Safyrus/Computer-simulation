@@ -1,17 +1,36 @@
 #include "computer/HardwareStates.hpp"
+#include <math.h>
+#include "utils/console.hpp"
 
 computer::HardwareStates::HardwareStates()
 {
     type = "HWSTATS";
     name = "HWSTATS";
+    std::string snd = "data/snd/square.wav";
+    if (!square.loadFromFile(snd))
+    {
+        printError("HWSTATES: Cannot load sound file '" + snd + "'");
+    }
+    reset();
+    buzzer.setBuffer(square);
+    buzzer.setLoop(true);
 }
 
 computer::HardwareStates::~HardwareStates()
 {
 }
 
+void computer::HardwareStates::setPwr(bool pwr)
+{
+    this->pwr = pwr;
+    buzzer.stop();
+}
+
 void computer::HardwareStates::reset()
 {
+    buzzerReg = 0;
+    buzzerTime = 0;
+    lastBuzzerCycle = 0;
 }
 
 void computer::HardwareStates::run()
@@ -25,11 +44,44 @@ void computer::HardwareStates::set(uint16_t adr, uint8_t data)
     switch (adrTo)
     {
     case 0:
+        if (reg == 2)
+        {
+            buzzerReg = data;
+            lastBuzzerCycle = cycleCPU;
+            buzzerTime = (buzzerReg >> 4);
+            //float sec = 2 - ((buzzerReg >> 4) * (1.0 / 8));
+            float pitch = (buzzerReg & 0x07);
+            if (pitch == 0)
+            {
+                pitch = 1;
+            }
+            else if (buzzerReg & 0x08)
+            {
+                pitch = 1.0 / (pitch+1);
+            }
+            else
+            {
+                pitch = 1.0 * (pitch+1);
+            }
+            if(buzzer.getStatus() != sf::Sound::Playing)
+            {
+                printDebug("HWSTATES(SND): START");
+                buzzer.play();
+            }
+            //buzzer.setPlayingOffset(sf::seconds(sec));
+            buzzer.setPitch(pitch);
+        }
+        break;
+    case 1:
+        if (fdc)
+        {
+            fdc->set(reg, data);
+        }
         break;
     case 2:
-        if(ioCtrl)
+        if (ioCtrl)
         {
-            ioCtrl->set(reg+32, data);
+            ioCtrl->set(reg + 32, data);
         }
         break;
     default:
@@ -50,14 +102,27 @@ uint8_t computer::HardwareStates::get(uint16_t adr)
         case 0:
             ret = connected;
             break;
+        case 1:
+            ret = cycleCPU / (1000000 / 256);
+            break;
+        case 2:
+
+            ret = buzzerReg;
+            break;
         default:
             break;
         }
         break;
-    case 2:
-        if(ioCtrl)
+    case 1:
+        if (fdc)
         {
-            ret = ioCtrl->get(reg+32);
+            ret = fdc->get(reg);
+        }
+        break;
+    case 2:
+        if (ioCtrl)
+        {
+            ret = ioCtrl->get(reg + 32);
         }
         break;
     default:
@@ -69,7 +134,11 @@ uint8_t computer::HardwareStates::get(uint16_t adr)
 void computer::HardwareStates::connect(std::shared_ptr<computer::Device> device, uint16_t startAdr, uint16_t endAdr)
 {
     std::string type = device->getType();
-    if (type.compare("ROM") == 0)
+    if (startAdr >= 0x8000)
+    {
+        connected |= 0x80;
+    }
+    else if (type.compare("ROM") == 0)
     {
         if (endAdr <= 0xFFF)
         {
@@ -86,7 +155,7 @@ void computer::HardwareStates::connect(std::shared_ptr<computer::Device> device,
         {
             connected |= 0x04;
         }
-        else if (startAdr >= 0x4000 && endAdr <= 0x77FF)
+        else if (startAdr >= 0x4000 && endAdr <= 0x7FFF)
         {
             connected |= 0x08;
         }
@@ -102,9 +171,11 @@ void computer::HardwareStates::connect(std::shared_ptr<computer::Device> device,
     {
         connected |= 0x40;
         ioCtrl = std::dynamic_pointer_cast<computer::IOController>(device);
-    }else if (startAdr >= 0x8000)
+    }
+    else if (type.compare("FDC") == 0)
     {
-        connected |= 0x80;
+        connected |= 0x20;
+        fdc = std::dynamic_pointer_cast<computer::FDC>(device);
     }
 }
 
@@ -144,8 +215,30 @@ void computer::HardwareStates::disconnect(std::shared_ptr<computer::Device> devi
     {
         ioCtrl = nullptr;
         connected &= 0xBF;
-    }else if (startAdr >= 0x8000)
+    }
+    else if (type.compare("FDC") == 0)
+    {
+        connected &= 0xDF;
+        fdc = nullptr;
+    }
+    else if (startAdr >= 0x8000)
     {
         connected &= 0x7F;
+    }
+}
+
+void computer::HardwareStates::refreshCycle(uint64_t cycle)
+{
+    cycleCPU = cycle;
+    uint64_t buzzerRemaining = 0;
+    if ((lastBuzzerCycle + (buzzerTime * 125000)) > cycleCPU)
+    {
+        buzzerRemaining = ((lastBuzzerCycle + (buzzerTime * 125000)) - cycleCPU);
+    }
+    buzzerReg = (buzzerReg & 0x0F) | ((int)(ceil(buzzerRemaining/125000.0)) << 4);
+    if((buzzerReg & 0xF0) == 0 && buzzer.getStatus() == sf::Sound::Playing)
+    {
+        printDebug("HWSTATES(SND): STOP");
+        buzzer.stop();
     }
 }

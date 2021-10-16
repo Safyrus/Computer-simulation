@@ -1,0 +1,96 @@
+# ####################
+# # For the Saphyr I #
+# ####################
+#
+# read the keyboard input and put the typed character on the screen.
+# 
+# /!\
+# The Keyboard need to be on port 1 for this program to work.
+# /!\
+
+# Some constant
+@const UEQ 05
+@const UGE 01
+@const FLC 01
+
+# Adress for the VPU
+@origin 1C18
+VPU_MODE:
+@origin 1C19
+VPU_STATE:
+
+# Adress for IOs
+@origin 1D00
+IO:
+IO1G:
+@origin 1D01
+IO1S:
+@origin 1D02
+IO1GR:
+@origin 1D03
+IO1SR:
+
+# VRAM adress
+@origin 2000
+VRAM:
+
+
+# Start of the program
+@origin 0000
+START:
+ # Prepare the VPU
+ SET 03 :VPU_MODE
+ JMP $F :WAIT_VSYNC
+ SET 0F :VRAM:h A1
+
+ START_LOOP:
+  # wait for the key
+  JMP $F :WAIT_KEY
+  # wait for the vsync
+  JMP $F :WAIT_VSYNC
+  # put the key on the screen
+  SET $A :VRAM:h A0
+  # loop
+  JMP $F :START_LOOP
+
+
+# Wait for a input on the
+# first device (which
+# should be the keyboard)
+WAIT_KEY:
+ # Save the return adress
+ MOV $G0 $J1
+ MOV $G1 $J2
+
+ WAIT_KEY_LOOP:
+  # Get the keyboard input
+  GET $A :IO1G
+  # if it is not 0
+  CMP $A 01
+  AND $F $F FLC
+  # then return to the caller
+  JMP UGE $G0 $G1
+  # else loop
+  JMP $F :WAIT_KEY_LOOP
+
+
+
+# Wait for the vertical
+# blanking interval
+WAIT_VSYNC:
+ # Save the return adress
+ MOV $G0 $J1
+ MOV $G1 $J2
+
+ WAIT_VSYNC_LOOP:
+  # Get the VPU state
+  GET $F :VPU_STATE
+  # if it is 0
+  AND $F $F 01
+  CMP $F 00
+  # then loop because it is
+  # not vsync
+  JMP UEQ :WAIT_VSYNC_LOOP
+  # else vsync is on and we
+  # return to the caller
+  JMP $F $G0 $G1

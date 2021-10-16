@@ -1,0 +1,74 @@
+# ####################
+# # For the Saphyr I #
+# ####################
+#
+# Play a pattern of sound with the buzzer.
+
+@origin 1C01
+HW_TIMER:
+@origin 1C02
+HW_BUZZER:
+
+
+# start
+@origin 0000
+# init C to 0
+MOV $C 00
+
+MOV $G0 :pattern1:h
+MOV $G1 :pattern1:l
+LOOP:
+ # get the next sound
+ GET $A $G0 $G1
+ AND $B $A F0
+ CMP $B 00
+ AND $F $F 04
+ JMP 00 :PLAY
+
+ CMD:
+  AND $B $A 0F
+  CMP $B 00
+  AND $F $F 04
+  JMP 04 :END
+  MUL $B $B 10
+  GET $A :HW_TIMER
+  ADD $D $A $B
+  CMD_WAIT:
+   GET $A :HW_TIMER
+   CMP $A $D
+   AND $F $F 04
+   JMP 00 :CMD_WAIT
+  JMP $F :NEXT
+
+ # play the next sound
+ PLAY:
+  SET $A :HW_BUZZER
+  # inc C
+  ADD $C $C 01
+
+ # wait for the sound to end
+ WAIT:
+  GET $F :HW_BUZZER
+  AND $F $F F0
+  CMP $F 00
+  AND $F $F 04
+  JMP 00 :WAIT
+ 
+ NEXT:
+  ADD $G1 $G1 01
+  CMP $G1 01
+  AND $F $F 01
+  JMP 01 :LOOP
+  ADD $G0 $G0 01
+  JMP $F :LOOP
+
+# the end
+END:
+ JMP $F :END
+
+
+pattern1:
+19 18 0F
+10 11 12 21 0F
+17 16 15 14 13 12 11 0F
+5B 5A 5B 5A 5B 5A 5B 00

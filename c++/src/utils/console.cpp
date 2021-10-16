@@ -177,3 +177,14 @@ void printError(std::string str)
               << ":" << std::setfill('0') << std::setw(2) << ltm->tm_sec
               << "] /!\\ ERROR /!\\ : " << str << ansi(RESET) << std::endl;
 }
+
+void printWarning(std::string str)
+{
+    time_t now = time(0);
+    tm *ltm = localtime(&now);
+    std::cout << ansi(YELLOW_FG) << std::dec
+              << "[" << std::setfill('0') << std::setw(2) << ltm->tm_hour
+              << ":" << std::setfill('0') << std::setw(2) << ltm->tm_min
+              << ":" << std::setfill('0') << std::setw(2) << ltm->tm_sec
+              << "] ! Warning ! : " << str << ansi(RESET) << std::endl;
+}

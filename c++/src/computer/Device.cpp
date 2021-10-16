@@ -1,4 +1,5 @@
 #include "computer/Device.hpp"
+#include "utils/console.hpp"
 
 computer::Device::Device()
 {
@@ -6,10 +7,13 @@ computer::Device::Device()
     pwr = false;
     type = "NO_VAL";
     name = "NO_NAME";
+    cycleCPU = 0;
+    printDebug("Device Creation");
 }
 
 computer::Device::~Device()
 {
+    printDebug(name + ": Device Destruction");
 }
 
 void computer::Device::setPwr(bool pwr)

@@ -4,6 +4,8 @@
 
 #include <iostream>
 #include <string.h>
+#include <locale>
+#include <codecvt>
 
 const std::vector<std::string> Lexer::CMDS = {"NOP", "RST", "OFF", "MOV", "CMP", "ADD", "ADC", "SUB", "SBB", "MUL", "DIV", "MOD", "AND", "OR", "XOR", "JMP", "GET", "SET"};
 
@@ -148,7 +150,15 @@ Token Lexer::makeString()
         return Token(Token::ERR, word, newPos);
     }
     word = word.substr(0, word.size() - 1);
-    return Token(Token::STRING, word, newPos);
+    std::string newWord = "";
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+    std::wstring str = converter.from_bytes(word);
+    for (unsigned int i = 0; i < str.size(); i++)
+    {
+        char valStr = str[i];
+        newWord += valStr;
+    }
+    return Token(Token::STRING, newWord, newPos);
 }
 
 Token Lexer::makeImport()
@@ -165,6 +175,34 @@ Token Lexer::makeOrigin()
     next();
     std::string word = findWord();
     return Token(Token::ORIGIN, word, newPos);
+}
+
+Token Lexer::makeConstDeclare()
+{
+    Position newPos = pos.copy();
+    next();
+    std::string word = findWord();
+
+    for (unsigned int i = 0; i < constants.size(); i++)
+    {
+        if(constants[i].compare(word) == 0)
+        {
+            std::string error = "[ASSEMBLER ERROR]: Cannot declare the constant " + word + " multiple time in file " + fileName + " at " + std::to_string(newPos.getLine()) + ":" + std::to_string(newPos.getCol());
+            printError(error);
+            return Token(Token::ERR, word, newPos);
+        }
+    }
+    constants.push_back(word);
+
+    return Token(Token::CONSTANT_DECLARE, word, newPos);
+}
+
+Token Lexer::makeConst()
+{
+    Position newPos = pos.copy();
+    next();
+    std::string word = findWord();
+    return Token(Token::CONSTANT, word, newPos);
 }
 
 Token Lexer::makeLabel()
@@ -227,9 +265,22 @@ Token Lexer::findToken()
         return Token(Token::HEX, word, newPos);
     }
 
+    for (unsigned int i = 0; i < constants.size(); i++)
+    {
+        if(constants[i].compare(word) == 0)
+        {
+            return Token(Token::CONSTANT, word, newPos);
+        }
+    }
+    std::string warning = "[ASSEMBLER WARNING]: Undefined word " + word + " in file " + fileName + " at " + std::to_string(newPos.getLine()) + ":" + std::to_string(newPos.getCol()) + ". Try to use undeclare constant";
+    printWarning(warning);
+    return Token(Token::CONSTANT, word, newPos);
+
+    /*
     std::string error = "[ASSEMBLER ERROR]: Undefined word " + word + " in file " + fileName + " at " + std::to_string(newPos.getLine()) + ":" + std::to_string(newPos.getCol());
     printError(error);
     return Token(Token::ERR, word, newPos);
+    */
 }
 
 Token Lexer::findAssemblerCmd()
@@ -244,6 +295,10 @@ Token Lexer::findAssemblerCmd()
     else if (word.compare("@origin") == 0)
     {
         return makeOrigin();
+    }
+    else if (word.compare("@const") == 0)
+    {
+        return makeConstDeclare();
     }
 
     std::string error = "[ASSEMBLER ERROR]: Undefined assembler command " + word + " in file " + fileName + " at " + std::to_string(newPos.getLine()) + ":" + std::to_string(newPos.getCol());

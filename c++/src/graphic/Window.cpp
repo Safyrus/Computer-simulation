@@ -32,6 +32,7 @@ graphic::Window::Window(std::string windowName, bool debug)
 
 graphic::Window::~Window()
 {
+    printDebug("Destruction");
 }
 
 void graphic::Window::addSubWindow(std::shared_ptr<graphic::Window> subWindow)
@@ -125,6 +126,7 @@ void graphic::Window::stopSubWindows()
         std::shared_ptr<graphic::Window> subW = subWindows[i];
         subW->stopSubWindows();
         subW->stop();
+        subWindows.erase(subWindows.begin() + i);
     }
 }
 
@@ -143,13 +145,13 @@ void graphic::Window::display()
     // while running or window is open
     while (run)
     {
-        std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+        //std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
         loop();
         loopSubWindows();
-        std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-        int delta = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
-        int sleepFor = std::max(0, (1000/fps)-delta);
-        sf::sleep(sf::milliseconds(sleepFor));
+        //std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+        //int delta = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+        //int sleepFor = std::max(0, (1000/fps)-delta);
+        //sf::sleep(sf::milliseconds(sleepFor));
     }
 
     // stoping

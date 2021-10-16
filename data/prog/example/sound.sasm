@@ -1,0 +1,39 @@
+# ####################
+# # For the Saphyr I #
+# ####################
+#
+# Play all the possible sound of the buzzer
+
+@origin 1C02
+HW_BUZZER:
+
+# start
+@origin 0000
+# init A to 0
+MOV $A 00
+
+LOOP:
+ # play the sound in A
+ SET $A :HW_BUZZER
+ # inc A
+ ADD $A $A 01
+
+ # wait for the sound to end
+ WAIT:
+  GET $B :HW_BUZZER
+  AND $B $B F0
+  CMP $B 00
+  AND $F $F 04
+  JMP 00 :WAIT
+
+ # check if all the note
+ # had played
+ CMP $A 00
+ AND $F $F 04
+ JMP 00 :LOOP
+
+# the end
+END:
+ JMP $F :END
+
+

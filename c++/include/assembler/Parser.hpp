@@ -8,6 +8,7 @@
 #include "assembler/node/NodeMovL.hpp"
 #include "assembler/node/NodeTri.hpp"
 #include "assembler/node/NodeMov2L.hpp"
+#include "assembler/node/NodeDuo.hpp"
 #include <vector>
 
 class Parser
@@ -26,6 +27,11 @@ private:
     static const std::vector<std::string> CMDS_DOUBLE;
 
     void next();
+    bool checkNext(bool print, int argNum);
+    bool checkVal(Token val, bool print, int argNum);
+    bool checkReg(Token reg, bool print, int argNum);
+    bool checkLabel(Token label, bool print, int argNum);
+
     Node* findDoubleNode();
     Node* findCmdNode();
     NodeBin* makeCmdNodeBin(bool print);
@@ -35,6 +41,7 @@ private:
     NodeMovL* makeCmdNodeMovL(bool print);
     NodeTri* makeCmdNodeTri(bool print);
     NodeMov2L* makeCmdNodeMov2L(bool print);
+    NodeDuo* makeNodeDuo(bool print);
 public:
     Parser(std::vector<Token> tokens);
     ~Parser();

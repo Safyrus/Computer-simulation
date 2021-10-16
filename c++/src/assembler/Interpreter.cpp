@@ -74,12 +74,13 @@ std::string Interpreter::interprete()
                     std::stringstream debugStr;
                     debugStr << "[ASSEMBLER ERROR]: same label in file " << t.getPos().getFileName() << " at " << t.getPos().getLine() << ":" << t.getPos().getCol();
                     printError(debugStr.str());
+                    return "FFFFFFFF ";
                 }
                 else
                 {
                     labels.push_back(nodes[i]);
                     labels_adr.push_back(index);
-                    printDebug("label " + nodes[i]->getToken(0).getValue() + ":" + std::to_string(index));
+                    printInfo("label " + nodes[i]->getToken(0).getValue() + ":" + std::to_string(index));
                 }
             }
             else if (t.getType().compare(Token::CMD) == 0)
@@ -96,9 +97,14 @@ std::string Interpreter::interprete()
             }
             else if (t.getType().compare(Token::STRING) == 0)
             {
+                printDebug("String: " + std::to_string(t.getValue().size()+1));
                 index += t.getValue().size()+1;
             }
             else if (t.getType().compare(Token::HEX) == 0 || t.getType().compare(Token::DEC) == 0 || t.getType().compare(Token::REG) == 0 || t.getType().compare(Token::BIN) == 0 || t.getType().compare(Token::CHAR) == 0)
+            {
+                index += 1;
+            }
+            else if (t.getType().compare(Token::CONSTANT) == 0)
             {
                 index += 1;
             }
@@ -132,6 +138,17 @@ std::string Interpreter::interprete()
             else if (t.getType().compare(Token::ORIGIN) == 0)
             {
                 index = strtol(t.getValue().c_str(), NULL, 16) & 0xFFFF;
+            }
+        }
+        else if (nodes[i]->getType() == Node::NODE_DUO)
+        {
+            Token t = nodes[i]->getToken(0);
+            if (t.getType().compare(Token::CONSTANT_DECLARE) == 0)
+            {
+                int valCode = getValCode(nodes[i]->getToken(1));
+                constants.push_back(t.getValue());
+                constants_val.push_back(valCode);
+                printDebug("constant " + t.getValue() + "(" + std::to_string(valCode) + ")" + ":" + std::to_string(index));
             }
         }
         else if (nodes[i]->getType() == Node::NODE_MOV2L)
@@ -191,20 +208,7 @@ std::string Interpreter::nodeUni(Node *n)
     std::stringstream res;
     res << std::hex;
     Token t = n->getToken(0);
-    if (t.getType().compare(Token::IMPORT) == 0)
-    { /*
-        std::string impName = t.getValue();
-        for (unsigned int i = 0; i < importName.size(); i++)
-        {
-            if (importName[i].compare(impName) == 0)
-            {
-                std::cout << "[ASSEMBLER ERROR]: already import\n";
-                return "FFFFFFFF ";
-            }
-        }
-        res << import(impName);*/
-    }
-    else if (t.getType().compare(Token::COMMENT) == 0 || t.getType().compare(Token::LABEL_DECLARE) == 0 || t.getType().compare(Token::ORIGIN) == 0)
+    if (t.getType().compare(Token::IMPORT) == 0 || t.getType().compare(Token::COMMENT) == 0 || t.getType().compare(Token::LABEL_DECLARE) == 0 || t.getType().compare(Token::ORIGIN) == 0)
     {
     }
     else if (t.getType().compare(Token::CMD) == 0)
@@ -229,15 +233,16 @@ std::string Interpreter::nodeUni(Node *n)
         }
         res << labelVal;
     }
-    else if (t.getType().compare(Token::HEX) == 0 || t.getType().compare(Token::DEC) == 0 || t.getType().compare(Token::REG) == 0 || t.getType().compare(Token::BIN) == 0 || t.getType().compare(Token::CHAR) == 0)
+    else if (t.getType().compare(Token::HEX) == 0 || t.getType().compare(Token::DEC) == 0 || t.getType().compare(Token::REG) == 0 || t.getType().compare(Token::BIN) == 0 || t.getType().compare(Token::CHAR) == 0 || t.getType().compare(Token::CONSTANT) == 0 )
     {
         int valCode = getValCode(t);
         res << std::uppercase << std::setfill('0') << std::setw(2) << valCode << " ";
     }
     else if (t.getType().compare(Token::STRING) == 0)
     {
-        std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-        std::wstring str = converter.from_bytes(t.getValue());
+        //std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+       // std::wstring str = converter.from_bytes(t.getValue());
+       std::string str = t.getValue();
         for (unsigned int i = 0; i < str.size(); i++)
         {
             uint8_t valStr = str[i];
@@ -596,6 +601,26 @@ int Interpreter::getValCode(Token val)
         valCode = stoi(labelVal, NULL, 16);
         //printDebug("\n**"+std::to_string(valCode)+"\n");
     }
+    else if (val.getType().compare(Token::CONSTANT) == 0)
+    {
+        bool find = false;
+        for (unsigned int i = 0; i < constants.size(); i++)
+        {
+            if (val.getValue().compare(constants[i]) == 0)
+            {
+                valCode = constants_val[i];
+                find = true;
+                break;
+            }
+        }
+        if (!find)
+        {
+            std::stringstream debugStr;
+            debugStr << "[ASSEMBLER ERROR] can't find constant code of " << val.getValue() << " in file " << val.getPos().getFileName() << " at " << val.getPos().getLine() << ":" << val.getPos().getCol();
+            printError(debugStr.str());
+            return -1;
+        }
+    }
     else
     {
         if (val.getType().compare(Token::HEX) == 0)
@@ -716,23 +741,4 @@ std::vector<Node *> Interpreter::import(std::string fileName)
         return nodesError;
     }
     return parseNodes;
-
-    //interpreting
-    /*
-    Interpreter interpreter(nodes, fileName);
-    fileOut = interpreter.interprete();
-
-    //verif interpreting
-    if (print_debug)
-    {
-        std::cout << "\n\n";
-        std::cout << fileOut;
-    }
-
-    for (unsigned int i = 0; i < nodes.size(); i++)
-    {
-        delete nodes[i];
-    }
-
-    return fileOut;*/
 }

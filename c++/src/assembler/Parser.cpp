@@ -49,6 +49,67 @@ void Parser::next()
     }
 }
 
+bool Parser::checkNext(bool print, int argNum)
+{
+    if (index == -1 || tokens[index].getType().compare(Token::CMD) == 0)
+    {
+        if (print)
+        {
+            Token token = tokens[index];
+            std::stringstream debugStr;
+            debugStr << "[ASSEMBLER ERROR]: Missing " << argNum << " argument in file " << token.getPos().getFileName() << " at " << token.getPos().getLine() << ":" << token.getPos().getCol();
+            printError(debugStr.str());
+        }
+        return false;
+    }
+    return true;
+}
+
+bool Parser::checkVal(Token val, bool print, int argNum)
+{
+    if (val.getType() != Token::DEC && val.getType() != Token::HEX && val.getType() != Token::REG && val.getType() != Token::BIN && val.getType() != Token::CHAR && val.getType() != Token::LABEL_LOW && val.getType() != Token::LABEL_HIGH && val.getType() != Token::CONSTANT)
+    {
+        if (print)
+        {
+            std::stringstream debugStr;
+            debugStr << "[ASSEMBLER ERROR]: type of argument " << argNum << " incorrect, expected hex, dec, bin, char or reg in file " << val.getPos().getFileName() << " at " << val.getPos().getLine() << ":" << val.getPos().getCol();
+            printError(debugStr.str());
+        }
+        return false;
+    }
+    return true;
+}
+
+bool Parser::checkReg(Token reg, bool print, int argNum)
+{
+    if (reg.getType() != Token::REG)
+    {
+        if (print)
+        {
+            std::stringstream debugStr;
+            debugStr << "[ASSEMBLER ERROR]: type of argument " << argNum << " incorrect, expected reg in file " << reg.getPos().getFileName() << " at " << reg.getPos().getLine() << ":" << reg.getPos().getCol();
+            printError(debugStr.str());
+        }
+        return false;
+    }
+    return true;
+}
+
+bool Parser::checkLabel(Token label, bool print, int argNum)
+{
+    if (label.getType() != Token::LABEL)
+    {
+        if (print)
+        {
+            std::stringstream debugStr;
+            debugStr << "[ASSEMBLER ERROR]: type of argument " << argNum << " incorrect, expected label in file " << label.getPos().getFileName() << " at " << label.getPos().getLine() << ":" << label.getPos().getCol();
+            printError(debugStr.str());
+        }
+        return false;
+    }
+    return true;
+}
+
 std::vector<Node *> Parser::parse()
 {
     std::vector<Node *> nodes;
@@ -63,7 +124,13 @@ std::vector<Node *> Parser::parse()
         debugStr << std::setfill(' ') << std::setw(4) << index << " " << tok.getType() << " " << tok.getValue();
         printDebug(debugStr.str());
 
-        if (tok.getType().compare(Token::CMD) != 0)
+        if (tok.getType().compare(Token::CONSTANT_DECLARE) == 0)
+        {
+            printDebug("     duo");
+            nodes.push_back(makeNodeDuo(true));
+            next();
+        }
+        else if (tok.getType().compare(Token::CMD) != 0)
         {
             printDebug("     uni");
             nodes.push_back(new NodeUni(tok));
@@ -293,44 +360,24 @@ NodeBin *Parser::makeCmdNodeBin(bool print)
 
     Token cmd = tokens[index];
     next();
-    if (index == -1 || tokens[index].getType().compare(Token::CMD) == 0)
+    if (!checkNext(print, 2))
     {
-        if (print)
-        {
-            debugStr << "[ASSEMBLER ERROR]: Missing 2 argument in file " << cmd.getPos().getFileName() << " at " << cmd.getPos().getLine() << ":" << cmd.getPos().getCol();
-            printError(debugStr.str());
-        }
         return new NodeBin(Token(Token::ERR, "Missing argument", cmd.getPos()), Token(), Token());
     }
     Token val1 = tokens[index];
-    if (val1.getType() != Token::DEC && val1.getType() != Token::HEX && val1.getType() != Token::REG && val1.getType() != Token::BIN && val1.getType() != Token::CHAR && val1.getType() != Token::LABEL_LOW && val1.getType() != Token::LABEL_HIGH)
+    if(!checkVal(val1, print, 1))
     {
-        if (print)
-        {
-            debugStr << "[ASSEMBLER ERROR]: type of argument 1 incorrect, expected hex, dec, bin, char or reg in file " << val1.getPos().getFileName() << " at " << val1.getPos().getLine() << ":" << val1.getPos().getCol();
-            printError(debugStr.str());
-        }
         return new NodeBin(Token(Token::ERR, "argument type incorrect", val1.getPos()), Token(), Token());
     }
     next();
-    if (index == -1 || tokens[index].getType().compare(Token::CMD) == 0)
+    if (!checkNext(print, 1))
     {
-        if (print)
-        {
-            debugStr << "[ASSEMBLER ERROR]: Missing 1 argument in file " << cmd.getPos().getFileName() << " at " << cmd.getPos().getLine() << ":" << cmd.getPos().getCol();
-            printError(debugStr.str());
-        }
         return new NodeBin(Token(Token::ERR, "Missing argument", cmd.getPos()), Token(), Token());
     }
     Token val2 = tokens[index];
-    if (val2.getType() != Token::DEC && val2.getType() != Token::HEX && val2.getType() != Token::REG && val2.getType() != Token::BIN && val2.getType() != Token::CHAR && val2.getType() != Token::LABEL_LOW && val2.getType() != Token::LABEL_HIGH)
+    if(!checkVal(val1, print, 2))
     {
-        if (print)
-        {
-            debugStr << "[ASSEMBLER ERROR]: type of argument 2 incorrect, expected hex, dec, bin, char or reg in file " << val2.getPos().getFileName() << " at " << val2.getPos().getLine() << ":" << val2.getPos().getCol();
-            printError(debugStr.str());
-        }
-        return new NodeBin(Token(Token::ERR, "argument type incorrect", val2.getPos()), Token(), Token());
+        return new NodeBin(Token(Token::ERR, "argument type incorrect", val1.getPos()), Token(), Token());
     }
     next();
     return new NodeBin(cmd, val1, val2);
@@ -345,44 +392,24 @@ NodeMov *Parser::makeCmdNodeMov(bool print)
 
     Token cmd = tokens[index];
     next();
-    if (index == -1 || tokens[index].getType().compare(Token::CMD) == 0)
+    if (!checkNext(print, 2))
     {
-        if (print)
-        {
-            debugStr << "[ASSEMBLER ERROR]: Missing 2 argument in file " << cmd.getPos().getFileName() << " at " << cmd.getPos().getLine() << ":" << cmd.getPos().getCol();
-            printError(debugStr.str());
-        }
         return new NodeMov(Token(Token::ERR, "Missing argument", cmd.getPos()), Token(), Token());
     }
     Token reg = tokens[index];
-    if (reg.getType() != Token::REG)
+    if(!checkReg(reg, print, 1))
     {
-        if (print)
-        {
-            debugStr << "[ASSEMBLER ERROR]: type of argument 1 incorrect, expected reg in file " << reg.getPos().getFileName() << " at " << reg.getPos().getLine() << ":" << reg.getPos().getCol();
-            printError(debugStr.str());
-        }
         return new NodeMov(Token(Token::ERR, "argument type incorrect", reg.getPos()), Token(), Token());
     }
     next();
-    if (index == -1 || tokens[index].getType().compare(Token::CMD) == 0)
+    if (!checkNext(print, 1))
     {
-        if (print)
-        {
-            debugStr << "[ASSEMBLER ERROR]: Missing 1 argument in file " << cmd.getPos().getFileName() << " at " << cmd.getPos().getLine() << ":" << cmd.getPos().getCol();
-            printError(debugStr.str());
-        }
         return new NodeMov(Token(Token::ERR, "Missing argument", cmd.getPos()), Token(), Token());
     }
     Token val = tokens[index];
-    if (val.getType() != Token::DEC && val.getType() != Token::HEX && val.getType() != Token::REG && val.getType() != Token::BIN && val.getType() != Token::CHAR && val.getType() != Token::LABEL_LOW && val.getType() != Token::LABEL_HIGH)
+    if(!checkVal(val, print, 2))
     {
-        if (print)
-        {
-            debugStr << "[ASSEMBLER ERROR]: type of argument 2 incorrect, expected hex, dec, bin, char or reg in file " << val.getPos().getFileName() << " at " << val.getPos().getLine() << ":" << val.getPos().getCol();
-            printError(debugStr.str());
-        }
-        return new NodeMov(Token(Token::ERR, "argument type incorrect", val.getPos()), Token(), Token());
+        return new NodeMov(Token(Token::ERR, "argument type incorrect", reg.getPos()), Token(), Token());
     }
     next();
     return new NodeMov(cmd, reg, val);
@@ -397,64 +424,34 @@ NodeMov2 *Parser::makeCmdNodeMov2(bool print)
 
     Token cmd = tokens[index];
     next();
-    if (index == -1 || tokens[index].getType().compare(Token::CMD) == 0)
+    if (!checkNext(print, 3))
     {
-        if (print)
-        {
-            debugStr << "[ASSEMBLER ERROR]: Missing 3 argument in file " << cmd.getPos().getFileName() << " at " << cmd.getPos().getLine() << ":" << cmd.getPos().getCol();
-            printError(debugStr.str());
-        }
         return new NodeMov2(Token(Token::ERR, "Missing argument", cmd.getPos()), Token(), Token(), Token());
     }
     Token reg = tokens[index];
-    if (reg.getType() != Token::REG)
+    if(!checkReg(reg, print, 1))
     {
-        if (print)
-        {
-            debugStr << "[ASSEMBLER ERROR]: type of argument 1 incorrect, expected reg in file " << reg.getPos().getFileName() << " at " << reg.getPos().getLine() << ":" << reg.getPos().getCol();
-            printError(debugStr.str());
-        }
         return new NodeMov2(Token(Token::ERR, "argument type incorrect", reg.getPos()), Token(), Token(), Token());
     }
     next();
-    if (index == -1 || tokens[index].getType().compare(Token::CMD) == 0)
+    if (!checkNext(print, 2))
     {
-        if (print)
-        {
-            debugStr << "[ASSEMBLER ERROR]: Missing 2 argument in file " << cmd.getPos().getFileName() << " at " << cmd.getPos().getLine() << ":" << cmd.getPos().getCol();
-            printError(debugStr.str());
-        }
         return new NodeMov2(Token(Token::ERR, "Missing argument", cmd.getPos()), Token(), Token(), Token());
     }
     Token val1 = tokens[index];
-    if (val1.getType() != Token::DEC && val1.getType() != Token::HEX && val1.getType() != Token::REG && val1.getType() != Token::BIN && val1.getType() != Token::CHAR && val1.getType() != Token::LABEL_LOW && val1.getType() != Token::LABEL_HIGH)
+    if(!checkVal(val1, print, 2))
     {
-        if (print)
-        {
-            debugStr << "[ASSEMBLER ERROR]: type of argument 2 incorrect, expected hex, dec, bin, char or reg in file " << val1.getPos().getFileName() << " at " << val1.getPos().getLine() << ":" << val1.getPos().getCol();
-            printError(debugStr.str());
-        }
         return new NodeMov2(Token(Token::ERR, "argument type incorrect", val1.getPos()), Token(), Token(), Token());
     }
     next();
-    if (index == -1 || tokens[index].getType().compare(Token::CMD) == 0)
+    if (!checkNext(print, 1))
     {
-        if (print)
-        {
-            debugStr << "[ASSEMBLER ERROR]: Missing 1 argument in file " << cmd.getPos().getFileName() << " at " << cmd.getPos().getLine() << ":" << cmd.getPos().getCol();
-            printError(debugStr.str());
-        }
         return new NodeMov2(Token(Token::ERR, "Missing argument", cmd.getPos()), Token(), Token(), Token());
     }
     Token val2 = tokens[index];
-    if (val2.getType() != Token::DEC && val2.getType() != Token::HEX && val2.getType() != Token::REG && val2.getType() != Token::BIN && val2.getType() != Token::CHAR && val2.getType() != Token::LABEL_LOW && val2.getType() != Token::LABEL_HIGH)
+    if(!checkVal(val2, print, 3))
     {
-        if (print)
-        {
-            debugStr << "[ASSEMBLER ERROR]: type of argument 3 incorrect, expected hex, dec, bin, char or reg in file " << val2.getPos().getFileName() << " at " << val2.getPos().getLine() << ":" << val2.getPos().getCol();
-            printError(debugStr.str());
-        }
-        return new NodeMov2(Token(Token::ERR, "argument type incorrect", val2.getPos()), Token(), Token(), Token());
+        return new NodeMov2(Token(Token::ERR, "argument type incorrect", val1.getPos()), Token(), Token(), Token());
     }
     next();
     return new NodeMov2(cmd, reg, val1, val2);
@@ -469,43 +466,23 @@ NodeBinL *Parser::makeCmdNodeBinL(bool print)
 
     Token cmd = tokens[index];
     next();
-    if (index == -1 || tokens[index].getType().compare(Token::CMD) == 0)
+    if (!checkNext(print, 2))
     {
-        if (print)
-        {
-            debugStr << "[ASSEMBLER ERROR]: Missing 2 argument in file " << cmd.getPos().getFileName() << " at " << cmd.getPos().getLine() << ":" << cmd.getPos().getCol();
-            printError(debugStr.str());
-        }
         return new NodeBinL(Token(Token::ERR, "Missing argument", cmd.getPos()), Token(), Token());
     }
     Token val = tokens[index];
-    if (val.getType() != Token::DEC && val.getType() != Token::HEX && val.getType() != Token::REG && val.getType() != Token::BIN && val.getType() != Token::CHAR && val.getType() != Token::LABEL_LOW && val.getType() != Token::LABEL_HIGH)
+    if(!checkVal(val, print, 1))
     {
-        if (print)
-        {
-            debugStr << "[ASSEMBLER ERROR]: type of argument 1 incorrect, expected hex, dec, bin, char or reg in file " << val.getPos().getFileName() << " at " << val.getPos().getLine() << ":" << val.getPos().getCol();
-            printError(debugStr.str());
-        }
         return new NodeBinL(Token(Token::ERR, "argument type incorrect", val.getPos()), Token(), Token());
     }
     next();
-    if (index == -1 || tokens[index].getType().compare(Token::CMD) == 0)
+    if (!checkNext(print, 1))
     {
-        if (print)
-        {
-            debugStr << "[ASSEMBLER ERROR]: Missing 1 argument in file " << cmd.getPos().getFileName() << " at " << cmd.getPos().getLine() << ":" << cmd.getPos().getCol();
-            printError(debugStr.str());
-        }
         return new NodeBinL(Token(Token::ERR, "Missing argument", cmd.getPos()), Token(), Token());
     }
     Token label = tokens[index];
-    if (label.getType() != Token::LABEL)
+    if (!checkLabel(label, print, 2))
     {
-        if (print)
-        {
-            debugStr << "[ASSEMBLER ERROR]: type of argument 2 incorrect, expected label in file " << label.getPos().getFileName() << " at " << label.getPos().getLine() << ":" << label.getPos().getCol();
-            printError(debugStr.str());
-        }
         return new NodeBinL(Token(Token::ERR, "argument type incorrect", label.getPos()), Token(), Token());
     }
     next();
@@ -521,43 +498,23 @@ NodeMovL *Parser::makeCmdNodeMovL(bool print)
 
     Token cmd = tokens[index];
     next();
-    if (index == -1 || tokens[index].getType().compare(Token::CMD) == 0)
+    if (!checkNext(print, 2))
     {
-        if (print)
-        {
-            debugStr << "[ASSEMBLER ERROR]: Missing 2 argument in file " << cmd.getPos().getFileName() << " at " << cmd.getPos().getLine() << ":" << cmd.getPos().getCol();
-            printError(debugStr.str());
-        }
         return new NodeMovL(Token(Token::ERR, "Missing argument", cmd.getPos()), Token(), Token());
     }
     Token reg = tokens[index];
-    if (reg.getType() != Token::REG)
+    if (!checkReg(reg, print, 1))
     {
-        if (print)
-        {
-            debugStr << "[ASSEMBLER ERROR]: type of argument 1 incorrect, expected reg in file " << reg.getPos().getFileName() << " at " << reg.getPos().getLine() << ":" << reg.getPos().getCol();
-            printError(debugStr.str());
-        }
         return new NodeMovL(Token(Token::ERR, "argument type incorrect", reg.getPos()), Token(), Token());
     }
     next();
-    if (index == -1 || tokens[index].getType().compare(Token::CMD) == 0)
+    if (!checkNext(print, 1))
     {
-        if (print)
-        {
-            debugStr << "[ASSEMBLER ERROR]: Missing 1 argument in file " << cmd.getPos().getFileName() << " at " << cmd.getPos().getLine() << ":" << cmd.getPos().getCol();
-            printError(debugStr.str());
-        }
         return new NodeMovL(Token(Token::ERR, "Missing argument", cmd.getPos()), Token(), Token());
     }
     Token label = tokens[index];
-    if (label.getType() != Token::LABEL)
+    if (!checkLabel(label, print, 2))
     {
-        if (print)
-        {
-            debugStr << "[ASSEMBLER ERROR]: type of argument 2 incorrect, expected label in file " << label.getPos().getFileName() << " at " << label.getPos().getLine() << ":" << label.getPos().getCol();
-            printError(debugStr.str());
-        }
         return new NodeMovL(Token(Token::ERR, "argument type incorrect", label.getPos()), Token(), Token());
     }
     next();
@@ -573,64 +530,34 @@ NodeTri *Parser::makeCmdNodeTri(bool print)
 
     Token cmd = tokens[index];
     next();
-    if (index == -1 || tokens[index].getType().compare(Token::CMD) == 0)
+    if (!checkNext(print, 3))
     {
-        if (print)
-        {
-            debugStr << "[ASSEMBLER ERROR]: Missing 3 argument in file " << cmd.getPos().getFileName() << " at " << cmd.getPos().getLine() << ":" << cmd.getPos().getCol();
-            printError(debugStr.str());
-        }
         return new NodeTri(Token(Token::ERR, "Missing argument", cmd.getPos()), Token(), Token(), Token());
     }
     Token val1 = tokens[index];
-    if (val1.getType() != Token::DEC && val1.getType() != Token::HEX && val1.getType() != Token::REG && val1.getType() != Token::BIN && val1.getType() != Token::CHAR && val1.getType() != Token::LABEL_LOW && val1.getType() != Token::LABEL_HIGH)
+    if(!checkVal(val1, print, 1))
     {
-        if (print)
-        {
-            debugStr << "[ASSEMBLER ERROR]: type of argument 1 incorrect, expected hex, dec, bin, char or reg in file " << val1.getPos().getFileName() << " at " << val1.getPos().getLine() << ":" << val1.getPos().getCol();
-            printError(debugStr.str());
-        }
         return new NodeTri(Token(Token::ERR, "argument type incorrect", val1.getPos()), Token(), Token(), Token());
     }
     next();
-    if (index == -1 || tokens[index].getType().compare(Token::CMD) == 0)
+    if (!checkNext(print, 2))
     {
-        if (print)
-        {
-            debugStr << "[ASSEMBLER ERROR]: Missing 2 argument in file " << cmd.getPos().getFileName() << " at " << cmd.getPos().getLine() << ":" << cmd.getPos().getCol();
-            printError(debugStr.str());
-        }
         return new NodeTri(Token(Token::ERR, "Missing argument", cmd.getPos()), Token(), Token(), Token());
     }
     Token val2 = tokens[index];
-    if (val2.getType() != Token::DEC && val2.getType() != Token::HEX && val2.getType() != Token::REG && val2.getType() != Token::BIN && val2.getType() != Token::CHAR && val2.getType() != Token::LABEL_LOW && val2.getType() != Token::LABEL_HIGH)
+    if(!checkVal(val2, print, 2))
     {
-        if (print)
-        {
-            debugStr << "[ASSEMBLER ERROR]: type of argument 2 incorrect, expected hex, dec, bin, char or reg in file " << val2.getPos().getFileName() << " at " << val2.getPos().getLine() << ":" << val2.getPos().getCol();
-            printError(debugStr.str());
-        }
-        return new NodeTri(Token(Token::ERR, "argument type incorrect", val2.getPos()), Token(), Token(), Token());
+        return new NodeTri(Token(Token::ERR, "argument type incorrect", val1.getPos()), Token(), Token(), Token());
     }
     next();
-    if (index == -1 || tokens[index].getType().compare(Token::CMD) == 0)
+    if (!checkNext(print, 1))
     {
-        if (print)
-        {
-            debugStr << "[ASSEMBLER ERROR]: Missing 1 argument in file " << cmd.getPos().getFileName() << " at " << cmd.getPos().getLine() << ":" << cmd.getPos().getCol();
-            printError(debugStr.str());
-        }
         return new NodeTri(Token(Token::ERR, "Missing argument", cmd.getPos()), Token(), Token(), Token());
     }
     Token val3 = tokens[index];
-    if (val3.getType() != Token::DEC && val3.getType() != Token::HEX && val3.getType() != Token::REG && val3.getType() != Token::BIN && val3.getType() != Token::CHAR && val3.getType() != Token::LABEL_LOW && val3.getType() != Token::LABEL_HIGH)
+    if(!checkVal(val3, print, 3))
     {
-        if (print)
-        {
-            debugStr << "[ASSEMBLER ERROR]: type of argument 3 incorrect, expected hex, dec, bin, char or reg in file " << val3.getPos().getFileName() << " at " << val3.getPos().getLine() << ":" << val3.getPos().getCol();
-            printError(debugStr.str());
-        }
-        return new NodeTri(Token(Token::ERR, "argument type incorrect", val3.getPos()), Token(), Token(), Token());
+        return new NodeTri(Token(Token::ERR, "argument type incorrect", val1.getPos()), Token(), Token(), Token());
     }
     next();
     return new NodeTri(cmd, val1, val2, val3);
@@ -645,65 +572,61 @@ NodeMov2L *Parser::makeCmdNodeMov2L(bool print)
 
     Token cmd = tokens[index];
     next();
-    if (index == -1 || tokens[index].getType().compare(Token::CMD) == 0)
+    if (!checkNext(print, 3))
     {
-        if (print)
-        {
-            debugStr << "[ASSEMBLER ERROR]: Missing 3 argument in file " << cmd.getPos().getFileName() << " at " << cmd.getPos().getLine() << ":" << cmd.getPos().getCol();
-            printError(debugStr.str());
-        }
         return new NodeMov2L(Token(Token::ERR, "Missing argument", cmd.getPos()), Token(), Token(), Token());
     }
     Token reg1 = tokens[index];
-    if (reg1.getType() != Token::REG)
+    if (!checkReg(reg1, print, 1))
     {
-        if (print)
-        {
-            debugStr << "[ASSEMBLER ERROR]: type of argument 1 incorrect, expected reg in file " << reg1.getPos().getFileName() << " at " << reg1.getPos().getLine() << ":" << reg1.getPos().getCol();
-            printError(debugStr.str());
-        }
         return new NodeMov2L(Token(Token::ERR, "argument type incorrect", reg1.getPos()), Token(), Token(), Token());
     }
     next();
-    if (index == -1 || tokens[index].getType().compare(Token::CMD) == 0)
+    if (!checkNext(print, 2))
     {
-        if (print)
-        {
-            debugStr << "[ASSEMBLER ERROR]: Missing 2 argument in file " << cmd.getPos().getFileName() << " at " << cmd.getPos().getLine() << ":" << cmd.getPos().getCol();
-            printError(debugStr.str());
-        }
         return new NodeMov2L(Token(Token::ERR, "Missing argument", cmd.getPos()), Token(), Token(), Token());
     }
     Token reg2 = tokens[index];
-    if (reg2.getType() != Token::REG)
+    if (!checkReg(reg2, print, 2))
     {
-        if (print)
-        {
-            debugStr << "[ASSEMBLER ERROR]: type of argument 2 incorrect, expected reg in file " << reg2.getPos().getFileName() << " at " << reg2.getPos().getLine() << ":" << reg2.getPos().getCol();
-            printError(debugStr.str());
-        }
-        return new NodeMov2L(Token(Token::ERR, "argument type incorrect", reg2.getPos()), Token(), Token(), Token());
+        return new NodeMov2L(Token(Token::ERR, "argument type incorrect", reg1.getPos()), Token(), Token(), Token());
     }
     next();
-    if (index == -1 || tokens[index].getType().compare(Token::CMD) == 0)
+    if (!checkNext(print, 1))
     {
-        if (print)
-        {
-            debugStr << "[ASSEMBLER ERROR]: Missing 1 argument in file " << cmd.getPos().getFileName() << " at " << cmd.getPos().getLine() << ":" << cmd.getPos().getCol();
-            printError(debugStr.str());
-        }
         return new NodeMov2L(Token(Token::ERR, "Missing argument", cmd.getPos()), Token(), Token(), Token());
     }
     Token label = tokens[index];
-    if (label.getType() != Token::LABEL)
+    if (!checkLabel(label, print, 3))
     {
-        if (print)
-        {
-            debugStr << "[ASSEMBLER ERROR]: type of argument 3 incorrect, expected label in file " << label.getPos().getFileName() << " at " << label.getPos().getLine() << ":" << label.getPos().getCol();
-            printError(debugStr.str());
-        }
         return new NodeMov2L(Token(Token::ERR, "argument type incorrect", label.getPos()), Token(), Token(), Token());
     }
     next();
     return new NodeMov2L(cmd, reg1, reg2, label);
+}
+
+NodeDuo *Parser::makeNodeDuo(bool print)
+{
+    std::stringstream debugStr;
+    debugStr << std::setfill(' ') << std::setw(4) << index << " duo";
+    printDebug(debugStr.str());
+    debugStr.str("");
+
+    Token tok = tokens[index];
+    next();
+    if (!checkNext(print, 1))
+    {
+        return new NodeDuo(Token(Token::ERR, "Missing argument", tok.getPos()), Token());
+    }
+    Token val = tokens[index];
+    if (val.getType() != Token::DEC && val.getType() != Token::HEX && val.getType() != Token::REG && val.getType() != Token::BIN && val.getType() != Token::CHAR)
+    {
+        if (print)
+        {
+            debugStr << "[ASSEMBLER ERROR]: type of argument 1 incorrect, expected hex, dec, bin, char or reg in file " << val.getPos().getFileName() << " at " << val.getPos().getLine() << ":" << val.getPos().getCol();
+            printError(debugStr.str());
+        }
+        return new NodeDuo(Token(Token::ERR, "argument type incorrect", val.getPos()), Token());
+    }
+    return new NodeDuo(tok, val);
 }

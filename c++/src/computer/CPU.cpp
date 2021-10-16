@@ -12,6 +12,8 @@
 
 #include "global.hpp"
 
+#include "utils/console.hpp"
+
 computer::CPU::CPU(std::shared_ptr<computer::Bus> bus) : Device()
 {
     threadWanted = false;
@@ -111,6 +113,7 @@ void computer::CPU::reset()
 void computer::CPU::resetReg()
 {
     cycle = 0;
+    refreshCycle(0);
     pc = 0;
     for (unsigned int i = 0; i < 16; i++)
     {

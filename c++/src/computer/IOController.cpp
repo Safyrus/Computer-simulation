@@ -101,12 +101,12 @@ void computer::IOController::run()
     // declare some variables
     const int SEC_IN_NS = 1000000000;
     const int CYCLE_PER_SEC = 1000000;
-    int cnt = 0;
+    uint64_t cnt = 0;
     int hz = 1024;
     int nsTime = SEC_IN_NS / hz;
     int cycleTime = CYCLE_PER_SEC / hz;
     bool start = false;
-    int lastCycle = cycleCPU;
+    uint64_t lastCycle = cycleCPU;
     uint64_t startCycle = cycleCPU;
 #ifndef _WIN32
     int minTime = 1000;
@@ -127,6 +127,12 @@ void computer::IOController::run()
             }
             lastCycle = cycleCPU;
 
+            // execute step(s)
+            while (cnt < ((cycleCPU - startCycle) / cycleTime))
+            {
+                runStep();
+                cnt++;
+            }
             // wait
             std::chrono::nanoseconds time(nsTime);
             if (nsTime < minTime)
@@ -134,13 +140,6 @@ void computer::IOController::run()
                 time = std::chrono::nanoseconds(minTime);
             }
             std::this_thread::sleep_for(time);
-
-            // execute step(s)
-            while (cnt < ((cycleCPU - startCycle) / cycleTime))
-            {
-                runStep();
-                cnt++;
-            }
         }
         else
         {

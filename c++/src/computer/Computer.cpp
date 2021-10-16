@@ -4,6 +4,8 @@
 #include "computer/VPU.hpp"
 #include "computer/IOController.hpp"
 #include "computer/RunnableDevice.hpp"
+#include "computer/FDD.hpp"
+#include "computer/FDC.hpp"
 
 #include "utils/console.hpp"
 
@@ -28,14 +30,21 @@ computer::Computer::Computer()
     cpu->setPwr(false);
 }
 
-computer::Computer::Computer(bool test, std::string prog)
+computer::Computer::Computer(bool test, std::string prog, uint32_t hz)
 {
     printDebug("Create BUS");
     bus = std::make_shared<computer::Bus>();
 
     printDebug("Create CPU thread");
     cpu = std::make_shared<computer::CPU>(bus, true);
-    cpu->hz = 15625;
+    if (hz != 0)
+    {
+        cpu->hz = hz;
+    }
+    else
+    {
+        cpu->hz = 15625;
+    }
     runCPU = new RunnableDevice(cpu);
 
     if (test)
@@ -65,8 +74,26 @@ computer::Computer::Computer(bool test, std::string prog)
         hwStats = std::make_shared<computer::HardwareStates>();
         hwStats->setName("HWSTATS");
 
+        printDebug("Create Floppy");
+        floppy = std::make_shared<data::Floppy>();
+        floppy->load("floppy.img");
+        printDebug("Create FDD");
+        std::shared_ptr<computer::FDD> fdd = std::make_shared<computer::FDD>();
+        fdd->insert(floppy);
+        fdd->useLock(true);
+        printDebug("Create DSKRAM512");
+        std::shared_ptr<computer::VRAM> dskram = std::make_shared<computer::VRAM>(0x0200);
+        dskram->setName("DSKRAM512");
+        printDebug("Create FDC");
+        std::shared_ptr<computer::FDC> fdc = std::make_shared<computer::FDC>(fdd, dskram);
+
+        printDebug("Create EXT");
+        std::shared_ptr<computer::ROM> ext = std::make_shared<computer::ROM>(0x8000);
+        ext->setName("EXT");
+        ext->load("ext");
+
         printDebug("Add Device HWSTATS");
-        addDevice(hwStats, 0x1C00, 0x1C20);
+        addDevice(hwStats, 0x1C00, 0x1C17);
         printDebug("Add Device ROM4K");
         addDevice(rom4k, 0x0000, 0x0FFF);
         printDebug("Add Device ROM2K");
@@ -75,12 +102,18 @@ computer::Computer::Computer(bool test, std::string prog)
         addDevice(ram1k, 0x1800, 0x1BFF);
         printDebug("Add Device VPU");
         addDevice(vpu, 0x1C18, 0x1C1F);
+        printDebug("Add Device FDC");
+        addDevice(fdc, 0x1C08, 0x1C0F);
         printDebug("Add Device IOCTRL");
         addDevice(io, 0x1D00, 0x1D1F);
+        printDebug("Add Device DSKRAM512");
+        addDevice(dskram, 0x1E00, 0x1FFF);
         printDebug("Add Device VRAM8K");
         addDevice(vram, 0x2000, 0x3FFF);
         printDebug("Add Device RAM16K");
         addDevice(ram16k, 0x4000, 0x7FFF);
+        printDebug("Add Device EXT");
+        addDevice(ext, 0x8000, 0xFFFF);
 
         printDebug("load program into ROM4K");
         rom4k = std::static_pointer_cast<computer::ROM>(getDevice("ROM", 0x0000, 0x0FFF));
@@ -116,7 +149,7 @@ computer::Computer::~Computer()
         runnables[i]->join();
         delete runnables[i];
     }
-    
+
     printDebug("Devices thread stop");
 }
 
@@ -134,6 +167,26 @@ void computer::Computer::reset()
 bool computer::Computer::getPower()
 {
     return cpu->getPwr();
+}
+
+bool computer::Computer::isDriveActive()
+{
+    std::shared_ptr<computer::FDC> fdc = std::static_pointer_cast<computer::FDC>(getDevice("FDC", 0x0000, 0xFFFF));
+    if (fdc)
+    {
+        return fdc->isFDDActive();
+    }
+    return false;
+}
+
+bool computer::Computer::isDriveLock()
+{
+    std::shared_ptr<computer::FDC> fdc = std::static_pointer_cast<computer::FDC>(getDevice("FDC", 0x0000, 0xFFFF));
+    if (fdc)
+    {
+        return fdc->isFDDLock();
+    }
+    return false;
 }
 
 std::shared_ptr<computer::CPU> computer::Computer::getCpu()
@@ -198,8 +251,8 @@ std::vector<std::shared_ptr<computer::Device>> computer::Computer::getAllDevice(
 
 void computer::Computer::connectIODevice(std::shared_ptr<computer::IODevice> device, uint8_t port)
 {
-    std::shared_ptr<computer::IOController> io = std::static_pointer_cast<computer::IOController>(getDevice("IOCTRL", 0x0000,0xFFFF));
-    if(io)
+    std::shared_ptr<computer::IOController> io = std::static_pointer_cast<computer::IOController>(getDevice("IOCTRL", 0x0000, 0xFFFF));
+    if (io)
     {
         printDebug("Computer: add io");
         io->addIO(device, port);
@@ -208,8 +261,8 @@ void computer::Computer::connectIODevice(std::shared_ptr<computer::IODevice> dev
 
 void computer::Computer::removeIODevvice(uint8_t port)
 {
-    std::shared_ptr<computer::IOController> io = std::static_pointer_cast<computer::IOController>(getDevice("IOCTRL", 0x0000,0xFFFF));
-    if(io)
+    std::shared_ptr<computer::IOController> io = std::static_pointer_cast<computer::IOController>(getDevice("IOCTRL", 0x0000, 0xFFFF));
+    if (io)
     {
         printDebug("Computer: remove io");
         io->removeIO(port);

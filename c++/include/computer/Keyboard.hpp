@@ -9,17 +9,18 @@ namespace computer
     class Keyboard : public computer::IODevice
     {
     private:
-        char keyBuf[8];
+        uint8_t keyBuf[8];
         uint8_t speBuf[8];
         uint8_t bufCurs;
         uint8_t speKey;
         bool talk;
         bool talkCPU;
+        bool keyLayoutMode;
 
         uint8_t cmdBuf[8];
         uint8_t cmdCurs;
 
-        void keyPressed(char key, uint8_t special);
+        void keyPressed(uint8_t key, uint8_t special);
         void runStep();
 
     public:

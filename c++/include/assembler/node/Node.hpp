@@ -22,5 +22,6 @@ public:
     static const std::string NODE_MOV2L;
     static const std::string NODE_MOVL;
     static const std::string NODE_TRI;
+    static const std::string NODE_DUO;
 };
 

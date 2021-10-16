@@ -37,6 +37,7 @@ namespace graphic
         MainWindow();
         MainWindow(std::string windowName);
         MainWindow(std::string windowName, bool debug, std::string prog);
+        MainWindow(std::string windowName, bool debug, std::string prog, uint32_t hz);
         ~MainWindow();
 
         void openSubWindow(std::string windowName);

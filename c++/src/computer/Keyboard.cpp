@@ -1,5 +1,6 @@
 #include "computer/Keyboard.hpp"
 #include "utils/console.hpp"
+#include "utils/sfmlFct.hpp"
 
 #include <chrono>
 #ifndef _WIN32
@@ -12,6 +13,7 @@ computer::Keyboard::Keyboard()
 {
     type = "IOKEY";
     name = "KEYBOARD";
+    keyLayoutMode = true;
     reset();
 }
 
@@ -56,7 +58,7 @@ void computer::Keyboard::runStep()
             connectedDevice->setTalk(defaultPort, talk);
         }
         connectedDevice->send(defaultPort, keyBuf[0]);
-        connectedDevice->send(defaultPort, speBuf[0]);
+        //connectedDevice->send(defaultPort, speBuf[0]);
         for (uint8_t i = 0; i < 7; i++)
         {
             keyBuf[i] = keyBuf[i + 1];
@@ -71,13 +73,13 @@ void computer::Keyboard::run()
     // declare some variables
     const int SEC_IN_NS = 1000000000;
     const int CYCLE_PER_SEC = 1000000;
-    int cnt = 0;
+    uint64_t cnt = 0;
     int hz = 64;
     int nsTime = SEC_IN_NS / hz;
     int cycleTime = CYCLE_PER_SEC / hz;
     bool start = false;
     uint64_t startCycle = cycleCPU;
-    int lastCycle = cycleCPU;
+    uint64_t lastCycle = cycleCPU;
 #ifndef _WIN32
     int minTime = 1000;
 #else
@@ -97,6 +99,13 @@ void computer::Keyboard::run()
             }
             lastCycle = cycleCPU;
 
+            // execute step(s)
+            while (cnt < ((cycleCPU - startCycle) / cycleTime))
+            {
+                runStep();
+                cnt++;
+            }
+
             // wait
             std::chrono::nanoseconds time(nsTime);
             if (nsTime < minTime)
@@ -104,13 +113,6 @@ void computer::Keyboard::run()
                 time = std::chrono::nanoseconds(minTime);
             }
             std::this_thread::sleep_for(time);
-
-            // execute step(s)
-            while (cnt < ((cycleCPU - startCycle) / cycleTime))
-            {
-                runStep();
-                cnt++;
-            }
         }
         else
         {
@@ -152,7 +154,7 @@ void computer::Keyboard::send(uint8_t port, uint8_t data)
     }
 }
 
-void computer::Keyboard::keyPressed(char key, uint8_t special)
+void computer::Keyboard::keyPressed(uint8_t key, uint8_t special)
 {
     if (bufCurs < 7)
     {
@@ -165,40 +167,85 @@ void computer::Keyboard::keyPressed(char key, uint8_t special)
 
 void computer::Keyboard::inputEvent(sf::Event event)
 {
-    switch (event.type)
+    if (keyLayoutMode)
     {
-    case sf::Event::KeyPressed:
-        if (event.key.alt)
+        if (event.type == sf::Event::KeyPressed || event.type == sf::Event::KeyReleased)
         {
-            speKey |= 0x04;
+            //std::string ev = (event.type == sf::Event::KeyPressed) ? "PRESSED" : "RELEASED";
+            //std::string str = "KEY " + ev + ":" + std::to_string(event.key.code) + " ctrl:" + std::to_string(event.key.control) + " shft:" + std::to_string(event.key.shift) + " alt:" + std::to_string(event.key.alt);
+            //printInfo(str);
+
+            speKey = 0;
+            if (event.key.shift)
+            {
+                speKey |= 0x01;
+            }
+            if (event.key.control)
+            {
+                speKey |= 0x02;
+            }
+            if (event.key.alt)
+            {
+                speKey |= 0x04;
+            }
+            if (event.type == sf::Event::KeyReleased)
+            {
+                speKey |= 0x08;
+            }
+
+            if (event.type == sf::Event::KeyPressed)
+            {
+                uint8_t keyCode = sfmlKeyToSAPHYRKey(event.key.code);
+                if (keyCode > 0)
+                {
+                    uint8_t keyFinal = keyCode;
+                    bool bit4 = (keyCode & 0x10);
+                    bool bit5 = (keyCode & 0x20);
+                    bool bit6 = (keyCode & 0x40);
+                    bool shiftNum = (bit4 && !(event.key.shift && (bit4 && bit5)));
+                    bool shiftZero = (!shiftNum && keyCode == 0x30);
+                    bool shift = (!shiftZero && (event.key.shift || bit5));
+                    bool ctrl = (!event.key.control && (bit6 || shiftZero));
+                    if (ctrl)
+                    {
+                        keyFinal |= 0x40;
+                    }
+                    else
+                    {
+                        keyFinal &= 0xBF;
+                    }
+                    if (shift)
+                    {
+                        keyFinal |= 0x20;
+                    }
+                    else
+                    {
+                        keyFinal &= 0xDF;
+                    }
+                    if (shiftNum || shiftZero)
+                    {
+                        keyFinal |= 0x10;
+                    }
+                    else
+                    {
+                        keyFinal &= 0xEF;
+                    }
+                    if (shiftZero)
+                    {
+                        keyFinal |= 0x0F;
+                    }
+                    if (event.key.alt)
+                    {
+                        keyFinal += 128;
+                    }
+                    //printInfo("KEY:" + std::to_string(keyCode) + " CODE:" + std::to_string(keyFinal));
+                    keyPressed(keyFinal, speKey);
+                }
+            }
         }
-        else if (event.key.control)
-        {
-            speKey |= 0x02;
-        }
-        else if (event.key.shift)
-        {
-            speKey |= 0x01;
-        }
-        break;
-    case sf::Event::KeyReleased:
-        if (event.key.alt)
-        {
-            speKey &= 0xFB;
-        }
-        else if (event.key.control)
-        {
-            speKey &= 0xFD;
-        }
-        else if (event.key.shift)
-        {
-            speKey &= 0xFE;
-        }
-        break;
-    case sf::Event::TextEntered:
-        keyPressed((char)(event.text.unicode & 0x7F), speKey);
-        break;
-    default:
-        break;
+    }
+    else
+    {
+        printInfo("TODO");
     }
 }

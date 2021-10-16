@@ -1,0 +1,371 @@
+#==============================#
+#           ROUTINES           #
+#==============================#
+
+# PARAM: VAR_CALL: adr to save
+#  USE: F
+#  VAR: RT_RET, STK_PTR
+RT_PROLOGUE:
+ # save call location
+ SET $J1 :VAR_RTRET_H
+ SET $J2 :VAR_RTRET_L
+
+ # check if the stack is full
+ GET $F :VAR_STKPTR
+ CMP $F 02
+ AND $F $F 01
+ JMP 00 :ERR_STACKFULL
+
+ # get adress to save
+ GET $J1 :VAR_CALL_H
+ GET $J2 :VAR_CALL_L
+
+ # save the adress to the stack
+ GET $F :VAR_STKPTR
+ SET $J2 :STACK:h $F
+ SUB $F $F 01
+ SET $J1 :STACK:h $F
+ SUB $F $F 01
+ # update stack ptr
+ SET $F :VAR_STKPTR
+
+ # return
+ JMP $F :SRT_RETURN
+
+
+# USE: F
+# VAR: STK_PTR
+RT_EPILOGUE:
+ # check if the stack is empty
+ GET $F :VAR_STKPTR
+ CMP $F FE
+ AND $F $F 01
+ JMP 01 :ERR_STACKEMPTY
+
+ # get the adress from
+ # the stack
+ GET $F :VAR_STKPTR
+ ADD $F $F 01
+ GET $J1 :STACK:h $F
+ ADD $F $F 01
+ GET $J2 :STACK:h $F
+ # update stack ptr
+ SET $F :VAR_STKPTR
+
+ # jump to the adress
+ JMP $F $J1 $J2
+
+
+RT_PUSHABCDE:
+ # save call location
+ SET $J1 :VAR_RTRET_H
+ SET $J2 :VAR_RTRET_L
+
+ # push registers
+ JMP $F :SRT_PUSH # push $A
+ MOV $A $B
+ JMP $F :SRT_PUSH # push $B
+ MOV $A $C
+ JMP $F :SRT_PUSH # push $C
+ MOV $A $D
+ JMP $F :SRT_PUSH # push $D
+ MOV $A $E
+ JMP $F :SRT_PUSH # push $E
+
+ # return
+ JMP $F :SRT_RETURN
+
+
+RT_POPABCDE:
+ # save call location
+ SET $J1 :VAR_RTRET_H
+ SET $J2 :VAR_RTRET_L
+
+ # pop registers
+ JMP $F :SRT_POP # pop $E
+ MOV $E $A
+ JMP $F :SRT_POP # pop $D
+ MOV $D $A
+ JMP $F :SRT_POP # pop $C
+ MOV $C $A
+ JMP $F :SRT_POP # pop $B
+ MOV $B $A
+ JMP $F :SRT_POP # pop $A
+
+ # return
+ JMP $F :SRT_RETURN
+
+
+# USE: A,B
+RT_CURSINC:
+ # save call location
+ SET $J1 :VAR_RTRET_H
+ SET $J2 :VAR_RTRET_L
+
+ # get the cursor
+ JMP $F :SRT_GETCURS
+
+ ADD $B $B 02
+ CMP $B 02
+ AND $F $F 01
+ JMP 01 :RT_CURSINC_END
+ ADD $A $A 01
+ CMP $A 25
+ AND $F $F 01
+ JMP 00 :RT_CURSINC_END
+ MOV $A :VRAM:h
+ MOV $F 01
+ JMP $F :RT_CURSINC_OVER
+
+ RT_CURSINC_END:
+ MOV $F 00
+ RT_CURSINC_OVER:
+ JMP $F :SRT_SETCURS
+ # return
+ JMP $F :SRT_RETURN
+
+
+# USE: A,B
+RT_CURSDEC:
+ # save call location
+ SET $J1 :VAR_RTRET_H
+ SET $J2 :VAR_RTRET_L
+
+ # get the cursor
+ JMP $F :SRT_GETCURS
+
+ SUB $B $B 02
+ CMP $B FE
+ AND $F $F 01
+ JMP 00 :RT_CURSDEC_END
+ SUB $A $A 01
+ CMP $A 20
+ AND $F $F 01
+ JMP 01 :RT_CURSDEC_END
+ MOV $A 24
+ RT_CURSDEC_END:
+ JMP $F :SRT_SETCURS
+ # return
+ JMP $F :SRT_RETURN
+
+
+# PARAM: A: char
+# RETURN: A: val
+RT_HEXTOVAL:
+ CMP $A 00
+ JMP UEQ $J1 $J2
+ # save call location
+ SET $J1 :VAR_RTRET_H
+ SET $J2 :VAR_RTRET_L
+
+ SUB $A $A 30
+ # is $A > 10
+ CMP $A 10
+ AND $F $F 0E
+ # then it was a character
+ JMP GRE :RT_HEXTOVAL_C
+ # else it was a number and we
+ # return the value directly
+ JMP $F :SRT_RETURN
+ RT_HEXTOVAL_C:
+ SUB $A $A 07
+ # is $A > 10
+ CMP $A 10
+ AND $F $F 0E
+ # then it was a lowercase
+ JMP GRE :RT_HEXTOVAL_L
+ # return the value
+ JMP $F :SRT_RETURN
+ RT_HEXTOVAL_L:
+ SUB $A $A 20
+ # return the value
+ JMP $F :SRT_RETURN
+
+
+# PARAM:
+# AB: first str
+# CD: second str
+# RETURN A: 1=YES,0=NO
+RT_CMPSTR:
+ # save call location
+ SET $J1 :VAR_RTRET_H
+ SET $J2 :VAR_RTRET_L
+
+ RT_CMPSTR_WHILE:
+  # check if we are at the end
+  # of the two string, and if
+  # so, say there are equal
+  JMP $F :SRT_ENDSTR_AB
+  JMP 00 :RT_CMPSTR_LOOP
+  JMP $F :SRT_ENDSTR_CD
+  JMP 00 :RT_CMPSTR_LOOP
+  JMP $F :RT_CMPSTR_YES
+
+  RT_CMPSTR_LOOP:
+  # check if we are at the end
+  # of any of the string, and if
+  # so, then there are not the
+  # same
+  JMP $F :SRT_ENDSTR_AB
+  JMP EQU :RT_CMPSTR_NO
+  JMP $F :SRT_ENDSTR_CD
+  JMP EQU :RT_CMPSTR_NO
+
+  # check if the chars are the
+  # same, if yes, then inc the
+  # two str, otherwise, the
+  # strs are not the same
+  GET $J1 $A $B
+  GET $J2 $C $D
+  CMP $J1 $J2
+  JMP UEQ :RT_CMPSTR_NXTAB
+  JMP $F :RT_CMPSTR_NO
+  # inc first str
+  RT_CMPSTR_NXTAB:
+  ADD $B $B 01
+  CMP $B 01
+  AND $F $F FLC
+  JMP UGE :RT_CMPSTR_NXTCD
+  ADD $A $A 01
+  # inc second str
+  RT_CMPSTR_NXTCD:
+  ADD $D $D 01
+  CMP $D 01
+  AND $F $F FLC
+  JMP UGE :RT_CMPSTR_WHILE
+  ADD $C $C 01
+  JMP $F :RT_CMPSTR_WHILE
+  
+ # result
+ RT_CMPSTR_YES:
+ MOV $A 01
+ JMP $F :RT_CMPSTR_END
+ RT_CMPSTR_NO:
+ MOV $A 00
+ RT_CMPSTR_END:
+ # return
+ JMP $F :SRT_RETURN
+
+
+# 
+RT_VSYNC:
+ # save call location
+ SET $J1 :VAR_RTRET_H
+ SET $J2 :VAR_RTRET_L
+ RT_VSYNC_WAIT:
+ GET $F :VPU_STATE
+ AND $F $F 01
+ CMP $F 00
+ JMP UEQ :RT_VSYNC_WAIT
+ JMP $F :SRT_RETURN
+
+
+# PARAM: AB: 16bit val
+# RETURN: AB: 16bit val
+RT_INC16:
+ # save call location
+ SET $J1 :VAR_RTRET_H
+ SET $J2 :VAR_RTRET_L
+
+ ADD $B $B 01
+ CMP $B 01
+ AND $F $F FLC
+ JMP UGE :SRT_RETURN
+ ADD $A $A 01
+ JMP $F :SRT_RETURN
+
+
+# PARAM: AB: 16bit val
+# RETURN: AB: 16bit val
+RT_DEC16:
+ # save call location
+ SET $J1 :VAR_RTRET_H
+ SET $J2 :VAR_RTRET_L
+
+ SUB $B $B 01
+ CMP $B FF
+ AND $F $F FLC
+ JMP 00 :SRT_RETURN
+ SUB $A $A 01
+ JMP $F :SRT_RETURN
+
+
+# CMP AB CD
+RT_CMP16:
+ # save call location
+ SET $J1 :VAR_RTRET_H
+ SET $J2 :VAR_RTRET_L
+ # compare high part
+ CMP $A $C
+ # return if not equal
+ JMP UEQ :RT_CMP16_NXT
+ JMP $F :SRT_RETURN
+ RT_CMP16_NXT:
+ # compare low part
+ CMP $B $D
+ JMP $F :SRT_RETURN
+
+
+# ADD AB AB CD
+RT_ADD16:
+ # save call location
+ SET $J1 :VAR_RTRET_H
+ SET $J2 :VAR_RTRET_L
+
+ XOR $F $D FF
+ ADD $F $F 01
+ CMP $B $F
+ AND $F $F FLC
+ JMP 00 :RT_ADD16_NXT
+ ADD $A $A 01
+ RT_ADD16_NXT:
+ ADD $B $B $D
+ ADD $A $A $C
+
+ # return
+ JMP $F :SRT_RETURN
+
+
+RT_WAITKEY:
+ # save call location
+ SET $J1 :VAR_RTRET_H
+ SET $J2 :VAR_RTRET_L
+ RT_WAITKEY_LOOP:
+ GET $F :IO1G
+ CMP $F 01
+ AND $F $F FLC
+ JMP UGE :SRT_RETURN
+ JMP $F :RT_WAITKEY_LOOP
+
+
+# param: *AB to *CD E time
+RT_COPYMEM:
+ # save call location
+ SET $J1 :VAR_RTRET_H
+ SET $J2 :VAR_RTRET_L
+ 
+ RT_COPYMEM_LOOP:
+  CMP $E 00
+  JMP UEQ :RT_COPYMEM_END
+  SUB $E $E 01
+
+  GET $F $A $B
+  SET $F $C $D
+  #
+  ADD $B $B 01
+  CMP $B 01
+  AND $F $F FLC
+  JMP UGE :RT_COPYMEM_INCCD
+  ADD $A $A 01
+  JMP $F :RT_COPYMEM_INCCD
+  #
+  RT_COPYMEM_INCCD:
+  ADD $D $D 01
+  CMP $D 01
+  AND $F $F FLC
+  JMP UGE :RT_COPYMEM_LOOP
+  ADD $C $C 01
+  JMP $F :RT_COPYMEM_LOOP
+
+ RT_COPYMEM_END:
+ JMP $F :SRT_RETURN

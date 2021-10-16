@@ -43,25 +43,29 @@ graphic::MainWindow::MainWindow(std::string windowName, bool debug, std::string 
     printDebug("Creation");
 }
 
+graphic::MainWindow::MainWindow(std::string windowName, bool debug, std::string prog, uint32_t hz)
+{
+    computer = std::make_shared<computer::Computer>(true, prog, hz);
+    this->windowName = windowName;
+    this->debug = debug;
+    computerWindowName = "S257 Dynamic Recompiler - Computer Window";
+    width = 256;
+    height = 256;
+    showMenu = true;
+    printDebug("Creation");
+}
+
 graphic::MainWindow::~MainWindow()
 {
+    printDebug("Main Destruction");
 }
 
 void graphic::MainWindow::makeMenu()
 {
-    std::shared_ptr<data::menu::Menu> subSubMenu = std::make_shared<data::menu::Menu>();
-    subSubMenu->addItem("789", std::make_shared<data::menu::MenuActionTest>("789"));
-    subSubMenu->addItem("456", std::make_shared<data::menu::MenuActionTest>("456"));
-
-    std::shared_ptr<data::menu::Menu> subMenu = std::make_shared<data::menu::Menu>();
-    subMenu->addItem("123", std::make_shared<data::menu::MenuActionTest>("123"));
-    subMenu->addItem("MENU", subSubMenu);
-
     menu = std::make_shared<data::menu::Menu>();
     menu->addItem("FILE", std::make_shared<data::menu::MenuActionTest>("Not implemented yet"));
     menu->addItem("OPTION", std::make_shared<data::menu::MenuActionTest>("Not implemented yet"));
     menu->addItem("COM", std::make_shared<data::menu::MenuActionOpenWindow>(shared_from_this(), computerWindowName));
-    menu->addItem("SUBMENU", subMenu);
 
     menuView = std::make_shared<graphic::MenuView>(menu);
     menuView->setPos(0, 0);
@@ -108,6 +112,17 @@ void graphic::MainWindow::start()
 
 void graphic::MainWindow::stop()
 {
+    printDebug("Wait for computer");
+    while (!computer.unique())
+    {
+        printDebug(".");
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+    computer.reset();
+    menu.reset();
+    menuView.reset();
+    screenVpu.reset();
+    keyboard.reset();
     window.close();
     printDebug("Stop");
 }

@@ -1,5 +1,5 @@
 CXX        := g++
-CXX_FLAGS  := -Wall -Wextra -std=c++17 -ggdb -pthread -O1
+CXX_FLAGS  := -Wall -Wextra -std=c++17 -pthread -O1
 
 ifeq ($(OS), Windows_NT)
     CXX_FLAGS  += -D _WIN32_WINNT=0x0A00
@@ -32,7 +32,13 @@ install:
 	-copy ..\data\pix46.ttf $(BIN)
 	-if exist "$(BIN)\prog\" ( Rmdir /Q /S $(BIN)\prog )
 	-mkdir $(BIN)\prog
-	-Xcopy /E ..\data\prog $(BIN)\prog\
+	-Xcopy /E ..\data\prog $(BIN)\prog
+	-if exist "$(BIN)\data\img\" ( Rmdir /Q /S $(BIN)\data\img )
+	-mkdir $(BIN)\data\img
+	-Xcopy /E ..\data\img $(BIN)\data\img
+	-if exist "$(BIN)\data\snd\" ( Rmdir /Q /S $(BIN)\data\snd )
+	-mkdir $(BIN)\data\snd
+	-Xcopy /E ..\data\snd $(BIN)\data\snd
 
 clean:
 	-del $(BIN)\$(EXECUTABLE).exe
@@ -41,6 +47,10 @@ install:
 	-cp ../data/pix46.ttf $(BIN)
 	if [ -d "$(BIN)/prog/" ]; then rm -r $(BIN)/prog/; fi
 	-cp -r ../data/prog $(BIN)
+	if [ -d "$(BIN)/data/img/" ]; then rm -r $(BIN)/data/img/; fi
+	-cp -r ../data/img $(BIN)/data
+	if [ -d "$(BIN)/data/snd/" ]; then rm -r $(BIN)/data/snd/; fi
+	-cp -r ../data/snd $(BIN)/data
 
 clean:
 	-rm $(BIN)/$(EXECUTABLE)

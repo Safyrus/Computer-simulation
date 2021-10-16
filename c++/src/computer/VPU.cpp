@@ -28,7 +28,7 @@ void computer::VPU::color2Mode()
         for (uint8_t j = 0; j < 8; j++)
         {
             unsigned int index = (i * 8 * 4) + (j * 4);
-            bool pxActive = data & (int)(pow(2, (7 - j)));
+            bool pxActive = data & (1 << (7 - j));
             pixArray[index + 0] = pxActive * 255;
             pixArray[index + 1] = pxActive * 255;
             pixArray[index + 2] = pxActive * 255;

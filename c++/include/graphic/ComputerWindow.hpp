@@ -21,6 +21,10 @@ namespace graphic
         sf::Texture pwrOff;
         sf::Texture buttonOn;
         sf::Texture buttonOff;
+        sf::Texture dskOn;
+        sf::Texture dskOff;
+        sf::Texture floppyOn;
+        sf::Texture floppyOff;
         uint32_t lastDeviceNumer;
 
         std::shared_ptr<data::menu::Menu> menu;

@@ -1,0 +1,134 @@
+@origin 1800
+RAM:
+@origin 1C0C
+FDC_STAT:
+@origin 1C0D
+FDC_CTRL:
+
+@origin 0000
+START:
+
+# check if the drive is lock
+GET $A :FDC_STAT
+AND $A $A 10
+CMP $A 00
+AND $F $F 04
+JMP 04 :ERR_LOCK
+
+
+MOV $C 00
+
+SET ~00011000 :FDC_CTRL
+NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP
+NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP
+NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP
+NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP
+WAIT_ZERO:
+    GET $A :FDC_STAT
+    AND $A $A 08
+    CMP $A 00
+    JMP 05 :WAIT_ZERO
+
+SYNC:
+    GET $A :FDC_STAT
+    AND $A $A 01
+    CMP $A 00
+    JMP 05 :SYNC
+SYNC_2:
+    GET $A :FDC_STAT
+    AND $A $A 01
+    CMP $A 01
+    JMP 05 :SYNC_2
+SYNC_3:
+    GET $A :FDC_STAT
+    AND $A $A 01
+    CMP $A 01
+    JMP 05 :SYNC_2
+SYNC_4:
+    GET $A :FDC_STAT
+    AND $A $A 01
+    CMP $A 01
+    JMP 05 :SYNC_2
+SYNC_5:
+    GET $A :FDC_STAT
+    AND $A $A 01
+    CMP $A 00
+    JMP 05 :SYNC
+
+LOOP:
+    GET $D :FDC_STAT
+    MUL $A $D 80
+    NOP
+    NOP
+    NOP
+    NOP
+    NOP
+    NOP
+    GET $D :FDC_STAT
+    MUL $D $D 80
+    DIV $A $A 02
+    AND $A $A 7F
+    OR  $A $A $D
+    NOP
+    NOP
+    NOP
+    GET $D :FDC_STAT
+    MUL $D $D 80
+    DIV $A $A 02
+    AND $A $A 7F
+    OR  $A $A $D
+    NOP
+    NOP
+    NOP
+    GET $D :FDC_STAT
+    MUL $D $D 80
+    DIV $A $A 02
+    AND $A $A 7F
+    OR  $A $A $D
+    NOP
+    NOP
+    NOP
+    GET $D :FDC_STAT
+    MUL $D $D 80
+    DIV $A $A 02
+    AND $A $A 7F
+    OR  $A $A $D
+    NOP
+    NOP
+    NOP
+    GET $D :FDC_STAT
+    MUL $D $D 80
+    DIV $A $A 02
+    AND $A $A 7F
+    OR  $A $A $D
+    ADD $C $C 01 # inc $C
+    CMP $C 01    # check if it
+    AND $F $F 01 # is the end
+    GET $D :FDC_STAT
+    MUL $D $D 80
+    DIV $A $A 02
+    AND $A $A 7F
+    OR  $A $A $D
+    SUB $C $C 01 # dec $C
+    NOP
+    NOP
+    GET $D :FDC_STAT
+    MUL $D $D 80
+    DIV $A $A 02
+    AND $A $A 7F
+    OR  $A $A $D
+    SET $A :RAM:h $C # save data
+    ADD $C $C 01 # inc $C
+    JMP 01 :LOOP # loop
+
+
+END:
+    SET ~00000000 :FDC_CTRL
+    MOV $E 02
+    JMP $F :END
+
+
+
+ERR_LOCK:
+    MOV $E 03
+    JMP $F :ERR_LOCK

@@ -1,0 +1,163 @@
+@origin 1C0C
+FDC_STAT:
+@origin 1C0D
+FDC_CTRL:
+
+@origin 0000
+SET 02 :FDC_CTRL # activate writeProtectionLED
+
+# check if we can write on the disk
+GET $A :FDC_STAT
+AND $B $A 02
+CMP $B 00
+AND $F $F 04
+JMP 04 :ERR_WRITE
+
+# check if the drive is lock
+AND $B $A 10
+CMP $B 00
+AND $F $F 04
+JMP 04 :ERR_LOCK
+
+
+# prepare write command
+MOV $A ~11010001
+# index
+MOV $C 00
+# move head up
+SET ~01100000 :FDC_CTRL
+MOV $E 10
+START:
+    GET $F :FDC_CTRL
+    AND $F $F ~00100000
+    CMP $F ~00100000
+    JMP 05 :START
+    MOV $E 00
+    MOV $G0 :DATA:h
+    MOV $G1 :DATA:l
+    GET $D $G0 $G1
+
+META:
+    SET $A :FDC_CTRL
+    NOP
+    NOP
+    NOP
+    SET $A :FDC_CTRL
+    XOR $A $A 01
+    NOP
+    NOP
+    SET $A :FDC_CTRL
+    NOP
+    NOP
+    NOP
+    SET $A :FDC_CTRL
+    NOP
+    NOP
+    NOP
+    SET $A :FDC_CTRL
+    NOP
+    NOP
+    NOP
+    SET $A :FDC_CTRL
+    XOR $A $A 01
+    NOP
+    NOP
+
+LOOP:
+    SET $A :FDC_CTRL
+    AND $B $D 01
+    XOR $A $A $B
+    DIV $D $D 02
+    SET $A :FDC_CTRL
+    XOR $A $A 01
+    ADD $G1 $G1 01 # next adr
+    NOP
+    SET $A :FDC_CTRL
+    AND $B $D 01
+    XOR $A $A $B
+    DIV $D $D 02
+    SET $A :FDC_CTRL
+    XOR $A $A 01
+    CMP $G1 00     # check if
+    AND $F $F 04   # overflow
+    SET $A :FDC_CTRL
+    AND $B $D 01
+    XOR $A $A $B
+    DIV $D $D 02
+    SET $A :FDC_CTRL
+    XOR $A $A 01
+    JMP 04 :LOOP_ADD # skip if not
+    JMP $F :LOOP_NADD
+LOOP_ADD:
+    ADD $G0 $G0 01 # next page
+    SET $A :FDC_CTRL
+    AND $B $D 01
+    XOR $A $A $B
+    DIV $D $D 02
+    SET $A :FDC_CTRL
+    JMP $F :LOOP_NXT
+LOOP_NADD:
+    SET $A :FDC_CTRL
+    AND $B $D 01
+    XOR $A $A $B
+    DIV $D $D 02
+    SET $A :FDC_CTRL
+    NOP
+LOOP_NXT:
+    XOR $A $A 01
+    NOP
+    SET $A :FDC_CTRL
+    AND $B $D 01
+    XOR $A $A $B
+    DIV $D $D 02
+    SET $A :FDC_CTRL
+    XOR $A $A 01
+    NOP
+    NOP
+    SET $A :FDC_CTRL
+    AND $B $D 01
+    XOR $A $A $B
+    DIV $D $D 02
+    SET $A :FDC_CTRL
+    XOR $A $A 01
+    NOP
+    ADD $C $C 01   # inc $C
+    SET $A :FDC_CTRL
+    AND $B $D 01
+    XOR $A $A $B
+    DIV $D $D 02
+    SET $A :FDC_CTRL
+    XOR $A $A 01
+    CMP $C 01    # check if it
+    AND $F $F 01 # is the end
+    SET $A :FDC_CTRL
+    AND $B $D 01
+    XOR $A $A $B
+    DIV $D $D 02
+    SET $A :FDC_CTRL
+    XOR $A $A 01
+    GET $D $G0 $G1 # get nxt data
+    JMP 01 :LOOP # loop if not done
+
+END:
+    SET ~00000000 :FDC_CTRL
+    MOV $E 02
+    JMP $F :END
+
+ERR_WRITE:
+    MOV $E 01
+    JMP $F :ERR_WRITE
+
+ERR_LOCK:
+    MOV $E 03
+    JMP $F :ERR_LOCK
+
+
+DATA:
+00 FF "THIS IS A SAMPLE TEXT TO TEST THE WRITE AND READ FUNCTIONALITY OF THE FDD"
+00 00 00  04 44 04  0A A0 00  0A EA EA  0E CE 6E  0A 24 8A  06 A4 AD  08 80 00  04 88 84  04 22 24  0A 4A 00  00 4E 40  00 00 48  00 0E 00  00 00 04  02 24 88 
+0E AA AE  02 22 22  0E 2E 8E  0E 2E 2E  0A AE 22  0E 8E 2E  0E 8E AE  0E 22 22  0E AE AE  0E AE 2E  00 04 04  00 40 48  02 48 42  00 E0 E0  08 42 48  0E 26 04 
+04 AA 86  0E AE AA  0E AC AE  0E 88 8E  0C AA AC  0E 8E 8E  0E 8E 88  0E 8A AE  0A AE AA  04 04 44  0E 44 4C  0A AC AA  08 88 8E  0A EE AA  0C AA AA  06 AA AC 
+0E AE 88  0E AA C6  0E AC AA  0E 84 2E  0E 44 44  0A AA AE  0A AA A4  0A AE EA  0A A4 AA  0A A4 44  0E 24 8E  0C 88 8C  08 84 22  06 22 26  04 A0 00  00 00 0E 
+08 40 00  00 4A EA  00 CC AE  00 68 86  00 CA AC  00 EC 8E  00 E8 C8  00 68 A6  00 AA EA  00 40 44  00 E4 4C  00 AA CA  00 88 8E  00 EE AA  00 CA AA  00 6A AC 
+01 23 45 67 89 AB CD EF

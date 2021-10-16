@@ -28,6 +28,8 @@ public:
     static const std::string COMMENT;
     static const std::string IMPORT;
     static const std::string ORIGIN;
+    static const std::string CONSTANT_DECLARE;
+    static const std::string CONSTANT;
     static const std::string ERR;
 
     std::string toString();

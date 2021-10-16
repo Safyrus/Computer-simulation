@@ -73,20 +73,6 @@ void dynarec::Translater::deleteBlocks(uint16_t adr)
             blocks[index] = nullptr;
         }
     }
-
-    /*
-    for (unsigned int i = 0; i < blocks.size(); i++)
-    {
-        if (blocks[i] != nullptr && adr >= i && adr <= (uint16_t)(i+(blocks[i]->getInsCount()*4)))
-        {
-            if (print)
-            {
-                printDebug(ansi(WHITE_FG) + "delete block " + std::to_string(i));
-            }
-            delete blocks[i];
-            blocks[i] = nullptr;
-        }
-    }*/
 }
 
 dynarec::Emitter *dynarec::Translater::handlerEndBlock(int ret)
@@ -193,11 +179,15 @@ void dynarec::Translater::initStep(uint16_t pc)
     startTime = std::chrono::steady_clock::now();
     running = true;
     lastHz = cpu->hz;
+    deleteBlocks();
 
     // set a low blockSize if the Hz is low
     if (cpu->hz != 0)
     {
-        blockSize = std::min((uint32_t)MAX_BLOCK_SIZE, std::max(cpu->hz / 4, (unsigned)1));
+        blockSize = std::min((uint32_t)MAX_BLOCK_SIZE, cpu->hz);
+    }else
+    {
+        blockSize = MAX_BLOCK_SIZE;
     }
 
     // get the current block
@@ -215,8 +205,11 @@ void dynarec::Translater::waitInst()
                 printDebug(ansi(WHITE_FG) + "reset time");
 
             // reset blocks
-            startTime = std::chrono::steady_clock::now();
-            cpu->cycle = 0;
+            std::chrono::steady_clock::time_point timeNow = std::chrono::steady_clock::now();
+            std::chrono::nanoseconds timeCpu((cpu->cycle*1000000000)/cpu->hz);
+            
+            startTime = timeNow - timeCpu;
+            //cpu->cycle = 0;
             blockSize = std::min((uint32_t)MAX_BLOCK_SIZE, cpu->hz);
             deleteBlocks();
             e = getBlock(cpu->pc);

@@ -118,6 +118,10 @@ void graphic::ComputerWindow::start()
     openTexture(pwrOn, "data/img/saphyr1_pwr_on.png");
     openTexture(buttonOff, "data/img/saphyr1_button_off.png");
     openTexture(buttonOn, "data/img/saphyr1_button_on.png");
+    openTexture(dskOff, "data/img/saphyr1_dsk_off.png");
+    openTexture(dskOn, "data/img/saphyr1_dsk_on.png");
+    openTexture(floppyOff, "data/img/saphyr1_floppy_off.png");
+    openTexture(floppyOn, "data/img/saphyr1_floppy_on.png");
 
     text.setFont(font);
     text.setCharacterSize(6);
@@ -138,6 +142,9 @@ void graphic::ComputerWindow::start()
 
 void graphic::ComputerWindow::stop()
 {
+    computer.reset();
+    menu.reset();
+    menuView.reset();
     window.close();
     printDebug("Stop");
 }
@@ -201,33 +208,53 @@ void graphic::ComputerWindow::loop()
 
     window.draw(rect);
 
-    sf::Sprite caseSpr;
+    sf::Sprite caseSprite;
     // draw case
-    caseSpr.setTexture(com);
-    caseSpr.setPosition(sf::Vector2f(0, 6));
-    window.draw(caseSpr);
+    caseSprite.setTexture(com);
+    caseSprite.setPosition(sf::Vector2f(0, 6));
+    window.draw(caseSprite);
 
-    // draw light
-    sf::Sprite pwrLight;
+    // draw pwr light
+    sf::Sprite pwrLightSprite;
     if (computer->getPower())
-        pwrLight.setTexture(pwrOn);
+        pwrLightSprite.setTexture(pwrOn);
     else
-        pwrLight.setTexture(pwrOff);
-    pwrLight.setPosition(sf::Vector2f(16, 25));
-    window.draw(pwrLight);
+        pwrLightSprite.setTexture(pwrOff);
+    pwrLightSprite.setPosition(sf::Vector2f(12, 25));
+    window.draw(pwrLightSprite);
 
-    // draw buttons
+    // draw pwr buttons
     sf::Sprite buttonPwrSprite;
     if (computer->getPower())
         buttonPwrSprite.setTexture(buttonOn);
     else
         buttonPwrSprite.setTexture(buttonOff);
-    buttonPwrSprite.setPosition(sf::Vector2f(16, 13));
+    buttonPwrSprite.setPosition(sf::Vector2f(12, 14));
     window.draw(buttonPwrSprite);
+
+    // draw rst buttons
     sf::Sprite buttonRstSprite;
     buttonRstSprite.setTexture(buttonOff);
-    buttonRstSprite.setPosition(sf::Vector2f(48, 13));
+    buttonRstSprite.setPosition(sf::Vector2f(12, 32));
     window.draw(buttonRstSprite);
+
+    // draw floppy drive
+    sf::Sprite floppySprite;
+    if (computer->isDriveLock())
+        floppySprite.setTexture(floppyOn);
+    else
+        floppySprite.setTexture(floppyOff);
+    floppySprite.setPosition(sf::Vector2f(52, 32));
+    window.draw(floppySprite);
+
+    // draw floppy drive light
+    sf::Sprite dskSprite;
+    if (computer->isDriveActive())
+        dskSprite.setTexture(dskOn);
+    else
+        dskSprite.setTexture(dskOff);
+    dskSprite.setPosition(sf::Vector2f(56, 32));
+    window.draw(dskSprite);
 
     // display the menu
     menuView->draw(window);
@@ -262,10 +289,16 @@ void graphic::ComputerWindow::openSubWindow(std::string windowName)
         printDebug("try open device window " + windowName);
         uint16_t i = stoi(windowName.substr(9, 2), NULL, 10);
         windowName = windowName.substr(11);
+
         if (windowName.compare("RAM") == 0 || windowName.compare("VRAM") == 0)
         {
             std::shared_ptr<computer::RAM> ram = std::dynamic_pointer_cast<computer::RAM>(computer->getAllDevice()[i]);
             std::string devWinName = "S257 Dynamic Recompiler - " + ram->getName() + " Window";
+            if (!findSubWinByName(devWinName).empty())
+            {
+                printDebug(devWinName + " window already open");
+                return;
+            }
             std::shared_ptr<graphic::RamWindow> subW = std::make_shared<graphic::RamWindow>(ram, devWinName, debug);
             printDebug("open ram");
             addSubWindow(subW);
@@ -274,6 +307,11 @@ void graphic::ComputerWindow::openSubWindow(std::string windowName)
         {
             std::shared_ptr<computer::ROM> rom = std::dynamic_pointer_cast<computer::ROM>(computer->getAllDevice()[i]);
             std::string devWinName = "S257 Dynamic Recompiler - " + rom->getName() + " Window";
+            if (!findSubWinByName(devWinName).empty())
+            {
+                printDebug(devWinName + " window already open");
+                return;
+            }
             std::shared_ptr<graphic::RomWindow> subW = std::make_shared<graphic::RomWindow>(rom, devWinName, debug);
             printDebug("open rom");
             addSubWindow(subW);
@@ -282,6 +320,11 @@ void graphic::ComputerWindow::openSubWindow(std::string windowName)
         {
             std::shared_ptr<computer::IOController> io = std::dynamic_pointer_cast<computer::IOController>(computer->getAllDevice()[i]);
             std::string devWinName = "S257 Dynamic Recompiler - " + io->getName() + " Window";
+            if (!findSubWinByName(devWinName).empty())
+            {
+                printDebug(devWinName + " window already open");
+                return;
+            }
             std::shared_ptr<graphic::IOControllerWindow> subW = std::make_shared<graphic::IOControllerWindow>(io, devWinName, debug);
             printDebug("open ioCtrl");
             addSubWindow(subW);

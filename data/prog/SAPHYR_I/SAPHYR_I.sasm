@@ -1,0 +1,235 @@
+################################
+#                              #
+#   NAME: SAPHYR-I_BOOT        #
+#                              #
+# AUTHOR: Safyrus              #
+#                              #
+# VERSION: 1                   #
+#                              #
+#   DESC: This is the first    #
+# program that starts on the   #
+# Saphyr I and try to find     #
+# another program to call and  #
+# pass the control to.         #
+#                              #
+#    ADR:                      #
+# 0000 - 0FFF : 4K ROM         #
+# 1000 - 17FF : 2K ROM         #
+# 1800 - 1BFF : 1K RAM         #
+# 1C00 - 1C7F : HW STATS       #
+#   00-07 : HARDWARE           #
+#     0 : devices connected    #
+#         (EIMVRRrr)           #
+#     1 : timer                #
+#     2 : buzzer               #
+#   08-0F : FDC                #
+#     0 FDC Command            #
+#     1 FDC Data               #
+#     2 FDC Track              #
+#     3 FDC Sector             #
+#     4 FDC State (R)          #
+#       (...LSTWD)             #
+#     5 FDC Control (W)        #
+#       (RwDiStMSzTzWlDt)      #
+#   10-17 : IO                 #
+#     0 connected              #
+#     1 talkCPU                #
+#     2 talkDEV                #
+#   18-1F : VPU                #
+#     0 : MODE                 #
+#     1 : STATE                #
+#   20-7F NOTHING              #
+# 1C80 - 1CFF : RESERVED       #
+# 1D00 - 1D1F : IO             #
+#   for each device:           #
+#     0: get                   #
+#     1: set                   #
+#     2: getState              #
+#     3: setState              #
+# 1D20 - 1DFF : RESERVED       #
+# 1E00 - 1FFF : MEM            #
+# 2000 - 3FFF : 8K VRAM        #
+# 4000 - 7FFF : 16K RAM        #
+# 8000 - FFFF : EXTENDED       #
+################################
+
+#/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\#
+# TODO
+# - boot floppy
+#/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\#
+
+
+#==============================#
+#            IMPORT            #
+#==============================#
+@import
+prog/SAPHYR_I/SAPHYR_I_DEF.sasm
+@origin 0000
+JMP $F :SETUP
+
+01 # version
+
+00 # padding
+00
+00
+
+@import
+prog/SAPHYR_I/SAPHYR_I_SRT.sasm
+@import
+prog/SAPHYR_I/SAPHYR_I_RT.sasm
+@import
+prog/SAPHYR_I/SAPHYR_I_FCT.sasm
+@import
+prog/SAPHYR_I/SAPHYR_I_DATA.sasm
+
+
+#==============================#
+#             SETUP            #
+#==============================#
+#                              #
+# We first need to check if we #
+# have the devices needed to   #
+# boot and optionnaly to       #
+# display error                #
+#------------------------------#
+
+SETUP:
+ # we need to check if the
+ # base RAM is present to start
+ # the booting process
+ GET $A :HW_CONNECT
+ AND $B $A 04
+ CMP $B 00
+ AND $F $F 0E
+ JMP EQU :ERR_NORAM
+
+ # We need to check if the VRAM
+ # is present to display error
+ AND $B $A 10
+ CMP $B 00
+ AND $F $F 0E
+ JMP EQU :BOOT
+ # set VPU_PRESENT to TRUE
+ SET 01 :VAR_VPU
+ # set VPU mode to 3
+ SET 03 :VPU_MODE
+ # init cursor
+ SET :VRAM:h :VAR_CURS_H
+ SET :VRAM:l :VAR_CURS_L
+
+ # setup the stack
+ SET FF :VAR_STKPTR
+
+ # skip boot
+ #JMP $F :BOOT_NOBOOT
+
+
+#==============================#
+#             BOOT             #
+#==============================#
+#                              #
+#                              #
+#------------------------------#
+
+BOOT:
+BOOT_FLOPPY:
+ # Do we have a floppy memory ?
+ # otherwise try to boot
+ # from EXT
+ AND $B $A 20
+ CMP $B 00
+ AND $F $F 0E
+ JMP 04 :BOOT_EXT
+
+ # Is the floppy present ?
+ GET $A :FDC_STATE
+ AND $A $A 10
+ CMP $A 00
+ JMP UEQ :BOOT_EXT
+
+ # Read the first sector
+ SET 00 :FDC_TRACK
+ SET 00 :FDC_SECTOR
+ SET FDCCMD_READ :FDC_CMD
+ BOOT_WAIT_FDC:
+  GET $F :FDC_CMD
+  AND $F $F 80
+  CMP $F 80
+  JMP UEQ :BOOT_WAIT_FDC
+
+ # Is the floppy bootable ?
+ GET $A :MEM_END
+ CMP $A 5A
+ JMP UEQ :MEM
+
+BOOT_EXT:
+ # Do we have an
+ # extended device ?
+ # otherwise say we can't boot
+ AND $B $A 80
+ CMP $B 00
+ AND $F $F 0E
+ JMP 04 :BOOT_NOBOOT
+
+ # Is it bootable ?
+ GET $B FF FF
+ CMP $B 5A
+ AND $F $F 04
+ JMP 04 80 00 # boot to EXT
+
+BOOT_NOBOOT:
+ JMP $F :ERR_NOBOOT
+
+
+
+#==============================#
+#            ERRORS            #
+#==============================#
+# 01: NO BASE RAM              #
+# 02: NO BOOT DEVICE FOUND     #
+# 03: UNKNOW ERROR             #
+# 10: STACK FULL               #
+# 11: STACK EMPTY              #
+#------------------------------#
+
+@const ERR_NORAM 01
+@const ERR_NOBOOT 02
+
+ERR_UNKNOW:
+ SET 62 :HW_BUZZER
+ MOV $E 03
+ JMP $F :ERR_UNKNOW
+
+ERR_NORAM:
+ SET 49 :HW_BUZZER
+ MOV $E ERR_NORAM
+ ERR_NORAM_LOOP:
+  JMP $F :ERR_NORAM_LOOP
+
+ERR_NOBOOT:
+ SET 20 :HW_BUZZER
+ MOV $E ERR_NOBOOT
+ MOV $C $D :STR_NOBOOT
+ # upper line is not an
+ # instruction but a
+ # shortcut for this:
+ #  MOV $C :STR_NOBOOT:h
+ #  MOV $D :STR_NOBOOT:l
+ JMP $F :FCT_PRINT
+
+ ERR_NOBOOT_LOOP:
+  # enter prompt mode
+  SET M_PROMPT :VAR_MODE
+  JMP $F :FCT_CMD
+  # loop
+  JMP $F :ERR_NOBOOT_LOOP
+
+ERR_STACKFULL:
+ MOV $E 10
+ ERR_STACKFULL_LOOP:
+  JMP $F :ERR_STACKFULL_LOOP
+
+ERR_STACKEMPTY:
+ MOV $E 11
+ ERR_STACKEMPTY_LOOP:
+  JMP $F :ERR_STACKEMPTY_LOOP

@@ -39,3 +39,4 @@ void clearConsole();
 void printDebug(std::string str, bool plain = false);
 void printInfo(std::string str);
 void printError(std::string str);
+void printWarning(std::string str);

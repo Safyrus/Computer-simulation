@@ -14,6 +14,7 @@ graphic::View::View()
 
 graphic::View::~View()
 {
+    printDebug("View Destruction");
 }
 
 void graphic::View::setPos(int x, int y)

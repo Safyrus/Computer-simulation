@@ -39,17 +39,16 @@ To learn about the custom architecture of the S257 CPU go into the note folder a
 ## Resource used
 
 - Sweetie 16 palette from GrafKid: [https://grafxkid.tumblr.com/palettes]
+- Font used for the manual:
+  - Spotlight typewriter [https://www.dafont.com/fr/spotlight-typewriter-nc.font]
+  - Tippa [https://www.dafont.com/fr/tippa.font]
+  - Simpleness [https://www.dafont.com/fr/simpleness.font]
 
 ## TODO
 
-- More verification in verifCPU.
 - Correct any grammar or spelling mistake in CHANGELOG and other files.
 - Add comments.
 - Optimize cycles.
-- Some assembler features.
-- Finish Saphyr-I architecture.
-
-- Graphics 2.0 with multiple things:
-  - help
-  - a new window for each device
-  - action to change computer
+- Add a help window.
+- Add a window for some devices.
+- Be able to change the computer configuration.

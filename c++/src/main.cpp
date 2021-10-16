@@ -15,9 +15,7 @@
 
 #include "global.hpp"
 #include "runS257Compiler.hpp"
-#include "runS257Interpreter.hpp"
 
-#include "assembler/AssemblerCompiler.hpp"
 #include "assembler/Interpreter.hpp"
 #include "assembler/Parser.hpp"
 #include "assembler/Lexer.hpp"
@@ -29,10 +27,10 @@
 
 #include "graphic/MainWindow.hpp"
 
-void runMainWindow(bool print_debug, std::string filePath)
+void runMainWindow(bool print_debug, std::string filePath, uint32_t hz)
 {
     printDebug("Create MainWindow");
-    std::shared_ptr<graphic::MainWindow> app = std::make_shared<graphic::MainWindow>("S257 Dynamic Recompiler - Main Window", print_debug, filePath);
+    std::shared_ptr<graphic::MainWindow> app = std::make_shared<graphic::MainWindow>("S257 Dynamic Recompiler - Main Window", print_debug, filePath, hz);
     //std::cout << "Load ComWinManager config" << std::endl;
     //app->loadConfig(filePath);
     printDebug("Run MainWindow");
@@ -44,11 +42,10 @@ int main(int argc, char const *argv[])
 {
     // define variables
     std::string filePath = "";
-    int hz = 8;
+    uint32_t hz = 8;
     bool test = false;
     bool error = false;
     int choice = 0;
-    AssemblerCompiler *compiler;
 
     // number of argument verification
     if (argc > 1)
@@ -90,9 +87,7 @@ int main(int argc, char const *argv[])
     // wait for input
     std::cout << "--- What do you want to test ? ---\n"
               << ansi(DEFAULT_FG) << "1 - " << ansi(GREEN_FG) << "Assembler\n"
-              << ansi(DEFAULT_FG) << "2 - " << ansi(YELLOW_FG) << "Computer(dynarec)(not done)\n"
-              << ansi(DEFAULT_FG) << "3 - " << ansi(RED_FG) << "Old assembler(don't use)\n"
-              << ansi(DEFAULT_FG) << "4 - " << ansi(GREEN_FG) << "Old computer(interpreter)" << ansi(YELLOW_FG) << "(may be bugged)\n"
+              << ansi(DEFAULT_FG) << "2 - " << ansi(GREEN_FG) << "Computer(dynarec)\n"
               << ansi(RESET);
     std::cin >> choice;
 
@@ -109,54 +104,28 @@ int main(int argc, char const *argv[])
             std::cout << "\n###########################\n";
             testEmitter();
             std::cout << "\n###########################\n";
-            testTranslater();
-            std::cout << "\n###########################\n";
-            testTranslater2(filePath);
-            std::cout << "\n###########################\n";
+            //testTranslater();
+            //std::cout << "\n###########################\n";
+            //testTranslater2(filePath);
+            //std::cout << "\n###########################\n";
             testDeviceThread(filePath, hz);
             std::cout << "\n###########################\n";
         }
 
-        runMainWindow(print_debug, filePath);
+        runMainWindow(print_debug, filePath, hz);
         break;
-
-    case 3: // old sasm compiler
-        compiler = new AssemblerCompiler();
-
-        // wait for the user input
-        std::cout << "-=#[ Test for assemblerCompiler(loadAssembly) ]#=-" << std::endl;
-        std::cout << "--- Enter file name to open ---" << std::endl;
-        std::cin >> filePath;
-
-        // compile
-        compiler->loadAssembler(filePath.c_str());
-        std::cin.ignore();
-
-        // wait for the user input
-        std::cout << "\n\n-=#[ Test for assemblerCompiler(saveBinary) ]#=-" << std::endl;
-        std::cout << "--- Enter file name to save ---" << std::endl;
-        std::cin >> filePath;
-
-        // save
-        compiler->saveBinary(filePath.c_str());
-        delete compiler;
-        break;
-
-    case 4: // S257 interpreter
-        runS257Interpreter(filePath, hz);
-        break;
-
     default:
         break;
     }
 
     // wait for user to close the console
     std::cout << "\n-=#[ Done ]#=-" << std::endl;
-    std::cin.ignore();
-    std::cin.ignore();
+    //std::cin.ignore();
+    //std::cin.ignore();
 
     // restore console
     if (!print_debug && !error)
         clearConsole();
     restoreConsole();
+    return error;
 }

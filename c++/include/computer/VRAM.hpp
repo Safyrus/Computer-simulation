@@ -26,6 +26,7 @@ namespace computer
 
         void setLock(bool lock);
         uint8_t unlockGet(uint16_t adr);
+        void unlockSet(uint16_t adr, uint8_t data);
     };
 } // namespace computer
 

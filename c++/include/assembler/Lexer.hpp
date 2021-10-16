@@ -24,6 +24,8 @@ private:
     static const char CHAR_LABEL_HIGH = 'h';
     static const std::vector<std::string> CMDS;
 
+    std::vector<std::string> constants;
+
     void next();
 
     Token makeComment();
@@ -33,6 +35,8 @@ private:
     Token makeString();
     Token makeImport();
     Token makeOrigin();
+    Token makeConstDeclare();
+    Token makeConst();
     Token makeLabel();
     Token makeReg();
     Token findToken();

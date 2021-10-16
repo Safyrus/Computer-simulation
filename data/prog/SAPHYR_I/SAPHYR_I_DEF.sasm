@@ -1,0 +1,160 @@
+#==============================#
+#           CONSTANTS          #
+#==============================#
+@const LES 08
+@const EQU 04
+@const GRE 02
+@const UEQ 05
+@const UGE 01
+@const FLC 01
+
+@const K_BS 08
+@const K_LF 0A
+@const K_CR 0D
+@const K_ESC 1B
+@const K_$ 24
+@const K_0 30
+@const K_1 31
+@const K_2 32
+@const K_3 33
+@const K_4 34
+@const K_5 35
+@const K_A 41
+@const K_B 42
+@const K_C 43
+@const K_D 44
+@const K_E 45
+@const K_F 46
+@const K_G 47
+@const K_J 4A
+@const K_O 4F
+@const K_R 52
+
+@const M_DEBUG 01
+@const M_PROMPT 02
+@const M_PROG 03
+
+@const FDCCMD_READ 04
+
+
+#==============================#
+#            MEM MAP           #
+#==============================#
+@origin 1800
+LOWRAM:
+
+@origin 1C00
+HW_CONNECT:
+@origin 1C01
+HW_TIME:
+@origin 1C02
+HW_BUZZER:
+
+@origin 1C08
+FDC_CMD:
+@origin 1C09
+FDC_DATA:
+@origin 1C0A
+FDC_TRACK:
+@origin 1C0B
+FDC_SECTOR:
+@origin 1C0C
+FDC_STATE:
+@origin 1C0D
+FDC_CTRL:
+
+@origin 1C18
+VPU_MODE:
+@origin 1C19
+VPU_STATE:
+
+@origin 1D00
+IO:
+IO1G:
+@origin 1D01
+IO1S:
+@origin 1D02
+IO1GR:
+@origin 1D03
+IO1SR:
+
+@origin 1E00
+MEM:
+@origin 1FFF
+MEM_END:
+
+@origin 2000
+VRAM:
+
+@origin 4000
+RAM:
+
+@origin 8000
+EXT:
+
+
+#==============================#
+#          LOW RAM MAP         #
+#==============================#
+@origin 1800
+STACK:
+@origin 1900
+VAR_RTRET_H:
+@origin 1901
+VAR_RTRET_L:
+@origin 1902
+VAR_STKPTR:
+@origin 1903
+VAR_CALL_H:
+@origin 1904
+VAR_CALL_L:
+@origin 1905
+VAR_VPU:
+@origin 1906
+VAR_CURS_H:
+@origin 1907
+VAR_CURS_L:
+@origin 190B
+VAR_MODE:
+@origin 190C
+VAR_MAXCMDBUF:
+@origin 190D
+VAR_KEYCHAR:
+@origin 190E
+VAR_KEYCHARSTOP:
+@origin 190F
+VAR_INPUTCMDINDEX:
+@origin 1910
+VAR_INPUTCMD:
+@origin 191F
+VAR_INPUTCMDSTOP:
+@origin 1920
+VAR_DBGCMD_OP:
+VAR_DBGCMD_OP1:
+@origin 1921
+VAR_DBGCMD_OP2:
+@origin 1922
+VAR_DBGCMD_OP3:
+@origin 1923
+VAR_DBGCMD_OP4:
+VAR_DBGCMD_OP_END:
+@origin 1924
+VAR_CMDRET_OP1:
+@origin 1925
+VAR_CMDRET_OP2:
+@origin 1926
+VAR_CMDRET_OP3:
+@origin 1927
+VAR_CMDRET_OP4:
+@origin 1928
+VAR_PROG_CURS:
+@origin 1929
+VAR_PROG_CURS_END:
+@origin 1A00
+VAR_PROG_MEM_START:
+@origin 1A10
+VAR_PROG_MEM:
+@origin 1BF8
+VAR_PROG_MEM_END:
+
+@origin 0000

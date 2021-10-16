@@ -18,10 +18,145 @@ This project try to follow the [Semantic Versioning](https://semver.org/spec/v2.
 
 ### **Removed**
 
-### **Work on**
+-----------------
 
-- graphics
-- hardware emulation
+## **[0.7.0]** - _2021-10-16_
+
+The "_Saphyr-I and 2.0 Graphics_" update.
+
+### **Added**
+
+#### Manual
+
+- A manual explaining how to install the SAPHYR I and use it, how it works, how to program it and other things.
+- The manual in Markdown.
+- Images used in the manual.
+
+#### Assembler
+
+- A "Duo" Node for representing one command with two value.
+- Possibility to declare and use constants.
+- Refactor duplicate code to functions.
+
+#### Computer
+
+- A "printWarning" function.
+- Add a "sfmlKeyToSAPHYRKey" function.
+- A "unlockSet" function to VRAM.
+- A new Floppy class to represent the content of a floppy disk.
+- A FDD (Floppy Disk Drive) Device to read and write floppy disks.
+- A FDC (Floppy Disk Controller) Device to control the FDD.
+- Default devices to Computer:
+  - a FDD
+  - a FDC
+  - a floppy automatically inserted in the FDD (loaded from file "floppy.img")
+  - 512bytes RAM for the FDC
+  - 32K ROM on the EXT port (loaded from file "ext").
+- New functions for the Computer. (isDriveActive and isDriveLock)
+- A buzzer that produce square waves to HardwareStates.
+- A timer that loop from 0 to 255 during a second to HardwareStates.
+
+#### Data
+
+- Textures of the floppy drive to use in the ComputerWindow.
+- A square wave sound "square.wav".
+- New test programs:
+  - test_floppy_fm_read: Read sector 0 on track 0 of the floppy directly with FM encoding.
+  - test_floppy_fm_read_head: Read sector 0 on track 1 of the floppy directly with FM encoding.
+  - test_floppy_fm_write: Write sector 0 on track 0 of the floppy directly with FM encoding.
+  - test_floppy_fm_write_head: Write sector 0 on track 1 of the floppy directly with FM encoding.
+  - write_boot: Write a boot sector on the floppy with the FDC.
+  - EXT: Program that can boot on a 32K ROM in the EXT port.
+- New example programs:
+  - fdc_write: Write sector 0 on track 0 with the FDC.
+  - fdc_read: Read sector 0 on track 0 with the FDC.
+  - keyboard: Read the keyboard input and put the typed character on the screen.
+  - screen_fill_vsync: Fill the screen with random value and make sure it does by checking the vsync.
+  - sound: Play all the possible sound of the buzzer.
+  - sound_pattern: Play a pattern of sound with the buzzer.
+- The SAPHYR_I Program that is the default program on the SAPHYR I 4K ROM. Features included:
+  - Run a program on a floppy or a EXT device that is bootable.
+  - Basic error detection.
+  - Can create and use a stack.
+  - Can declare functions, routine and subroutines.
+  - Have some basic useful routines.
+  - Print text on the screen in a "terminal/console" way.
+  - Act based on user input.
+  - Execute predefined programs:
+    - A PROMPT program to run other programs.
+    - A DEBUG program to execute raw hex instruction.
+    - A PROG program to enter a program in a basic form of the SAMS language. Interprete it and run it.
+
+#### Graphics
+
+- Floppy disk drive graphics on the case of the ComputerWindow.
+
+#### Others
+
+- A 3D model of the SAPHYR I in blender with textures files.
+- A processing sketch "ImgToBin" to convert an image into a color indexed image for the SAPHYR I palette.
+- A Logisim circuit "keyboard_logic" to represent how the SAPHYR I keyboard works.
+- "compile_and_run" script (bat and sh).
+
+### **Changed**
+
+#### Computer
+
+- Add debug prints in Device.
+- Maximum compiled block size under low CPU frequency.
+- Main function return an error code if necessary.
+- Hz of the dynamic recompiler can now be set at the start with the Hz argument in main.
+- Keyboard now only sending the key to the IOController.
+- Keyboard layout to be more accurate with the SAPHYR I keyboard.
+- flag in "connected" register in HardwareStates not being set properly.
+
+#### Data
+
+- Buttons (on and off) textures and the case texture.
+- Aseprite files to update the SAPHYR I front panel.
+
+#### Graphics
+
+- Add debug prints in MenuAction, View and Window.
+- Buttons position on the ComputerWindow to match the new textures.
+
+#### Others
+
+- Move FontImgToBin sketch into Processing folder.
+- Makefile install and flags.
+- Update README.
+
+### **Fixed**
+
+#### Computer
+
+- Block not being deleted when resetting.
+- Time to wait for CPU cycle not being correct when resetting.
+- IOController and Keyboard local variables type and steps order in run.
+- Cycle refresh not send to devices during reset.
+
+#### Graphics
+
+- VPU color2Mode performance issue.
+- Incorrect framerate.
+- Sub Windows not being removed.
+- Same window being able to open multiple times.
+- MainWindow closing before the computer had stop.
+
+### **Removed**
+
+#### Computer
+
+- The old computer interpreter and compiler.
+- Old assembler and interpreter from main.
+
+#### Data
+
+- Programs for the old version.
+
+#### Graphics
+
+- The test submenu on MainWindow.
 
 -----------------
 

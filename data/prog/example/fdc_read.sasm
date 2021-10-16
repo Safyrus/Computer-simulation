@@ -1,0 +1,63 @@
+# ####################
+# # For the Saphyr I #
+# ####################
+#
+# Read sector 0 on track 0 with the FDC.
+
+# declare some label
+@origin 1C08
+FDC_CMD:
+@origin 1C09
+FDC_DATA:
+@origin 1C0A
+FDC_TRACK:
+@origin 1C0B
+FDC_SECTOR:
+@origin 1C0C
+FDC_STATS:
+@origin 1C0D
+FDC_CTRL:
+@origin 1E00
+RAM_MEM:
+
+
+# start
+@origin 0000
+# put the MEM RAM adress in $AB
+MOV $A :RAM_MEM:h
+MOV $B :RAM_MEM:l
+
+# fill the first part of the MEM with 0
+LOOP2:
+    SET 00 $A $B
+    ADD $B $B 01
+    CMP $B 00
+    AND $F $F 04
+    JMP 00 :LOOP2
+
+# fill the second part of the MEM with 0
+ADD $A $A 01
+LOOP22:
+    SET 00 $A $B
+    ADD $B $B 01
+    CMP $B 00
+    AND $F $F 04
+    JMP 00 :LOOP22
+
+# wait for the FDC in case it is busy
+WAIT:
+    GET $F :FDC_CMD
+    AND $F $F 80
+    CMP $F 80
+    AND $F $F FE
+    JMP 04 :WAIT
+
+# Read sector 0 on track 0
+# The data will be save in MEM
+SET 00 :FDC_TRACK
+SET 00 :FDC_SECTOR
+SET 04 :FDC_CMD
+
+# The end
+END:
+    JMP $F :END

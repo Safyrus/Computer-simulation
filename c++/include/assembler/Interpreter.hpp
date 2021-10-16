@@ -8,6 +8,8 @@ private:
     std::vector<Node *> nodes;
     std::vector<Node *> labels;
     std::vector<int> labels_adr;
+    std::vector<std::string> constants;
+    std::vector<int> constants_val;
     static std::vector<std::string> importName;
     int index;
 

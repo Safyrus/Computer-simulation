@@ -1,0 +1,73 @@
+#==============================#
+#         SUBROUTINES          #
+#==============================#
+# PARAM: AB: new cursor value
+SRT_SETCURS:
+ SET $A :VAR_CURS_H
+ SET $B :VAR_CURS_L
+ JMP $F $J1 $J2
+
+# RET: AB: cursor value
+SRT_GETCURS:
+ GET $A :VAR_CURS_H
+ GET $B :VAR_CURS_L
+ JMP $F $J1 $J2
+
+SRT_RETURN:
+ GET $J1 :VAR_RTRET_H
+ GET $J2 :VAR_RTRET_L
+ JMP $F $J1 $J2
+
+# PARAM:
+#  A: val to push
+# USE: A,F
+SRT_PUSH:
+ # check if the stack is full
+ GET $F :VAR_STKPTR
+ CMP $F 00
+ JMP UEQ :ERR_STACKFULL
+
+ # save the value to the stack
+ GET $F :VAR_STKPTR
+ SET $A :STACK:h $F
+ # update stack ptr
+ SUB $F $F 01
+ SET $F :VAR_STKPTR
+
+ # return
+ JMP $F $J1 $J2
+
+# RETURN:
+#  A: val
+# USE: A,F
+SRT_POP:
+ # check if the stack is empty
+ GET $F :VAR_STKPTR
+ CMP $F FF
+ JMP UEQ :ERR_STACKEMPTY
+
+ # get the value from the stack
+ GET $F :VAR_STKPTR
+ ADD $F $F 01
+ GET $A :STACK:h $F
+ # update stack ptr
+ SET $F :VAR_STKPTR
+
+ # return
+ JMP $F $J1 $J2
+
+
+SRT_ENDSTR_AB:
+ GET $F $A $B
+ CMP $F 00
+ AND $F $F 04
+ # return
+ JMP $F $J1 $J2
+
+
+SRT_ENDSTR_CD:
+ GET $F $C $D
+ CMP $F 00
+ AND $F $F 04
+ # return
+ JMP $F $J1 $J2

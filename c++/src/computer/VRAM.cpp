@@ -69,3 +69,8 @@ uint8_t computer::VRAM::unlockGet(uint16_t adr)
 {
     return RAM::get(adr);
 }
+
+void computer::VRAM::unlockSet(uint16_t adr, uint8_t data)
+{
+    RAM::set(adr, data);
+}
