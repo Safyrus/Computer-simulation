@@ -233,6 +233,15 @@ Token Lexer::makeLabel()
     }
 }
 
+Token Lexer::makeExternDeclare()
+{
+    Position newPos = pos.copy();
+    next();
+    std::string word = findWord();
+    return Token(Token::EXTERN, word, newPos);
+}
+
+
 Token Lexer::makeReg()
 {
     Position newPos = pos.copy();
@@ -299,6 +308,10 @@ Token Lexer::findAssemblerCmd()
     else if (word.compare("@const") == 0)
     {
         return makeConstDeclare();
+    }
+    else if (word.compare("@extern") == 0)
+    {
+        return makeExternDeclare();
     }
 
     std::string error = "[ASSEMBLER ERROR]: Undefined assembler command " + word + " in file " + fileName + " at " + std::to_string(newPos.getLine()) + ":" + std::to_string(newPos.getCol());

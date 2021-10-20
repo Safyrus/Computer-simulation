@@ -27,6 +27,8 @@
 
 #include "graphic/MainWindow.hpp"
 
+#include "linker/Linker.hpp"
+
 void runMainWindow(bool print_debug, std::string filePath, uint32_t hz)
 {
     printDebug("Create MainWindow");
@@ -42,10 +44,15 @@ int main(int argc, char const *argv[])
 {
     // define variables
     std::string filePath = "";
+    std::string str;
+    std::string linkFile;
+    std::string labelFile;
+    std::string outFile;
     uint32_t hz = 8;
     bool test = false;
     bool error = false;
     int choice = 0;
+    Linker linker;
 
     // number of argument verification
     if (argc > 1)
@@ -53,6 +60,7 @@ int main(int argc, char const *argv[])
         if (strcmp(argv[1], "help") == 0)
         {
             std::cout << "arg: main [debug][file][hz][test]\n";
+            std::cout << "     link [debug][linkFile][labelFile][outFile]\n";
             return 0;
         }
         if (strcmp(argv[1], "true") == 0 || strcmp(argv[1], "1") == 0)
@@ -66,7 +74,14 @@ int main(int argc, char const *argv[])
     // hz
     if (argc > 3)
     {
-        hz = std::stoi(argv[3], NULL, 10);
+        try
+        {
+            hz = std::stoi(argv[3], NULL, 10);
+        }
+        catch(const std::exception& e)
+        {
+            hz = 0;
+        }
     }
     if (argc > 4)
     {
@@ -88,6 +103,7 @@ int main(int argc, char const *argv[])
     std::cout << "--- What do you want to test ? ---\n"
               << ansi(DEFAULT_FG) << "1 - " << ansi(GREEN_FG) << "Assembler\n"
               << ansi(DEFAULT_FG) << "2 - " << ansi(GREEN_FG) << "Computer(dynarec)\n"
+              << ansi(DEFAULT_FG) << "3 - " << ansi(GREEN_FG) << "Linker\n"
               << ansi(RESET);
     std::cin >> choice;
 
@@ -114,14 +130,25 @@ int main(int argc, char const *argv[])
 
         runMainWindow(print_debug, filePath, hz);
         break;
+    case 3: // linker
+        linkFile = filePath;
+        if (argc > 3)
+        {
+            labelFile = argv[3];
+        }
+        if (argc > 4)
+        {
+            outFile = argv[4];
+        }
+        error = linker.link(linkFile, labelFile, outFile);
+        break;
+
     default:
         break;
     }
 
     // wait for user to close the console
     std::cout << "\n-=#[ Done ]#=-" << std::endl;
-    //std::cin.ignore();
-    //std::cin.ignore();
 
     // restore console
     if (!print_debug && !error)

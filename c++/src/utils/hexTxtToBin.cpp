@@ -15,7 +15,7 @@ std::vector<unsigned char> hexTxtToBin(std::string textFilePath)
     file.open(textFilePath);
     if (!file.is_open())
     {
-        printError("hexfile conversion, open file fail");
+        printError("hexTxtToBin: open file fail");
         return binVect;
     }
 
@@ -36,6 +36,13 @@ std::vector<unsigned char> hexTxtToBin(std::string textFilePath)
             {
                 binVect.push_back(std::stoi(s1, nullptr, 16));
             }
+            catch (const std::invalid_argument &ia)
+            {
+                if(s1 != "\n" && s1 != "")
+                {
+                    printWarning("hexTxtToBin: cannot convert \"" + s1 + "\"");
+                }
+            }
             catch (const std::exception &e)
             {
             }
@@ -44,6 +51,13 @@ std::vector<unsigned char> hexTxtToBin(std::string textFilePath)
             try
             {
                 binVect.push_back(std::stoi(s2, nullptr, 16));
+            }
+            catch (const std::invalid_argument &ia)
+            {
+                if(s2 != "\n" && s2 != "")
+                {
+                    printWarning("hexTxtToBin: cannot convert \"" + s2 + "\"");
+                }
             }
             catch (const std::exception &e)
             {
@@ -56,6 +70,13 @@ std::vector<unsigned char> hexTxtToBin(std::string textFilePath)
                 // convert the word
                 binVect.push_back(std::stoi(word, nullptr, 16));
                 printDebug(word + "|", true);
+            }
+            catch (const std::invalid_argument &ia)
+            {
+                if(word != "")
+                {
+                    printWarning("hexTxtToBin: cannot convert \"" + word + "\"");
+                }
             }
             catch (const std::exception &e)
             {

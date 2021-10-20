@@ -155,7 +155,8 @@ BOOT_FLOPPY:
   GET $F :FDC_CMD
   AND $F $F 80
   CMP $F 80
-  JMP UEQ :BOOT_WAIT_FDC
+  AND $F $F 04
+  JMP EQU :BOOT_WAIT_FDC
 
  # Is the floppy bootable ?
  GET $A :MEM_END

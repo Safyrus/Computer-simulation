@@ -18,6 +18,7 @@ const std::string Token::IMPORT = "IMPORT";
 const std::string Token::ORIGIN = "ORIGIN";
 const std::string Token::CONSTANT_DECLARE = "CONSTANT_DECLARE";
 const std::string Token::CONSTANT = "CONSTANT";
+const std::string Token::EXTERN = "EXTERN";
 const std::string Token::ERR = "ERROR";
 
 Token::Token()

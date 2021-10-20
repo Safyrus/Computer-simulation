@@ -1,5 +1,4 @@
-@origin 039C
-FCT_PRINT:
+@extern FCT_PRINT
 
 @origin 8000
 MOV $C $D :DATA
@@ -8,9 +7,4 @@ END:
   JMP $F :END
 
 DATA:
-"THERE IS NOTHING HERE"
-
-# need to pad with 00 by hand, after compiling, for now
-
-@origin FFFF
-5A
+"BOOTING FROM THE CARTRIDGE"

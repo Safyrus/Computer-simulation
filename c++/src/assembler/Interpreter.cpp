@@ -11,6 +11,7 @@
 #include <sstream>
 #include <iostream>
 #include <codecvt>
+#include <fstream>
 
 std::vector<std::string> Interpreter::importName;
 
@@ -97,8 +98,8 @@ std::string Interpreter::interprete()
             }
             else if (t.getType().compare(Token::STRING) == 0)
             {
-                printDebug("String: " + std::to_string(t.getValue().size()+1));
-                index += t.getValue().size()+1;
+                printDebug("String: " + std::to_string(t.getValue().size() + 1));
+                index += t.getValue().size() + 1;
             }
             else if (t.getType().compare(Token::HEX) == 0 || t.getType().compare(Token::DEC) == 0 || t.getType().compare(Token::REG) == 0 || t.getType().compare(Token::BIN) == 0 || t.getType().compare(Token::CHAR) == 0)
             {
@@ -138,6 +139,30 @@ std::string Interpreter::interprete()
             else if (t.getType().compare(Token::ORIGIN) == 0)
             {
                 index = strtol(t.getValue().c_str(), NULL, 16) & 0xFFFF;
+            }
+            else if (t.getType().compare(Token::EXTERN) == 0)
+            {
+                bool sameLabel = false;
+                for (unsigned int i = 0; i < externLabels.size(); i++)
+                {
+                    if (t.getValue().compare(externLabels[i]->getToken(0).getValue()) == 0)
+                    {
+                        sameLabel = true;
+                        break;
+                    }
+                }
+                if (sameLabel)
+                {
+                    std::stringstream debugStr;
+                    debugStr << "[ASSEMBLER ERROR]: same extern label in file " << t.getPos().getFileName() << " at " << t.getPos().getLine() << ":" << t.getPos().getCol();
+                    printError(debugStr.str());
+                    return "FFFFFFFF ";
+                }
+                else
+                {
+                    externLabels.push_back(nodes[i]);
+                    printInfo("extern label " + nodes[i]->getToken(0).getValue());
+                }
             }
         }
         else if (nodes[i]->getType() == Node::NODE_DUO)
@@ -198,6 +223,7 @@ std::string Interpreter::interprete()
         }
     }
 
+    writeLabelFile(importName.at(0) + "lb");
     return res;
 }
 
@@ -208,7 +234,7 @@ std::string Interpreter::nodeUni(Node *n)
     std::stringstream res;
     res << std::hex;
     Token t = n->getToken(0);
-    if (t.getType().compare(Token::IMPORT) == 0 || t.getType().compare(Token::COMMENT) == 0 || t.getType().compare(Token::LABEL_DECLARE) == 0 || t.getType().compare(Token::ORIGIN) == 0)
+    if (t.getType().compare(Token::IMPORT) == 0 || t.getType().compare(Token::COMMENT) == 0 || t.getType().compare(Token::LABEL_DECLARE) == 0 || t.getType().compare(Token::ORIGIN) == 0 || t.getType().compare(Token::EXTERN) == 0)
     {
     }
     else if (t.getType().compare(Token::CMD) == 0)
@@ -233,16 +259,16 @@ std::string Interpreter::nodeUni(Node *n)
         }
         res << labelVal;
     }
-    else if (t.getType().compare(Token::HEX) == 0 || t.getType().compare(Token::DEC) == 0 || t.getType().compare(Token::REG) == 0 || t.getType().compare(Token::BIN) == 0 || t.getType().compare(Token::CHAR) == 0 || t.getType().compare(Token::CONSTANT) == 0 )
+    else if (t.getType().compare(Token::HEX) == 0 || t.getType().compare(Token::DEC) == 0 || t.getType().compare(Token::REG) == 0 || t.getType().compare(Token::BIN) == 0 || t.getType().compare(Token::CHAR) == 0 || t.getType().compare(Token::CONSTANT) == 0)
     {
         int valCode = getValCode(t);
         res << std::uppercase << std::setfill('0') << std::setw(2) << valCode << " ";
     }
     else if (t.getType().compare(Token::STRING) == 0)
     {
-        //std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-       // std::wstring str = converter.from_bytes(t.getValue());
-       std::string str = t.getValue();
+        // std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+        // std::wstring str = converter.from_bytes(t.getValue());
+        std::string str = t.getValue();
         for (unsigned int i = 0; i < str.size(); i++)
         {
             uint8_t valStr = str[i];
@@ -266,7 +292,7 @@ std::string Interpreter::nodeBin(Node *n)
     Token val1 = n->getToken(1);
     Token val2 = n->getToken(2);
 
-    //find cmd code
+    // find cmd code
     int cmdCode = -1;
     for (unsigned int i = 0; i < CMDS_NAME.size(); i++)
     {
@@ -282,7 +308,7 @@ std::string Interpreter::nodeBin(Node *n)
     cmdCode = CMDS_CODE[cmdCode][cmdCodeType];
     res << std::uppercase << std::setfill('0') << std::setw(2) << cmdCode << " 00 ";
 
-    //find vals code
+    // find vals code
     int valCode = getValCode(val1);
     res << std::uppercase << std::setfill('0') << std::setw(2) << valCode << " ";
     valCode = getValCode(val2);
@@ -300,7 +326,7 @@ std::string Interpreter::nodeMov(Node *n)
     Token reg = n->getToken(1);
     Token val = n->getToken(2);
 
-    //find cmd code
+    // find cmd code
     int cmdCode = -1;
     for (unsigned int i = 0; i < CMDS_NAME.size(); i++)
     {
@@ -315,11 +341,11 @@ std::string Interpreter::nodeMov(Node *n)
     cmdCode = CMDS_CODE[cmdCode][cmdCodeType];
     res << std::uppercase << std::setfill('0') << std::setw(2) << cmdCode << " ";
 
-    //find reg code
+    // find reg code
     int regCode = getValCode(reg);
     res << std::uppercase << std::setfill('0') << std::setw(2) << regCode << " ";
 
-    //find val code
+    // find val code
     int valCode = getValCode(val);
     res << std::uppercase << std::setfill('0') << std::setw(2) << valCode << " ";
 
@@ -336,7 +362,7 @@ std::string Interpreter::nodeMov2(Node *n)
     Token val1 = n->getToken(2);
     Token val2 = n->getToken(3);
 
-    //find cmd code
+    // find cmd code
     int cmdCode = -1;
     for (unsigned int i = 0; i < CMDS_NAME.size(); i++)
     {
@@ -352,7 +378,7 @@ std::string Interpreter::nodeMov2(Node *n)
     cmdCode = CMDS_CODE[cmdCode][cmdCodeType];
     res << std::uppercase << std::setfill('0') << std::setw(2) << cmdCode << " ";
 
-    //find reg code
+    // find reg code
     int regCode = getRegCode(reg);
     if (regCode == -1)
     {
@@ -360,7 +386,7 @@ std::string Interpreter::nodeMov2(Node *n)
     }
     res << std::uppercase << std::setfill('0') << std::setw(2) << regCode << " ";
 
-    //find val code
+    // find val code
     int valCode = getValCode(val1);
     res << std::uppercase << std::setfill('0') << std::setw(2) << valCode << " ";
     valCode = getValCode(val2);
@@ -378,7 +404,7 @@ std::string Interpreter::nodeBinL(Node *n)
     Token val = n->getToken(1);
     Token label = n->getToken(2);
 
-    //find cmd code
+    // find cmd code
     int cmdCode = -1;
     for (unsigned int i = 0; i < CMDS_NAME.size(); i++)
     {
@@ -391,11 +417,11 @@ std::string Interpreter::nodeBinL(Node *n)
     cmdCode = CMDS_CODE[cmdCode][(val.getType().compare(Token::REG) == 0) ? 3 : 7];
     res << std::uppercase << std::setfill('0') << std::setw(2) << cmdCode << " ";
 
-    //find val code
+    // find val code
     int valCode = getValCode(val);
     res << std::uppercase << std::setfill('0') << std::setw(2) << valCode << " ";
 
-    //find label code
+    // find label code
     std::string labelVal = getLabelVal(label);
     if (labelVal == "FFFFFFFF ")
     {
@@ -415,7 +441,7 @@ std::string Interpreter::nodeMovL(Node *n)
     Token reg = n->getToken(1);
     Token label = n->getToken(2);
 
-    //find cmd code
+    // find cmd code
     int cmdCode = -1;
     for (unsigned int i = 0; i < CMDS_NAME.size(); i++)
     {
@@ -428,7 +454,7 @@ std::string Interpreter::nodeMovL(Node *n)
     cmdCode = CMDS_CODE[cmdCode][3];
     res << std::uppercase << std::setfill('0') << std::setw(2) << cmdCode << " ";
 
-    //find reg code
+    // find reg code
     int regCode = getRegCode(reg);
     if (regCode == -1)
     {
@@ -436,7 +462,7 @@ std::string Interpreter::nodeMovL(Node *n)
     }
     res << std::uppercase << std::setfill('0') << std::setw(2) << regCode << " ";
 
-    //find label code
+    // find label code
     std::string labelVal = getLabelVal(label);
     if (labelVal == "FFFFFFFF ")
     {
@@ -457,7 +483,7 @@ std::string Interpreter::nodeMov2L(Node *n)
     Token reg2 = n->getToken(2);
     Token label = n->getToken(3);
 
-    //find cmd code
+    // find cmd code
     int cmdCode = -1;
     for (unsigned int i = 0; i < CMDS_NAME.size(); i++)
     {
@@ -469,7 +495,7 @@ std::string Interpreter::nodeMov2L(Node *n)
     }
     cmdCode = CMDS_CODE[cmdCode][1];
 
-    //find reg code
+    // find reg code
     int regCode1 = getRegCode(reg1);
     if (regCode1 == -1)
     {
@@ -481,7 +507,7 @@ std::string Interpreter::nodeMov2L(Node *n)
         return "FFFFFFFF ";
     }
 
-    //find label code
+    // find label code
     bool find = false;
     int label_adr = -1;
     for (unsigned int i = 0; i < labels.size(); i++)
@@ -495,18 +521,40 @@ std::string Interpreter::nodeMov2L(Node *n)
     }
     if (!find)
     {
-        std::stringstream debugStr;
-        debugStr << "[ASSEMBLER ERROR]: can't find label in file " << label.getPos().getFileName() << " at " << label.getPos().getLine() << ":" << label.getPos().getCol();
-        printError(debugStr.str());
-        return "FFFFFFFF ";
+        for (unsigned int i = 0; i < externLabels.size(); i++)
+        {
+            if (label.getValue().compare(externLabels[i]->getToken(0).getValue()) == 0)
+            {
+                find = true;
+                break;
+            }
+        }
+        if (!find)
+        {
+            std::stringstream debugStr;
+            debugStr << "[ASSEMBLER ERROR]: can't find label in file " << label.getPos().getFileName() << " at " << label.getPos().getLine() << ":" << label.getPos().getCol();
+            printError(debugStr.str());
+            return "FFFFFFFF ";
+        }
+        else
+        {
+            res << std::uppercase << std::setfill('0') << std::setw(2) << cmdCode << " ";
+            res << std::uppercase << std::setfill('0') << std::setw(2) << regCode1 << " ";
+            res << std::uppercase << std::setfill('0') << std::setw(2) << Lexer::CHAR_LABEL << label.getValue() << Lexer::CHAR_LABEL << Lexer::CHAR_LABEL_HIGH << " 00 ";
+            res << std::uppercase << std::setfill('0') << std::setw(2) << cmdCode << " ";
+            res << std::uppercase << std::setfill('0') << std::setw(2) << regCode2 << " ";
+            res << std::uppercase << std::setfill('0') << std::setw(2) << Lexer::CHAR_LABEL << label.getValue() << Lexer::CHAR_LABEL << Lexer::CHAR_LABEL_LOW << " 00 ";
+        }
     }
-
-    res << std::uppercase << std::setfill('0') << std::setw(2) << cmdCode << " ";
-    res << std::uppercase << std::setfill('0') << std::setw(2) << regCode1 << " ";
-    res << std::uppercase << std::setfill('0') << std::setw(2) << (label_adr / 256) << " 00 ";
-    res << std::uppercase << std::setfill('0') << std::setw(2) << cmdCode << " ";
-    res << std::uppercase << std::setfill('0') << std::setw(2) << regCode2 << " ";
-    res << std::uppercase << std::setfill('0') << std::setw(2) << (label_adr % 256) << " 00 ";
+    else
+    {
+        res << std::uppercase << std::setfill('0') << std::setw(2) << cmdCode << " ";
+        res << std::uppercase << std::setfill('0') << std::setw(2) << regCode1 << " ";
+        res << std::uppercase << std::setfill('0') << std::setw(2) << (label_adr / 256) << " 00 ";
+        res << std::uppercase << std::setfill('0') << std::setw(2) << cmdCode << " ";
+        res << std::uppercase << std::setfill('0') << std::setw(2) << regCode2 << " ";
+        res << std::uppercase << std::setfill('0') << std::setw(2) << (label_adr % 256) << " 00 ";
+    }
 
     return res.str();
 }
@@ -521,7 +569,7 @@ std::string Interpreter::nodeTri(Node *n)
     Token val2 = n->getToken(2);
     Token val3 = n->getToken(3);
 
-    //find cmd code
+    // find cmd code
     int cmdCode = -1;
     for (unsigned int i = 0; i < CMDS_NAME.size(); i++)
     {
@@ -539,7 +587,7 @@ std::string Interpreter::nodeTri(Node *n)
     cmdCode = CMDS_CODE[cmdCode][cmdCodeType];
     res << std::uppercase << std::setfill('0') << std::setw(2) << cmdCode << " ";
 
-    //find vals code
+    // find vals code
     int valCode = getValCode(val1);
     res << std::uppercase << std::setfill('0') << std::setw(2) << valCode << " ";
     valCode = getValCode(val2);
@@ -597,9 +645,9 @@ int Interpreter::getValCode(Token val)
         {
             return -1;
         }
-        //printDebug("\n*"+labelVal+"\n");
+        // printDebug("\n*"+labelVal+"\n");
         valCode = stoi(labelVal, NULL, 16);
-        //printDebug("\n**"+std::to_string(valCode)+"\n");
+        // printDebug("\n**"+std::to_string(valCode)+"\n");
     }
     else if (val.getType().compare(Token::CONSTANT) == 0)
     {
@@ -666,10 +714,26 @@ std::string Interpreter::getLabelVal(Token lab)
     }
     if (!find)
     {
-        std::stringstream debugStr;
-        debugStr << "[ASSEMBLER ERROR]: can't find label in file " << lab.getPos().getFileName() << " at " << lab.getPos().getLine() << ":" << lab.getPos().getCol();
-        printError(debugStr.str());
-        return "FFFFFFFF ";
+        for (unsigned int i = 0; i < externLabels.size(); i++)
+        {
+            if (lab.getValue().compare(externLabels[i]->getToken(0).getValue()) == 0)
+            {
+                find = true;
+                break;
+            }
+        }
+        if (!find)
+        {
+            std::stringstream debugStr;
+            debugStr << "[ASSEMBLER ERROR]: can't find label in file " << lab.getPos().getFileName() << " at " << lab.getPos().getLine() << ":" << lab.getPos().getCol();
+            printError(debugStr.str());
+            return "FFFFFFFF ";
+        }
+        else
+        {
+            res << Lexer::CHAR_LABEL << lab.getValue() << Lexer::CHAR_LABEL << Lexer::CHAR_LABEL_HIGH << " ";
+            res << Lexer::CHAR_LABEL << lab.getValue() << Lexer::CHAR_LABEL << Lexer::CHAR_LABEL_LOW << " ";
+        }
     }
     return res.str();
 }
@@ -681,7 +745,7 @@ std::vector<Node *> Interpreter::import(std::string fileName)
     std::vector<Node *> nodesError = {new Node()};
     std::string debugStr = "";
 
-    //lexing
+    // lexing
     std::string file = "";
     try
     {
@@ -695,7 +759,7 @@ std::vector<Node *> Interpreter::import(std::string fileName)
     Lexer lexer(file, fileName);
     std::vector<Token> tokens = lexer.makeToken();
 
-    //verif lexing
+    // verif lexing
     debugStr.clear();
     for (unsigned int i = 0; i < tokens.size(); i++)
     {
@@ -715,11 +779,11 @@ std::vector<Node *> Interpreter::import(std::string fileName)
         return nodesError;
     }
 
-    //parsing
+    // parsing
     Parser parser(tokens);
     std::vector<Node *> parseNodes = parser.parse();
 
-    //print parsing
+    // print parsing
     debugStr.clear();
     for (unsigned int i = 0; i < parseNodes.size(); i++)
     {
@@ -741,4 +805,21 @@ std::vector<Node *> Interpreter::import(std::string fileName)
         return nodesError;
     }
     return parseNodes;
+}
+
+void Interpreter::writeLabelFile(std::string fileName)
+{
+    // open file
+    std::ofstream file;
+    file.open(fileName);
+
+    // write labels and their adresses
+    for (unsigned int i = 0; i < labels.size(); i++)
+    {
+        file << labels[i]->getToken(0).getValue() << " ";
+        file << std::hex << std::uppercase << std::setfill('0') << std::setw(4) << labels_adr[i] << "\n";
+    }
+
+    // close file
+    file.close();
 }

@@ -12,18 +12,6 @@ private:
     Position pos;
     char current_char;
 
-    static const char CHAR_ASSEMBLER = '@';
-    static const char CHAR_DEC = '%';
-    static const char CHAR_BIN = '~';
-    static const char CHAR_CHAR = '\'';
-    static const char CHAR_STRING = '"';
-    static const char CHAR_REG = '$';
-    static const char CHAR_COMMENT = '#';
-    static const char CHAR_LABEL = ':';
-    static const char CHAR_LABEL_LOW = 'l';
-    static const char CHAR_LABEL_HIGH = 'h';
-    static const std::vector<std::string> CMDS;
-
     std::vector<std::string> constants;
 
     void next();
@@ -36,6 +24,7 @@ private:
     Token makeImport();
     Token makeOrigin();
     Token makeConstDeclare();
+    Token makeExternDeclare();
     Token makeConst();
     Token makeLabel();
     Token makeReg();
@@ -49,6 +38,18 @@ private:
 public:
     Lexer(std::string text, std::string fileName);
     ~Lexer();
+
+    static const char CHAR_ASSEMBLER = '@';
+    static const char CHAR_DEC = '%';
+    static const char CHAR_BIN = '~';
+    static const char CHAR_CHAR = '\'';
+    static const char CHAR_STRING = '"';
+    static const char CHAR_REG = '$';
+    static const char CHAR_COMMENT = '#';
+    static const char CHAR_LABEL = ':';
+    static const char CHAR_LABEL_LOW = 'l';
+    static const char CHAR_LABEL_HIGH = 'h';
+    static const std::vector<std::string> CMDS;
 
     std::vector<Token> makeToken();
 };

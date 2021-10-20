@@ -7,6 +7,7 @@ class Interpreter
 private:
     std::vector<Node *> nodes;
     std::vector<Node *> labels;
+    std::vector<Node *> externLabels;
     std::vector<int> labels_adr;
     std::vector<std::string> constants;
     std::vector<int> constants_val;
@@ -31,6 +32,8 @@ private:
     int getValCode(Token val);
     std::string getLabelVal(Token lab);
     std::vector<Node *> import(std::string fileName);
+
+    void writeLabelFile(std::string fileName);
 
 public:
     Interpreter(std::vector<Node *> nodes, std::string fileName);

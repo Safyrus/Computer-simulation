@@ -20,6 +20,31 @@ This project try to follow the [Semantic Versioning](https://semver.org/spec/v2.
 
 -----------------
 
+## **[0.7.1]** - _2021-10-20_
+
+### **Added**
+
+- New command for the SASM language named "extern" to declare a label with its address declare in another file.
+- A basic linker to link compiled SASM files.
+- "getDir" function to get the directory of a filename.
+- "saveString" function to save a string into a file.
+- Link script (bat and sh).
+- printWarning when conversion falied in "hexTxtToBin"
+
+### **Changed**
+
+- Char constant are now public instead of private.
+- Assembler to generate an SASMLB (SASM LaBels) file with all the labels addresses.
+- Main file by adding a third choice to run the linker.
+- EXT program by moving the end (5A) into EXT_end and declaring FCT_PRINT extern.
+- String in write_boot and EXT programs to be more useful.
+
+### **Fixed**
+
+- SAPHYR I program not waiting for the FDC to finish reading when booting on floppy.
+
+-----------------
+
 ## **[0.7.0]** - _2021-10-16_
 
 The "_Saphyr-I and 2.0 Graphics_" update.
