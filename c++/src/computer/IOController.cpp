@@ -13,6 +13,10 @@ computer::IOController::IOController()
     type = "IOCTRL";
     name = "IOCTRL";
     reset();
+    for (uint8_t i = 0; i < DEVICES_SIZE; i++)
+    {
+        runnables[i] = nullptr;
+    }
 }
 
 computer::IOController::~IOController()
@@ -278,9 +282,12 @@ void computer::IOController::removeIO(uint8_t port)
         printDebug("IOController(removeIO): Wrong port number");
         return;
     }
-    runnables[port]->stop();
-    runnables[port]->join();
-    delete runnables[port];
+    if(runnables[port])
+    {
+        runnables[port]->stop();
+        runnables[port]->join();
+        delete runnables[port];
+    }
     devices[port] = nullptr;
     connected &= (0xFF ^ (0x01 << port));
 }

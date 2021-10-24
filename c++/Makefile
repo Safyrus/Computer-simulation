@@ -14,6 +14,8 @@ endif
 SRC        := src
 INCLUDE    := include
 
+SRCFILE    = $(call rwildcard,$(SRC),*.cpp)
+
 LIBRARIES  := -lsfml-graphics -lsfml-audio -lsfml-window -lsfml-system
 EXECUTABLE := main
 
@@ -22,26 +24,37 @@ rwildcard=$(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(su
 
 all: $(BIN)/$(EXECUTABLE)
 
-$(BIN)/$(EXECUTABLE): $(call rwildcard,$(SRC),*.cpp)
-	$(CXX) $(CXX_FLAGS) -I$(INCLUDE) -L$(LIB) $^ -o $@ $(LIBRARIES)
+$(BIN)/$(EXECUTABLE): $(addprefix $(BIN)/obj/,$(SRCFILE:.cpp=.o))
+	$(CXX) $(CXX_FLAGS) -L$(LIB) $^ -o $@ $(LIBRARIES)
+
+
+$(BIN)/obj/%.o: %.cpp
+ifeq ($(OS), Windows_NT)
+	@-if not exist "$(@D)" ( mkdir "$(@D)" )
+else
+	@-if ! [ -d "$(@D)" ]; then mkdir -p "$(@D)"; fi
+endif
+	@$(CXX) $(CXX_FLAGS) -I$(INCLUDE) -c $^ -o $@
 
 
 ifeq ($(OS), Windows_NT)
 BIN := $(subst /,\,$(BIN))
 install:
 	-copy ..\data\pix46.ttf $(BIN)
-	-if exist "$(BIN)\prog\" ( Rmdir /Q /S $(BIN)\prog )
+	-if exist "$(BIN)\prog\" ( Rmdir /Q /S "$(BIN)\prog" )
 	-mkdir $(BIN)\prog
 	-Xcopy /E ..\data\prog $(BIN)\prog
-	-if exist "$(BIN)\data\img\" ( Rmdir /Q /S $(BIN)\data\img )
+	-if exist "$(BIN)\data\img\" ( Rmdir /Q /S "$(BIN)\data\img" )
 	-mkdir $(BIN)\data\img
 	-Xcopy /E ..\data\img $(BIN)\data\img
-	-if exist "$(BIN)\data\snd\" ( Rmdir /Q /S $(BIN)\data\snd )
+	-if exist "$(BIN)\data\snd\" ( Rmdir /Q /S "$(BIN)\data\snd" )
 	-mkdir $(BIN)\data\snd
 	-Xcopy /E ..\data\snd $(BIN)\data\snd
 
 clean:
 	-del $(BIN)\$(EXECUTABLE).exe
+	-Rmdir /Q /S "$(BIN)\obj"
+
 else
 install:
 	-cp ../data/pix46.ttf $(BIN)
@@ -54,4 +67,5 @@ install:
 
 clean:
 	-rm $(BIN)/$(EXECUTABLE)
+	-rm -r $(BIN)/obj
 endif

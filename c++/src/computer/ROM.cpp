@@ -73,7 +73,12 @@ void computer::ROM::load(std::string filePath)
     std::vector<uint8_t> vals = hexTxtToBin(filePath);
     for (unsigned int i = 0; i < vals.size(); i++)
     {
-        this->data[i % len] = vals[i];
+        if(i > len)
+        {
+            printWarning("Data exceeded the ROM size, discaring remaining data");
+            break;
+        }
+        this->data[i] = vals[i];
     }
 }
 

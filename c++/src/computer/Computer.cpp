@@ -75,7 +75,7 @@ computer::Computer::Computer(bool test, std::string prog, uint32_t hz)
         hwStats->setName("HWSTATS");
 
         printDebug("Create Floppy");
-        floppy = std::make_shared<data::Floppy>();
+        std::shared_ptr<data::Floppy> floppy = std::make_shared<data::Floppy>();
         floppy->load("floppy.img");
         printDebug("Create FDD");
         std::shared_ptr<computer::FDD> fdd = std::make_shared<computer::FDD>();
@@ -118,14 +118,14 @@ computer::Computer::Computer(bool test, std::string prog, uint32_t hz)
         printDebug("load program into ROM4K");
         rom4k = std::static_pointer_cast<computer::ROM>(getDevice("ROM", 0x0000, 0x0FFF));
         rom4k->load(prog);
-        io.reset();
+        //io.reset();
     }
     else
     {
         printDebug("Create HWSTATS");
         hwStats = std::make_shared<computer::HardwareStates>();
         printDebug("Add Device HWSTATS");
-        addDevice(hwStats, 0x1C00, 0x1C20);
+        addDevice(hwStats, 0x1C00, 0x1C17);
     }
 
     printDebug("Run CPU thread");
@@ -201,7 +201,7 @@ std::shared_ptr<computer::Bus> computer::Computer::getBus()
 
 void computer::Computer::addDevice(std::shared_ptr<computer::Device> device, uint16_t startAdr, uint16_t endAdr)
 {
-    printDebug("Add " + device->getType() + " at " + std::to_string(startAdr) + "  " + std::to_string(endAdr));
+    printDebug("Add " + device->getType() + " at " + std::to_string(startAdr) + ":" + std::to_string(endAdr));
     devices.push_back(device);
     runnables.push_back(new computer::RunnableDevice(device));
     runnables.back()->run();
@@ -219,12 +219,40 @@ void computer::Computer::removeDevice(std::string type, uint16_t startAdr, uint1
         uint16_t end = adr & 0xffff;
         if (devices[i]->getType() == type && start >= startAdr && end <= endAdr)
         {
+            printDebug("Computer: remove device " + devices[i]->getName() + " at " + std::to_string(start) + ":" + std::to_string(end));
             runnables[i]->stop();
             runnables[i]->join();
             delete runnables[i];
             runnables.erase(runnables.begin() + i);
+            bus->removeDevice(devices[i]);
             hwStats->disconnect(devices[i], startAdr, endAdr);
+            devices[i] = nullptr;
             devices.erase(devices.begin() + i);
+        }
+    }
+}
+
+void computer::Computer::removeAllDevices()
+{
+    unsigned int size = devices.size();
+    int index = 0;
+    for (unsigned int i = 0; i < size; i++)
+    {
+        uint32_t adr = bus->getDeviceAdr(devices[index]);
+        uint16_t start = adr >> 16;
+        uint16_t end = adr & 0xffff;
+        if (devices[index]->getType() != "HWSTATS")
+        {
+            printDebug("Computer: Remove device " + devices[index]->getName() + " at " + std::to_string(start) + ":" + std::to_string(end));
+            runnables[index]->stop();
+            runnables[index]->join();
+            delete runnables[index];
+            runnables.erase(runnables.begin() + index);
+            hwStats->disconnect(devices[index], start, end);
+            devices.erase(devices.begin() + index);
+        }else
+        {
+            index = 1;
         }
     }
 }
@@ -254,17 +282,17 @@ void computer::Computer::connectIODevice(std::shared_ptr<computer::IODevice> dev
     std::shared_ptr<computer::IOController> io = std::static_pointer_cast<computer::IOController>(getDevice("IOCTRL", 0x0000, 0xFFFF));
     if (io)
     {
-        printDebug("Computer: add io");
+        printDebug("Computer: add io at port " + std::to_string(port));
         io->addIO(device, port);
     }
 }
 
-void computer::Computer::removeIODevvice(uint8_t port)
+void computer::Computer::removeIODevice(uint8_t port)
 {
     std::shared_ptr<computer::IOController> io = std::static_pointer_cast<computer::IOController>(getDevice("IOCTRL", 0x0000, 0xFFFF));
     if (io)
     {
-        printDebug("Computer: remove io");
+        printDebug("Computer: remove io at port " + std::to_string(port));
         io->removeIO(port);
     }
 }

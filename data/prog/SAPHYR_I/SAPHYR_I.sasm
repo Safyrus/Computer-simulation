@@ -4,7 +4,7 @@
 #                              #
 # AUTHOR: Safyrus              #
 #                              #
-# VERSION: 1                   #
+# VERSION: 1.1                 #
 #                              #
 #   DESC: This is the first    #
 # program that starts on the   #
@@ -55,7 +55,8 @@
 
 #/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\#
 # TODO
-# - boot floppy
+# - fix stackfull error when
+#   vpu is not present
 #/!\/!\/!\/!\/!\/!\/!\/!\/!\/!\#
 
 

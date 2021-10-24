@@ -24,8 +24,6 @@ namespace computer
         std::vector<computer::RunnableDevice *> runnables;
         computer::RunnableDevice *runCPU;
 
-        std::shared_ptr<data::Floppy> floppy;
-
     public:
         Computer();
         Computer(bool test, std::string prog, uint32_t hz = 0);
@@ -42,11 +40,12 @@ namespace computer
 
         void addDevice(std::shared_ptr<computer::Device> device, uint16_t startAdr, uint16_t endAdr);
         void removeDevice(std::string type, uint16_t startAdr, uint16_t endAdr);
+        void removeAllDevices();
         std::shared_ptr<computer::Device> getDevice(std::string type, uint16_t startAdr, uint16_t endAdr);
         std::vector<std::shared_ptr<computer::Device>> getAllDevice();
 
         void connectIODevice(std::shared_ptr<computer::IODevice> device, uint8_t port);
-        void removeIODevvice(uint8_t port);
+        void removeIODevice(uint8_t port);
     };
 } // namespace computer
 

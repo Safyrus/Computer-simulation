@@ -1,9 +1,12 @@
 #include "data/menu/MenuAction.hpp"
 #include "utils/console.hpp"
 
-data::menu::MenuAction::MenuAction()
+data::menu::MenuAction::MenuAction(bool print)
 {
-    printDebug("MenuAction: Creation");
+    if(print)
+    {
+        printDebug("MenuAction: Creation");
+    }
 }
 
 data::menu::MenuAction::~MenuAction()

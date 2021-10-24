@@ -20,6 +20,39 @@ This project try to follow the [Semantic Versioning](https://semver.org/spec/v2.
 
 -----------------
 
+## **[0.7.2]** - _2021-10-24_
+
+### **Added**
+
+- "loadConfig" function in MainWindow.
+- "removeAllDevices" function in Computer.
+- "split" function in utils.
+- "loadConfig" function in MainWindow that load a CSV file.
+  This file tell which device to put in the computer at the start.
+- An argument "configFile" in main.
+
+### **Changed**
+
+- Makefile to not do everything in once but to compile each C++ files into object files and link them.
+- Refactor to divide "graphic" namespace into "view" and "window".
+- Computer floppy to be a local variable instead of a class one.
+- .sh and run scripts.
+- Some debug prints in menu actions.
+- ROM load function to ignore data above the ROM size.
+
+### **Fixed**
+
+- Typo in function name "removeIODevice".
+- Try to fix a bug of object not being deleted in the Bus.
+- Removing a non-existing IO device making the app crash.
+- A crash when the vpu or the keyboard is not present and try to be use in the MainWindow.
+
+### **Removed**
+
+- split function in Linker (it uses the utils one instead)
+
+-----------------
+
 ## **[0.7.1]** - _2021-10-20_
 
 ### **Added**

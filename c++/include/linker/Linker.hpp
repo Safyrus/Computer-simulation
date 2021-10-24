@@ -36,7 +36,6 @@ private:
 
     std::string addToStr(std::string val, std::string string);
     std::string addValToStr(uint8_t val, std::string string);
-    std::vector<std::string> split(std::string str, std::string delimiter);
     int findCompileFile(std::string name);
     int findLabel(std::string label);
     std::vector<std::string> readTokens(std::string fileName);

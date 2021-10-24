@@ -1,9 +1,11 @@
 #include "data/menu/MenuActionOpenWindow.hpp"
+#include "utils/console.hpp"
 
 #include <iostream>
 
-data::menu::MenuActionOpenWindow::MenuActionOpenWindow(std::shared_ptr<graphic::Window> win, std::string name)
+data::menu::MenuActionOpenWindow::MenuActionOpenWindow(std::shared_ptr<graphic::window::Window> win, std::string name): MenuAction(false)
 {
+    printDebug("MenuActionOpenWindow: Creation");
     this->win = win;
     this->name = name;
 }

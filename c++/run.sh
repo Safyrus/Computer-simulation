@@ -1,2 +1,2 @@
 cd bin/Linux
-echo 2 | ./main false $1 0
+./main false null 1000000 false $1 <<< 2

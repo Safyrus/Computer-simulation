@@ -1,7 +1,9 @@
 #include "data/menu/MenuActionDoubleCPUHz.hpp"
+#include "utils/console.hpp"
 
-data::menu::MenuActionDoubleCPUHz::MenuActionDoubleCPUHz(std::shared_ptr<computer::CPU> cpu)
+data::menu::MenuActionDoubleCPUHz::MenuActionDoubleCPUHz(std::shared_ptr<computer::CPU> cpu): MenuAction(false)
 {
+    printDebug("MenuActionDoubleCPUHz: Creation");
     this->cpu = cpu;
 }
 

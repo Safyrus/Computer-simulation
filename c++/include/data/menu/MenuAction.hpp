@@ -7,7 +7,7 @@ namespace data::menu
     {
     private:
     public:
-        MenuAction();
+        MenuAction(bool print=true);
         ~MenuAction();
 
         virtual void execute() = 0;

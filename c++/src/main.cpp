@@ -25,16 +25,19 @@
 
 #include "dynarecs/testDynarecs.hpp"
 
-#include "graphic/MainWindow.hpp"
+#include "graphic/window/MainWindow.hpp"
 
 #include "linker/Linker.hpp"
 
-void runMainWindow(bool print_debug, std::string filePath, uint32_t hz)
+void runMainWindow(bool print_debug, std::string filePath, uint32_t hz, std::string configFile)
 {
     printDebug("Create MainWindow");
-    std::shared_ptr<graphic::MainWindow> app = std::make_shared<graphic::MainWindow>("S257 Dynamic Recompiler - Main Window", print_debug, filePath, hz);
-    //std::cout << "Load ComWinManager config" << std::endl;
-    //app->loadConfig(filePath);
+    std::shared_ptr<graphic::window::MainWindow> app = std::make_shared<graphic::window::MainWindow>("S257 Dynamic Recompiler - Main Window", print_debug, filePath, hz);
+    if(configFile != "")
+    {
+        printDebug("Load config");
+        app->loadConfig(configFile);
+    }
     printDebug("Run MainWindow");
     app->display();
     printDebug("End MainWindow");
@@ -44,10 +47,10 @@ int main(int argc, char const *argv[])
 {
     // define variables
     std::string filePath = "";
-    std::string str;
-    std::string linkFile;
-    std::string labelFile;
-    std::string outFile;
+    std::string configFile = "";
+    std::string linkFile = "";
+    std::string labelFile = "";
+    std::string outFile = "";
     uint32_t hz = 8;
     bool test = false;
     bool error = false;
@@ -59,7 +62,7 @@ int main(int argc, char const *argv[])
     {
         if (strcmp(argv[1], "help") == 0)
         {
-            std::cout << "arg: main [debug][file][hz][test]\n";
+            std::cout << "arg: main [debug][file][hz][test][configFile]\n";
             std::cout << "     link [debug][linkFile][labelFile][outFile]\n";
             return 0;
         }
@@ -87,6 +90,10 @@ int main(int argc, char const *argv[])
     {
         if (strcmp(argv[4], "true") == 0 || strcmp(argv[4], "1") == 0)
             test = true;
+    }
+    if (argc > 5)
+    {
+        configFile = argv[5];
     }
 
     // setup console
@@ -128,7 +135,7 @@ int main(int argc, char const *argv[])
             std::cout << "\n###########################\n";
         }
 
-        runMainWindow(print_debug, filePath, hz);
+        runMainWindow(print_debug, filePath, hz, configFile);
         break;
     case 3: // linker
         linkFile = filePath;

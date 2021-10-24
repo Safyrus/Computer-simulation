@@ -74,7 +74,7 @@ void SetWindow(int Width, int Height)
     SetConsoleWindowInfo(Handle, TRUE, &Rect);       // Set Window Size
 }
 
-void rawConsole(bool raw)
+void rawConsole(bool)
 {
 }
 
