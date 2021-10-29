@@ -7,7 +7,11 @@
 #include "graphic/window/CPUWindow.hpp"
 #include "graphic/window/RamWindow.hpp"
 #include "graphic/window/RomWindow.hpp"
+#include "graphic/window/VramWindow.hpp"
 #include "graphic/window/IOControllerWindow.hpp"
+#include "graphic/window/HwStatesWindow.hpp"
+#include "graphic/window/VPUWindow.hpp"
+#include "graphic/window/FDCWindow.hpp"
 
 #include "utils/console.hpp"
 
@@ -70,7 +74,7 @@ void graphic::window::ComputerWindow::makeMenu()
     {
         std::string name = devices[i]->getName();
         std::string type = devices[i]->getType();
-        if (type.compare("RAM") == 0 || type.compare("VRAM") == 0 || type.compare("ROM") == 0 || type.compare("IOCTRL") == 0)
+        if (type.compare("RAM") == 0 || type.compare("VRAM") == 0 || type.compare("ROM") == 0 || type.compare("IOCTRL") == 0 || type.compare("HWSTATS") == 0 || type.compare("VPU") == 0 || type.compare("FDC") == 0)
         {
             std::stringstream indexStr;
             indexStr << std::dec << std::setfill('0') << std::setw(2) << i;
@@ -138,6 +142,10 @@ void graphic::window::ComputerWindow::start()
     makeMenu();
 
     window.setView(fixRatioCenterView());
+
+    cursorOnPWR = false;
+    cursorOnRST = false;
+    mousePressed = false;
 }
 
 void graphic::window::ComputerWindow::stop()
@@ -170,12 +178,28 @@ void graphic::window::ComputerWindow::loop()
             mousePos = sf::Vector2i(event.mouseMove.x, event.mouseMove.y);
             viewMousePos = window.mapPixelToCoords(mousePos);
             menuView->setMousePos(viewMousePos.x, viewMousePos.y);
+
+            // PWR button collision
+            cursorOnPWR = (viewMousePos.x >= 12 && viewMousePos.x <= 20 && viewMousePos.y >= 8 + 6 && viewMousePos.y <= 15 + 6);
+
+            // RST button collision
+            cursorOnRST = (viewMousePos.x >= 12 && viewMousePos.x <= 20 && viewMousePos.y >= 26 + 6 && viewMousePos.y <= 33 + 6);
             break;
         case sf::Event::MouseButtonPressed:
             menuView->setMousePressed(true);
+            mousePressed = true;
             break;
         case sf::Event::MouseButtonReleased:
             menuView->setMouseReleased(true);
+            mousePressed = false;
+            if(cursorOnPWR)
+            {
+                computer->power();
+            }
+            if(cursorOnRST)
+            {
+                computer->reset();
+            }
             break;
         case sf::Event::KeyPressed:
             printDebug("Key " + std::to_string(event.key.code) + " Pressed");
@@ -225,7 +249,7 @@ void graphic::window::ComputerWindow::loop()
 
     // draw pwr buttons
     sf::Sprite buttonPwrSprite;
-    if (computer->getPower())
+    if (computer->getPower() || (cursorOnPWR && mousePressed))
         buttonPwrSprite.setTexture(buttonOn);
     else
         buttonPwrSprite.setTexture(buttonOff);
@@ -234,7 +258,13 @@ void graphic::window::ComputerWindow::loop()
 
     // draw rst buttons
     sf::Sprite buttonRstSprite;
-    buttonRstSprite.setTexture(buttonOff);
+    if(cursorOnRST && mousePressed)
+    {
+        buttonRstSprite.setTexture(buttonOn);
+    }else
+    {
+        buttonRstSprite.setTexture(buttonOff);
+    }
     buttonRstSprite.setPosition(sf::Vector2f(12, 32));
     window.draw(buttonRstSprite);
 
@@ -290,7 +320,7 @@ void graphic::window::ComputerWindow::openSubWindow(std::string windowName)
         uint16_t i = stoi(windowName.substr(9, 2), NULL, 10);
         windowName = windowName.substr(11);
 
-        if (windowName.compare("RAM") == 0 || windowName.compare("VRAM") == 0)
+        if (windowName.compare("RAM") == 0)
         {
             std::shared_ptr<computer::RAM> ram = std::dynamic_pointer_cast<computer::RAM>(computer->getAllDevice()[i]);
             std::string devWinName = "S257 Dynamic Recompiler - " + ram->getName() + " Window";
@@ -301,6 +331,19 @@ void graphic::window::ComputerWindow::openSubWindow(std::string windowName)
             }
             std::shared_ptr<graphic::window::RamWindow> subW = std::make_shared<graphic::window::RamWindow>(ram, devWinName, debug);
             printDebug("open ram");
+            addSubWindow(subW);
+        }
+        else if (windowName.compare("VRAM") == 0)
+        {
+            std::shared_ptr<computer::VRAM> vram = std::dynamic_pointer_cast<computer::VRAM>(computer->getAllDevice()[i]);
+            std::string devWinName = "S257 Dynamic Recompiler - " + vram->getName() + " Window";
+            if (!findSubWinByName(devWinName).empty())
+            {
+                printDebug(devWinName + " window already open");
+                return;
+            }
+            std::shared_ptr<graphic::window::VramWindow> subW = std::make_shared<graphic::window::VramWindow>(vram, devWinName, debug);
+            printDebug("open vram");
             addSubWindow(subW);
         }
         else if (windowName.compare("ROM") == 0)
@@ -327,6 +370,45 @@ void graphic::window::ComputerWindow::openSubWindow(std::string windowName)
             }
             std::shared_ptr<graphic::window::IOControllerWindow> subW = std::make_shared<graphic::window::IOControllerWindow>(io, devWinName, debug);
             printDebug("open ioCtrl");
+            addSubWindow(subW);
+        }
+        else if (windowName.compare("HWSTATS") == 0)
+        {
+            std::shared_ptr<computer::HardwareStates> hwstats = std::dynamic_pointer_cast<computer::HardwareStates>(computer->getAllDevice()[i]);
+            std::string devWinName = "S257 Dynamic Recompiler - " + hwstats->getName() + " Window";
+            if (!findSubWinByName(devWinName).empty())
+            {
+                printDebug(devWinName + " window already open");
+                return;
+            }
+            std::shared_ptr<graphic::window::HwStatesWindow> subW = std::make_shared<graphic::window::HwStatesWindow>(hwstats, devWinName, debug);
+            printDebug("open hwStats");
+            addSubWindow(subW);
+        }
+        else if (windowName.compare("VPU") == 0)
+        {
+            std::shared_ptr<computer::VPU> vpu = std::dynamic_pointer_cast<computer::VPU>(computer->getAllDevice()[i]);
+            std::string devWinName = "S257 Dynamic Recompiler - " + vpu->getName() + " Window";
+            if (!findSubWinByName(devWinName).empty())
+            {
+                printDebug(devWinName + " window already open");
+                return;
+            }
+            std::shared_ptr<graphic::window::VPUWindow> subW = std::make_shared<graphic::window::VPUWindow>(vpu, devWinName, debug);
+            printDebug("open hwStats");
+            addSubWindow(subW);
+        }
+        else if (windowName.compare("FDC") == 0)
+        {
+            std::shared_ptr<computer::FDC> fdc = std::dynamic_pointer_cast<computer::FDC>(computer->getAllDevice()[i]);
+            std::string devWinName = "S257 Dynamic Recompiler - " + fdc->getName() + " Window";
+            if (!findSubWinByName(devWinName).empty())
+            {
+                printDebug(devWinName + " window already open");
+                return;
+            }
+            std::shared_ptr<graphic::window::FDCWindow> subW = std::make_shared<graphic::window::FDCWindow>(fdc, devWinName, debug);
+            printDebug("open hwStats");
             addSubWindow(subW);
         }
         else

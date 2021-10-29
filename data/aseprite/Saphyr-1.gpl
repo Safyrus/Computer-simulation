@@ -1,0 +1,19 @@
+GIMP Palette
+Name: Saphyr-1
+Columns: 4
+  0   0   0 Black      #000000
+170   0 170 Magenta    #AA00AA
+255  85 255 Pink       #FF55FF
+255   0  85 Red        #FF0055
+  0   0  85 Dark blue  #000055
+ 85  85  85 Grey       #555555
+170   0  85 Dark Red   #AA0055
+255 170   0 Orange     #FFAA00
+  0  85 170 Blue       #0055AA
+170 170 255 Light Blue #AAAAFF
+170 170 170 Light Grey #AAAAAA
+255 255  85 Yellow     #FFFF55
+  0 170 255 Azure      #00AAFF
+  0  85   0 Dark green #005500
+ 85 255  85 Green      #55FF55
+255 255 255 White      #FFFFFF

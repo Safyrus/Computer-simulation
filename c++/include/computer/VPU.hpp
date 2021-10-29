@@ -57,6 +57,7 @@ namespace computer
         VPU(std::shared_ptr<computer::VRAM> vram);
         ~VPU();
 
+        void setPwr(bool pwr);
         void reset();
         void run();
         void set(uint16_t adr, uint8_t data);

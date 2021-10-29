@@ -159,6 +159,8 @@ void computer::IOController::run()
 
 void computer::IOController::set(uint16_t adr, uint8_t data)
 {
+    if(!pwr)
+        return;
     if (adr < 32)
     {
         uint8_t port = adr / 4;
@@ -203,6 +205,8 @@ void computer::IOController::set(uint16_t adr, uint8_t data)
 
 uint8_t computer::IOController::get(uint16_t adr)
 {
+    if(!pwr)
+        return 0;
     uint8_t ret = 0;
     if (adr < 32)
     {

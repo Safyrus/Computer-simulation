@@ -27,6 +27,10 @@ namespace graphic::window
         sf::Texture floppyOff;
         uint32_t lastDeviceNumer;
 
+        bool cursorOnPWR;
+        bool cursorOnRST;
+        bool mousePressed;
+
         std::shared_ptr<data::menu::Menu> menu;
         std::shared_ptr<view::MenuView> menuView;
         void makeMenu();

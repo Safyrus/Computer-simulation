@@ -18,6 +18,10 @@ computer::ROM::ROM()
     len = 0x0400;
     this->data = new uint8_t[len];
     this->hz = 0;
+    for (uint16_t i = 0; i < len; i++)
+    {
+        data[i] = 0;
+    }
 }
 
 computer::ROM::ROM(uint16_t size)
@@ -27,6 +31,10 @@ computer::ROM::ROM(uint16_t size)
     len = size;
     this->data = new uint8_t[len];
     this->hz = 0;
+    for (uint16_t i = 0; i < len; i++)
+    {
+        data[i] = 0;
+    }
 }
 
 computer::ROM::ROM(uint16_t size, uint32_t hz)
@@ -36,6 +44,10 @@ computer::ROM::ROM(uint16_t size, uint32_t hz)
     len = size;
     this->data = new uint8_t[len];
     this->hz = hz;
+    for (uint16_t i = 0; i < len; i++)
+    {
+        data[i] = 0;
+    }
 }
 
 computer::ROM::~ROM()

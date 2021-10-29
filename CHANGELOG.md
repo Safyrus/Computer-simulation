@@ -20,6 +20,70 @@ This project try to follow the [Semantic Versioning](https://semver.org/spec/v2.
 
 -----------------
 
+## **[0.7.3]** - _2021-10-29_
+
+### **Added**
+
+#### Graphics
+
+- New Device Windows with more "graphic" visualization:
+  - HwStatesWindow for the hardware states.
+  - VPUWindow for the VPU.
+  - FDCWindow for the FDC.
+- A new VRAMView and VRAMWindow.
+- Mouse actions to the buttons on the computer case in the ComputerWindow.
+
+#### Data
+
+- Images used in the new device windows:
+  - fdc_board
+  - fdc_led_green_on
+  - fdc_led_red_on
+  - hwstats_board
+  - hwstats_led_green_on
+  - hwstats_led_red_on
+  - io_board
+  - io_led_red_on
+  - vpu_board
+  - vpu_led_green_on
+  - vpu_led_red_on
+- Aseprite files:
+  - fdc-board
+  - hwstates-board
+  - io-board
+  - mem_map
+  - vpu-board
+  - keyboard
+- The Saphyr-I palette in GPL and PNG format.
+- A Logisim "random" circuit.
+
+### **Changed**
+
+#### Computer
+
+- FDC encoding error to only print one time when reading.
+
+#### Graphics
+
+- The computer screen goes black when the computer power is turned off.
+- The aspect of the IOController window.
+- ComputerWindow to open the new sub windows.
+
+### **Fixed**
+
+#### Computer
+
+- The ROM data not being initialized with zeros.
+- IOController and HardwareStates returning something when power is off.
+
+### **Removed**
+
+#### Graphics
+
+- The IOControllerView.
+
+-----------------
+
 ## **[0.7.2]** - _2021-10-24_
 
 ### **Added**

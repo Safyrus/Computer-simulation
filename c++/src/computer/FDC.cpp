@@ -35,6 +35,7 @@ void computer::FDC::MFMread()
         uint8_t dataBuf = 0;
         uint16_t ramIndex = 0;
         uint8_t dataIndex = 0;
+        bool wrongEncoding = false;
         for (uint16_t i = 0; i < 12500; i++)
         {
             bool data = fdd->FDCget(track, sector, i);
@@ -53,7 +54,11 @@ void computer::FDC::MFMread()
                     data = 1;
                     break;
                 default:
-                    printError("FDC: wrong encoding !");
+                    if(!wrongEncoding)
+                    {
+                        printError("FDC: wrong encoding !");
+                        wrongEncoding = true;
+                    }
                     data = rand() % 2;
                     break;
                 }

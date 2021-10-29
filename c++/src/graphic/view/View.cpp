@@ -3,6 +3,7 @@
 
 graphic::view::View::View()
 {
+    printDebug("View Creation");
     x = 0;
     y = 0;
     w = 1;

@@ -39,6 +39,8 @@ void computer::HardwareStates::run()
 
 void computer::HardwareStates::set(uint16_t adr, uint8_t data)
 {
+    if(!pwr)
+        return;
     uint16_t adrTo = adr / 8;
     uint8_t reg = adr % 8;
     switch (adrTo)
@@ -91,6 +93,8 @@ void computer::HardwareStates::set(uint16_t adr, uint8_t data)
 
 uint8_t computer::HardwareStates::get(uint16_t adr)
 {
+    if(!pwr)
+        return 0;
     uint16_t adrTo = adr / 8;
     uint8_t reg = adr % 8;
     uint8_t ret = 0;

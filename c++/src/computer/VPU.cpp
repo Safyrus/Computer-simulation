@@ -177,6 +177,12 @@ void computer::VPU::resetDraw()
     }
 }
 
+void computer::VPU::setPwr(bool pwr)
+{
+    this->pwr = pwr;
+    resetDraw();
+}
+
 void computer::VPU::reset()
 {
     resetDraw();
@@ -194,7 +200,7 @@ void computer::VPU::run()
             vram->setLock(true);
             drawStates &= 0xFE;
             unsigned int refreshRate = 60;
-            float vblankTimePerFrame = (1-(128/147.5));
+            float vblankTimePerFrame = (1 - (128 / 147.5));
             std::chrono::nanoseconds timePerCycleDraw((uint32_t)((1000000000 / refreshRate) * (1 - vblankTimePerFrame)));
             switch (mode)
             {
