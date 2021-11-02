@@ -203,12 +203,6 @@ bool computer::FDD::getData()
     }
 }
 
-bool computer::FDD::getDataFDC()
-{
-    bool data = false;
-    return data;
-}
-
 bool computer::FDD::isWriteProtected()
 {
     return (writeProtectionLED && (!floppy || floppy->isWritable()));
@@ -395,7 +389,7 @@ void computer::FDD::set(uint16_t adr, uint8_t data)
     }
 }
 
-uint8_t computer::FDD::FDCget(uint8_t track, uint8_t sector, uint16_t offset)
+bool computer::FDD::FDCget(uint8_t track, uint8_t sector, uint16_t offset)
 {
     if (!pwr)
         return 0;

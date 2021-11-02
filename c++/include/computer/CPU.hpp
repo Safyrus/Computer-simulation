@@ -23,6 +23,7 @@ namespace computer
         std::shared_ptr<computer::Bus> bus;
         bool threadWanted;
         bool hasReset;
+        bool printInstructions;
 
     public:
         uint16_t pc;
@@ -46,6 +47,8 @@ namespace computer
         void setBusData(uint16_t adr, uint8_t data);
         void loadOnBus(uint16_t start, std::vector<uint8_t> data);
         void refreshCycle(uint64_t cycle);
+        void doPrintInstructions(bool print);
+        bool getPrintInstructions();
     };
 } // namespace computer
 

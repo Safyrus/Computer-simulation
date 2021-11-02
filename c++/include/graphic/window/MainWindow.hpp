@@ -25,6 +25,8 @@ namespace graphic::window
         std::shared_ptr<graphic::view::MenuView> menuView;
         void makeMenu();
         bool showMenu;
+        bool loadConf;
+        std::string conf;
 
         std::shared_ptr<graphic::view::ScreenVPUView> screenVpu;
         std::shared_ptr<computer::Keyboard> keyboard;
@@ -35,14 +37,13 @@ namespace graphic::window
 
     public:
         MainWindow();
-        MainWindow(std::string windowName);
-        MainWindow(std::string windowName, bool debug, std::string prog);
-        MainWindow(std::string windowName, bool debug, std::string prog, uint32_t hz);
+        MainWindow(std::string windowName, bool debug = false, std::string prog = "prog/verifCPU/verifCPU", uint32_t hz = 0, bool printCPU = true);
         ~MainWindow();
 
         void openSubWindow(std::string windowName);
 
         void loadConfig(std::string filePath);
+        void loadConfigNxtFrame(std::string filePath);
         /*void saveConfig(std::string filePath);
 
         void loadState(std::string filePath);

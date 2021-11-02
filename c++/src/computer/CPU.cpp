@@ -16,11 +16,13 @@
 
 computer::CPU::CPU(std::shared_ptr<computer::Bus> bus) : Device()
 {
+    printDebug("CPU Creation");
     threadWanted = false;
     type = "CPU";
     name = "S257-01";
     this->bus = bus;
     hz = 0;
+    printInstructions = true;
     resetReg();
     for (unsigned int i = 0; i < 1024 * 64; i++)
     {
@@ -30,11 +32,13 @@ computer::CPU::CPU(std::shared_ptr<computer::Bus> bus) : Device()
 
 computer::CPU::CPU(std::shared_ptr<computer::Bus> bus, bool threadWanted) : Device()
 {
+    printDebug("CPU Creation");
     this->threadWanted = threadWanted;
     type = "CPU";
     name = "S257-01";
     this->bus = bus;
     hz = 0;
+    printInstructions = true;
     resetReg();
     for (unsigned int i = 0; i < 1024 * 64; i++)
     {
@@ -44,12 +48,13 @@ computer::CPU::CPU(std::shared_ptr<computer::Bus> bus, bool threadWanted) : Devi
 
 computer::CPU::~CPU()
 {
+    printDebug("CPU Destruction");
 }
 
 void computer::CPU::run()
 {
     dynarec::Translater t(shared_from_this(), false);
-    t.print = print_debug;
+    t.print = printInstructions;
     if (!threadWanted)
     {
         t.run(pc);
@@ -152,5 +157,18 @@ void computer::CPU::loadOnBus(uint16_t start, std::vector<uint8_t> data)
 void computer::CPU::refreshCycle(uint64_t)
 {
     cycleCPU = this->cycle;
-    bus->refreshCycle(this->cycle);
+    if(bus)
+    {
+        bus->refreshCycle(this->cycle);
+    }
+}
+
+void computer::CPU::doPrintInstructions(bool print)
+{
+    printInstructions = print;
+}
+
+bool computer::CPU::getPrintInstructions()
+{
+    return printInstructions;
 }

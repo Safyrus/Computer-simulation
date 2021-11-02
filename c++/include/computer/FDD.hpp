@@ -46,7 +46,6 @@ namespace computer
         void setReadWrite(bool write);
 
         bool getData();
-        bool getDataFDC();
         bool isWriteProtected();
         bool isTrackZero();
         bool isSectorZero();
@@ -62,7 +61,7 @@ namespace computer
         void run();
         uint8_t get(uint16_t adr);
         void set(uint16_t adr, uint8_t data);
-        uint8_t FDCget(uint8_t track, uint8_t sector, uint16_t offset);
+        bool FDCget(uint8_t track, uint8_t sector, uint16_t offset);
         void FDCset(uint8_t track, uint8_t sector, uint16_t offset, uint8_t data);
 
         void insert(std::shared_ptr<data::Floppy> floppy);

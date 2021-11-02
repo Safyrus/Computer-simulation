@@ -1,2 +1,2 @@
 cd bin/Linux
-./main false null 1000000 false $1 <<< 2
+./main false prog/verifCPU/verifCPU 1000000 false $1 <<< 2

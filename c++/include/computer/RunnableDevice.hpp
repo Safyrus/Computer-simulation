@@ -21,6 +21,8 @@ namespace computer
 
         std::thread thread;
 
+        bool hasStop;
+
     public:
         RunnableDevice(std::shared_ptr<computer::Device> device);
         ~RunnableDevice();
@@ -28,6 +30,7 @@ namespace computer
         void run();
         void join();
         void stop();
+        bool isStop();
     };
 } // namespace computer
 

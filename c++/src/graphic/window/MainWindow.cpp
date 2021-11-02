@@ -6,6 +6,7 @@
 
 #include "data/menu/MenuActionTest.hpp"
 #include "data/menu/MenuActionOpenWindow.hpp"
+#include "data/menu/MenuActionLoadConfig.hpp"
 
 #include "utils/console.hpp"
 #include "utils/split.hpp"
@@ -20,41 +21,22 @@ graphic::window::MainWindow::MainWindow()
     width = 256;
     height = 256;
     showMenu = true;
+    loadConf = false;
+    conf = "";
     printDebug("Creation");
 }
 
-graphic::window::MainWindow::MainWindow(std::string windowName)
+graphic::window::MainWindow::MainWindow(std::string windowName, bool debug, std::string prog, uint32_t hz, bool printCPU)
 {
-    computer = std::make_shared<computer::Computer>(true, "prog/verifCPU/verifCPU");
-    this->windowName = windowName;
-    computerWindowName = "S257 Dynamic Recompiler - Computer Window";
-    width = 256;
-    height = 256;
-    showMenu = true;
-    printDebug("Creation");
-}
-
-graphic::window::MainWindow::MainWindow(std::string windowName, bool debug, std::string prog)
-{
-    computer = std::make_shared<computer::Computer>(true, prog);
+    computer = std::make_shared<computer::Computer>(true, prog, hz, printCPU);
     this->windowName = windowName;
     this->debug = debug;
     computerWindowName = "S257 Dynamic Recompiler - Computer Window";
     width = 256;
     height = 256;
     showMenu = true;
-    printDebug("Creation");
-}
-
-graphic::window::MainWindow::MainWindow(std::string windowName, bool debug, std::string prog, uint32_t hz)
-{
-    computer = std::make_shared<computer::Computer>(true, prog, hz);
-    this->windowName = windowName;
-    this->debug = debug;
-    computerWindowName = "S257 Dynamic Recompiler - Computer Window";
-    width = 256;
-    height = 256;
-    showMenu = true;
+    loadConf = false;
+    conf = "";
     printDebug("Creation");
 }
 
@@ -65,8 +47,11 @@ graphic::window::MainWindow::~MainWindow()
 
 void graphic::window::MainWindow::makeMenu()
 {
+    std::shared_ptr<data::menu::Menu> fileMenu = std::make_shared<data::menu::Menu>();
+    fileMenu->addItem("LOAD CONFIG", std::make_shared<data::menu::MenuActionLoadConfig>(shared_from_this(), "config.csv"));
+
     menu = std::make_shared<data::menu::Menu>();
-    menu->addItem("FILE", std::make_shared<data::menu::MenuActionTest>("Not implemented yet"));
+    menu->addItem("FILE", fileMenu);
     menu->addItem("OPTION", std::make_shared<data::menu::MenuActionTest>("Not implemented yet"));
     menu->addItem("COM", std::make_shared<data::menu::MenuActionOpenWindow>(shared_from_this(), computerWindowName));
 
@@ -212,6 +197,12 @@ void graphic::window::MainWindow::loop()
 
     // Update the window
     window.display();
+
+    if(loadConf)
+    {
+        loadConfig(conf);
+        loadConf = false;
+    }
 }
 
 void graphic::window::MainWindow::openSubWindow(std::string windowName)
@@ -235,6 +226,12 @@ void graphic::window::MainWindow::openSubWindow(std::string windowName)
         std::string msg = "no window with name: " + windowName;
         printDebug(msg);
     }
+}
+
+void graphic::window::MainWindow::loadConfigNxtFrame(std::string filePath)
+{
+    loadConf = true;
+    conf = filePath;
 }
 
 void graphic::window::MainWindow::loadConfig(std::string filePath)
@@ -271,10 +268,12 @@ void graphic::window::MainWindow::loadConfig(std::string filePath)
 
     // get Hz
     uint64_t hz = computer->getCpu()->hz;
+    bool printCPU = computer->getCpu()->getPrintInstructions();
 
     // Recreate the computer
+    stopSubWindows();
     stop();
-    computer = std::make_shared<computer::Computer>(false, "", hz);
+    computer = std::make_shared<computer::Computer>(false, "", hz, printCPU);
 
     // read the csv
     // structure: device,insert,file

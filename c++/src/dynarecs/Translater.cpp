@@ -174,6 +174,8 @@ dynarec::Emitter *dynarec::Translater::handlerEndBlock(int ret)
 
 void dynarec::Translater::initStep(uint16_t pc)
 {
+    printDebug("Translater: init");
+
     // setup variables
     cpu->pc = pc;
     startTime = std::chrono::steady_clock::now();
@@ -185,7 +187,8 @@ void dynarec::Translater::initStep(uint16_t pc)
     if (cpu->hz != 0)
     {
         blockSize = std::min((uint32_t)MAX_BLOCK_SIZE, cpu->hz);
-    }else
+    }
+    else
     {
         blockSize = MAX_BLOCK_SIZE;
     }
@@ -206,8 +209,8 @@ void dynarec::Translater::waitInst()
 
             // reset blocks
             std::chrono::steady_clock::time_point timeNow = std::chrono::steady_clock::now();
-            std::chrono::nanoseconds timeCpu((cpu->cycle*1000000000)/cpu->hz);
-            
+            std::chrono::nanoseconds timeCpu((cpu->cycle * 1000000000) / cpu->hz);
+
             startTime = timeNow - timeCpu;
             //cpu->cycle = 0;
             blockSize = std::min((uint32_t)MAX_BLOCK_SIZE, cpu->hz);
@@ -318,6 +321,7 @@ int dynarec::Translater::runStep()
 
 int dynarec::Translater::run(uint16_t pc)
 {
+    printDebug("Translater: start running");
     // init the Translater
     int res = 0;
     initStep(pc);
@@ -328,6 +332,7 @@ int dynarec::Translater::run(uint16_t pc)
         res = runStep();
     }
 
+    printDebug("Translater: stop running");
     // return the last code from the Translater
     return res;
 }
@@ -380,7 +385,8 @@ void dynarec::Translater::recompile(uint16_t pc)
 
     // print debug what block we want to recompile
     debugStr << ansi(WHITE_FG) << "| recompile adr " << std::hex << std::setfill('0') << std::setw(4) << pc << " ...";
-    printDebug(debugStr.str());
+    if (print)
+        printDebug(debugStr.str());
 
     // if the block already exist
     if (blocks[pc] != nullptr)
@@ -426,295 +432,363 @@ void dynarec::Translater::recompile(uint16_t pc)
         switch (ins)
         {
         case NOP:
-            printDebug(ansi(WHITE_FG) + "|     Compile: NOP ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: NOP ");
             emitter->NOP();
             break;
         case OFF:
-            printDebug(ansi(WHITE_FG) + "|     Compile: OFF ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: OFF ");
             emitter->OFF();
             recompile = false;
             break;
         case MOV_RV:
-            printDebug(ansi(WHITE_FG) + "|     Compile: MOV_RV ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: MOV_RV ");
             emitter->MOV((REG)dst, src);
             break;
         case MOV_RR:
-            printDebug(ansi(WHITE_FG) + "|     Compile: MOV_RR ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: MOV_RR ");
             emitter->MOV((REG)dst, (REG)src);
             break;
         case CMP_RR:
-            printDebug(ansi(WHITE_FG) + "|     Compile: CMP_RR ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: CMP_RR ");
             emitter->CMP((REG)src, (REG)val);
             break;
         case CMP_RV:
-            printDebug(ansi(WHITE_FG) + "|     Compile: CMP_RV ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: CMP_RV ");
             emitter->CMP((REG)src, val);
             break;
         case CMP_VR:
-            printDebug(ansi(WHITE_FG) + "|     Compile: CMP_VR ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: CMP_VR ");
             emitter->CMP(src, (REG)val);
             break;
         case CMP_VV:
-            printDebug(ansi(WHITE_FG) + "|     Compile: CMP_VV ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: CMP_VV ");
             emitter->CMP(src, val);
             break;
         case ADD_RR:
-            printDebug(ansi(WHITE_FG) + "|     Compile: ADD_RR ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: ADD_RR ");
             emitter->ADD((REG)dst, (REG)src, (REG)val);
             break;
         case ADD_VR:
-            printDebug(ansi(WHITE_FG) + "|     Compile: ADD_VR ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: ADD_VR ");
             emitter->ADD((REG)dst, src, (REG)val);
             break;
         case ADD_RV:
-            printDebug(ansi(WHITE_FG) + "|     Compile: ADD_RV ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: ADD_RV ");
             emitter->ADD((REG)dst, (REG)src, val);
             break;
         case ADD_VV:
-            printDebug(ansi(WHITE_FG) + "|     Compile: ADD_VV ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: ADD_VV ");
             emitter->ADD((REG)dst, src, val);
             break;
         case ADC_RR:
-            printDebug(ansi(WHITE_FG) + "|     Compile: ADC_RR ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: ADC_RR ");
             emitter->ADC((REG)dst, (REG)src, (REG)val);
             break;
         case ADC_VR:
-            printDebug(ansi(WHITE_FG) + "|     Compile: ADC_VR ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: ADC_VR ");
             emitter->ADC((REG)dst, src, (REG)val);
             break;
         case ADC_RV:
-            printDebug(ansi(WHITE_FG) + "|     Compile: ADC_RV ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: ADC_RV ");
             emitter->ADC((REG)dst, (REG)src, val);
             break;
         case ADC_VV:
-            printDebug(ansi(WHITE_FG) + "|     Compile: ADC_VV ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: ADC_VV ");
             emitter->ADC((REG)dst, src, val);
             break;
         case SUB_RR:
-            printDebug(ansi(WHITE_FG) + "|     Compile: SUB_RR ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: SUB_RR ");
             emitter->SUB((REG)dst, (REG)src, (REG)val);
             break;
         case SUB_VR:
-            printDebug(ansi(WHITE_FG) + "|     Compile: SUB_VR ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: SUB_VR ");
             emitter->SUB((REG)dst, src, (REG)val);
             break;
         case SUB_RV:
-            printDebug(ansi(WHITE_FG) + "|     Compile: SUB_RV ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: SUB_RV ");
             emitter->SUB((REG)dst, (REG)src, val);
             break;
         case SUB_VV:
-            printDebug(ansi(WHITE_FG) + "|     Compile: SUB_VV ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: SUB_VV ");
             emitter->SUB((REG)dst, src, val);
             break;
         case SBB_RR:
-            printDebug(ansi(WHITE_FG) + "|     Compile: SBB_RR ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: SBB_RR ");
             emitter->SBB((REG)dst, (REG)src, (REG)val);
             break;
         case SBB_VR:
-            printDebug(ansi(WHITE_FG) + "|     Compile: SBB_VR ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: SBB_VR ");
             emitter->SBB((REG)dst, src, (REG)val);
             break;
         case SBB_RV:
-            printDebug(ansi(WHITE_FG) + "|     Compile: SBB_RV ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: SBB_RV ");
             emitter->SBB((REG)dst, (REG)src, val);
             break;
         case SBB_VV:
-            printDebug(ansi(WHITE_FG) + "|     Compile: SBB_VV ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: SBB_VV ");
             emitter->SBB((REG)dst, src, val);
             break;
         case MUL_RR:
-            printDebug(ansi(WHITE_FG) + "|     Compile: MUL_RR ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: MUL_RR ");
             emitter->MUL((REG)dst, (REG)src, (REG)val);
             break;
         case MUL_VR:
-            printDebug(ansi(WHITE_FG) + "|     Compile: MUL_VR ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: MUL_VR ");
             emitter->MUL((REG)dst, src, (REG)val);
             break;
         case MUL_RV:
-            printDebug(ansi(WHITE_FG) + "|     Compile: MUL_RV ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: MUL_RV ");
             emitter->MUL((REG)dst, (REG)src, val);
             break;
         case MUL_VV:
-            printDebug(ansi(WHITE_FG) + "|     Compile: MUL_VV ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: MUL_VV ");
             emitter->MUL((REG)dst, src, val);
             break;
         case DIV_RR:
-            printDebug(ansi(WHITE_FG) + "|     Compile: DIV_RR ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: DIV_RR ");
             emitter->DIV((REG)dst, (REG)src, (REG)val);
             break;
         case DIV_VR:
-            printDebug(ansi(WHITE_FG) + "|     Compile: DIV_VR ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: DIV_VR ");
             emitter->DIV((REG)dst, src, (REG)val);
             break;
         case DIV_RV:
-            printDebug(ansi(WHITE_FG) + "|     Compile: DIV_RV ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: DIV_RV ");
             emitter->DIV((REG)dst, (REG)src, val);
             break;
         case DIV_VV:
-            printDebug(ansi(WHITE_FG) + "|     Compile: DIV_VV ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: DIV_VV ");
             emitter->DIV((REG)dst, src, val);
             break;
         case MOD_RR:
-            printDebug(ansi(WHITE_FG) + "|     Compile: MOD_RR ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: MOD_RR ");
             emitter->MOD((REG)dst, (REG)src, (REG)val);
             break;
         case MOD_VR:
-            printDebug(ansi(WHITE_FG) + "|     Compile: MOD_VR ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: MOD_VR ");
             emitter->MOD((REG)dst, src, (REG)val);
             break;
         case MOD_RV:
-            printDebug(ansi(WHITE_FG) + "|     Compile: MOD_RV ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: MOD_RV ");
             emitter->MOD((REG)dst, (REG)src, val);
             break;
         case MOD_VV:
-            printDebug(ansi(WHITE_FG) + "|     Compile: MOD_VV ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: MOD_VV ");
             emitter->MOD((REG)dst, src, val);
             break;
         case AND_RR:
-            printDebug(ansi(WHITE_FG) + "|     Compile: AND_RR ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: AND_RR ");
             emitter->AND((REG)dst, (REG)src, (REG)val);
             break;
         case AND_VR:
-            printDebug(ansi(WHITE_FG) + "|     Compile: AND_VR ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: AND_VR ");
             emitter->AND((REG)dst, src, (REG)val);
             break;
         case AND_RV:
-            printDebug(ansi(WHITE_FG) + "|     Compile: AND_RV ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: AND_RV ");
             emitter->AND((REG)dst, (REG)src, val);
             break;
         case AND_VV:
-            printDebug(ansi(WHITE_FG) + "|     Compile: AND_VV ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: AND_VV ");
             emitter->AND((REG)dst, src, val);
             break;
         case OR_RR:
-            printDebug(ansi(WHITE_FG) + "|     Compile: OR_RR ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: OR_RR ");
             emitter->OR((REG)dst, (REG)src, (REG)val);
             break;
         case OR_VR:
-            printDebug(ansi(WHITE_FG) + "|     Compile: OR_VR ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: OR_VR ");
             emitter->OR((REG)dst, src, (REG)val);
             break;
         case OR_RV:
-            printDebug(ansi(WHITE_FG) + "|     Compile: OR_RV ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: OR_RV ");
             emitter->OR((REG)dst, (REG)src, val);
             break;
         case OR_VV:
-            printDebug(ansi(WHITE_FG) + "|     Compile: OR_VV ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: OR_VV ");
             emitter->OR((REG)dst, src, val);
             break;
         case XOR_RR:
-            printDebug(ansi(WHITE_FG) + "|     Compile: XOR_RR ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: XOR_RR ");
             emitter->XOR((REG)dst, (REG)src, (REG)val);
             break;
         case XOR_VR:
-            printDebug(ansi(WHITE_FG) + "|     Compile: XOR_VR ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: XOR_VR ");
             emitter->XOR((REG)dst, src, (REG)val);
             break;
         case XOR_RV:
-            printDebug(ansi(WHITE_FG) + "|     Compile: XOR_RV ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: XOR_RV ");
             emitter->XOR((REG)dst, (REG)src, val);
             break;
         case XOR_VV:
-            printDebug(ansi(WHITE_FG) + "|     Compile: XOR_VV ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: XOR_VV ");
             emitter->XOR((REG)dst, src, val);
             break;
         case JMP_RRR:
-            printDebug(ansi(WHITE_FG) + "|     Compile: JMP_RRR ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: JMP_RRR ");
             recompile = false;
             emitter->JMP((REG)dst, (REG)src, (REG)val);
             break;
         case JMP_RVR:
-            printDebug(ansi(WHITE_FG) + "|     Compile: JMP_RVR ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: JMP_RVR ");
             recompile = false;
             emitter->JMP((REG)dst, src, (REG)val);
             break;
         case JMP_RRV:
-            printDebug(ansi(WHITE_FG) + "|     Compile: JMP_RRV ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: JMP_RRV ");
             recompile = false;
             emitter->JMP((REG)dst, (REG)src, val);
             break;
         case JMP_RVV:
-            printDebug(ansi(WHITE_FG) + "|     Compile: JMP_RVV ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: JMP_RVV ");
             recompile = false;
             emitter->JMP((REG)dst, src, val);
             break;
         case JMP_VRR:
-            printDebug(ansi(WHITE_FG) + "|     Compile: JMP_VRR ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: JMP_VRR ");
             recompile = false;
             emitter->JMP(dst, (REG)src, (REG)val);
             break;
         case JMP_VVR:
-            printDebug(ansi(WHITE_FG) + "|     Compile: JMP_VVR ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: JMP_VVR ");
             recompile = false;
             emitter->JMP(dst, src, (REG)val);
             break;
         case JMP_VRV:
-            printDebug(ansi(WHITE_FG) + "|     Compile: JMP_VRV ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: JMP_VRV ");
             recompile = false;
             emitter->JMP(dst, (REG)src, val);
             break;
         case JMP_VVV:
-            printDebug(ansi(WHITE_FG) + "|     Compile: JMP_VVV ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: JMP_VVV ");
             recompile = false;
             emitter->JMP(dst, src, val);
             break;
         case GET_RR:
-            printDebug(ansi(WHITE_FG) + "|     Compile: GET_RR ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: GET_RR ");
             recompile = false;
             emitter->GET((REG)dst, (REG)src, (REG)val);
             break;
         case GET_VR:
-            printDebug(ansi(WHITE_FG) + "|     Compile: GET_VR ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: GET_VR ");
             recompile = false;
             emitter->GET((REG)dst, src, (REG)val);
             break;
         case GET_RV:
-            printDebug(ansi(WHITE_FG) + "|     Compile: GET_RV ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: GET_RV ");
             recompile = false;
             emitter->GET((REG)dst, (REG)src, val);
             break;
         case GET_VV:
-            printDebug(ansi(WHITE_FG) + "|     Compile: GET_VV ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: GET_VV ");
             recompile = false;
             emitter->GET((REG)dst, src, val);
             break;
         case SET_RRR:
-            printDebug(ansi(WHITE_FG) + "|     Compile: SET_RRR ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: SET_RRR ");
             recompile = false;
             emitter->SET((REG)dst, (REG)src, (REG)val);
             break;
         case SET_RVR:
-            printDebug(ansi(WHITE_FG) + "|     Compile: SET_RVR ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: SET_RVR ");
             recompile = false;
             emitter->SET((REG)dst, src, (REG)val);
             break;
         case SET_RRV:
-            printDebug(ansi(WHITE_FG) + "|     Compile: SET_RRV ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: SET_RRV ");
             recompile = false;
             emitter->SET((REG)dst, (REG)src, val);
             break;
         case SET_RVV:
-            printDebug(ansi(WHITE_FG) + "|     Compile: SET_RVV ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: SET_RVV ");
             recompile = false;
             emitter->SET((REG)dst, src, val);
             break;
         case SET_VRR:
-            printDebug(ansi(WHITE_FG) + "|     Compile: SET_VRR ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: SET_VRR ");
             recompile = false;
             emitter->SET(dst, (REG)src, (REG)val);
             break;
         case SET_VVR:
-            printDebug(ansi(WHITE_FG) + "|     Compile: SET_VVR ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: SET_VVR ");
             recompile = false;
             emitter->SET(dst, src, (REG)val);
             break;
         case SET_VRV:
-            printDebug(ansi(WHITE_FG) + "|     Compile: SET_VRV ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: SET_VRV ");
             recompile = false;
             emitter->SET(dst, (REG)src, val);
             break;
         case SET_VVV:
-            printDebug(ansi(WHITE_FG) + "|     Compile: SET_VVV ");
+            if (print)
+                printDebug(ansi(WHITE_FG) + "|     Compile: SET_VVV ");
             recompile = false;
             emitter->SET(dst, src, val);
             break;
@@ -737,5 +811,6 @@ void dynarec::Translater::recompile(uint16_t pc)
         }
     }
 
-    printDebug(ansi(WHITE_FG) + "| recompile done");
+    if(print)
+        printDebug(ansi(WHITE_FG) + "| recompile done");
 }

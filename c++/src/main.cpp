@@ -29,10 +29,10 @@
 
 #include "linker/Linker.hpp"
 
-void runMainWindow(bool print_debug, std::string filePath, uint32_t hz, std::string configFile)
+void runMainWindow(bool print_debug, std::string filePath, uint32_t hz, std::string configFile, bool print_cpu)
 {
     printDebug("Create MainWindow");
-    std::shared_ptr<graphic::window::MainWindow> app = std::make_shared<graphic::window::MainWindow>("S257 Dynamic Recompiler - Main Window", print_debug, filePath, hz);
+    std::shared_ptr<graphic::window::MainWindow> app = std::make_shared<graphic::window::MainWindow>("S257 Dynamic Recompiler - Main Window", print_debug, filePath, hz, print_cpu);
     if(configFile != "")
     {
         printDebug("Load config");
@@ -127,15 +127,15 @@ int main(int argc, char const *argv[])
             std::cout << "\n###########################\n";
             testEmitter();
             std::cout << "\n###########################\n";
-            //testTranslater();
-            //std::cout << "\n###########################\n";
-            //testTranslater2(filePath);
-            //std::cout << "\n###########################\n";
+            testTranslater();
+            std::cout << "\n###########################\n";
+            testTranslater2(filePath);
+            std::cout << "\n###########################\n";
             testDeviceThread(filePath, hz);
             std::cout << "\n###########################\n";
         }
 
-        runMainWindow(print_debug, filePath, hz, configFile);
+        runMainWindow(print_debug, filePath, hz, configFile, test);
         break;
     case 3: // linker
         linkFile = filePath;

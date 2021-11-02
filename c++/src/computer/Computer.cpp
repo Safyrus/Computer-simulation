@@ -30,13 +30,14 @@ computer::Computer::Computer()
     cpu->setPwr(false);
 }
 
-computer::Computer::Computer(bool test, std::string prog, uint32_t hz)
+computer::Computer::Computer(bool test, std::string prog, uint32_t hz, bool printCPU)
 {
     printDebug("Create BUS");
     bus = std::make_shared<computer::Bus>();
 
     printDebug("Create CPU thread");
     cpu = std::make_shared<computer::CPU>(bus, true);
+    cpu->doPrintInstructions(printCPU);
     if (hz != 0)
     {
         cpu->hz = hz;

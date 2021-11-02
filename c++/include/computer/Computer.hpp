@@ -26,7 +26,7 @@ namespace computer
 
     public:
         Computer();
-        Computer(bool test, std::string prog, uint32_t hz = 0);
+        Computer(bool test, std::string prog, uint32_t hz = 0, bool printCPU = false);
         ~Computer();
 
         void power();

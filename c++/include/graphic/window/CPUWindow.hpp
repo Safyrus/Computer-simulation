@@ -14,6 +14,9 @@ namespace graphic::window
         sf::Font font;
         sf::Text text;
         sf::RectangleShape rect;
+        sf::Texture board;
+
+        void openTexture(sf::Texture &texture, std::string file);
 
         void start();
         void stop();

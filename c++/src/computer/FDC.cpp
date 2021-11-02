@@ -58,6 +58,7 @@ void computer::FDC::MFMread()
                     {
                         printError("FDC: wrong encoding !");
                         wrongEncoding = true;
+                        cmd |= 0x40;
                     }
                     data = rand() % 2;
                     break;

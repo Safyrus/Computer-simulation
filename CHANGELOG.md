@@ -20,6 +20,52 @@ This project try to follow the [Semantic Versioning](https://semver.org/spec/v2.
 
 -----------------
 
+## **[0.7.4]** - _2021-11-02_
+
+### **Added**
+
+#### Data
+
+- cpu-board png and aseprite.
+
+#### Computer
+
+- An "isStop" function in RunnableDevice to know if the thread has stop.
+
+#### Graphics
+
+- A MenuAction to load a config file.
+- A "load config" action under the file menu in the main window to load a config file named "config.csv".
+
+### **Changed**
+
+#### Computer
+
+- Reactivate dynamic recompiler test.
+- Translater to print CPU and recompile info only when test are active.
+- FDD "FDCget" function to return a boolean instead of an unsigned 8bit integer.
+- FDC to activate the 6bit flag when reading a wrong encoded sector.
+
+#### Graphics
+
+- CPU window visual with more graphic.
+
+#### Others
+
+- Run scripts default program.
+
+### **Fixed**
+
+- Crash when the CPU call "refreshCycle" and tries to call the bus "refreshCycle" function without having a bus.
+- Crash when trying to delete runnable devices in IOController that have already been deleted.
+
+### **Removed**
+
+- run-debug and run-test scripts.
+- Useless "getDataFDC" function in FDD.
+
+-----------------
+
 ## **[0.7.3]** - _2021-10-29_
 
 ### **Added**

@@ -23,7 +23,7 @@ computer::IOController::~IOController()
 {
     for (uint8_t i = 0; i < DEVICES_SIZE; i++)
     {
-        if (runnables[i])
+        if (runnables[i] && !runnables[i]->isStop())
         {
             runnables[i]->stop();
             runnables[i]->join();
@@ -275,8 +275,8 @@ void computer::IOController::addIO(std::shared_ptr<computer::IODevice> device, u
     runnables[port]->run();
     connected |= (0x01 << port);
     devices[port]->setPwr(pwr);
-    device->setDefaultPort(port);
-    device->setConnectedDevice(shared_from_this());
+    devices[port]->setDefaultPort(port);
+    devices[port]->setConnectedDevice(shared_from_this());
 }
 
 void computer::IOController::removeIO(uint8_t port)
@@ -288,10 +288,12 @@ void computer::IOController::removeIO(uint8_t port)
     }
     if(runnables[port])
     {
+        printDebug("IOController(removeIO): Stop thread");
         runnables[port]->stop();
         runnables[port]->join();
         delete runnables[port];
     }
+    printDebug("IOController(removeIO): remove IO");
     devices[port] = nullptr;
     connected &= (0xFF ^ (0x01 << port));
 }
