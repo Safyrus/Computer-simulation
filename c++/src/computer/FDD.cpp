@@ -8,6 +8,7 @@ computer::FDD::FDD()
     type = "FDD";
     name = "FDD";
     lock = false;
+    headPos = 0;
 }
 
 computer::FDD::~FDD()
@@ -91,7 +92,11 @@ void computer::FDD::setMotor(bool on)
     else
     {
         uint32_t index = (cycleCPU - motorTimeCycle) / 2;
-        lastMotorIndex = (lastMotorIndex + index) % floppy->getBpt();
+        lastMotorIndex = (lastMotorIndex + index);
+        if (floppy)
+        {
+            lastMotorIndex %= floppy->getBpt();
+        }
     }
 }
 
@@ -105,14 +110,22 @@ void computer::FDD::setStep(bool on)
         {
             stepMotor = false;
             int dir = (stepMotorDirection) ? 1 : -1;
-            if (dir + floppy->getHead() < 0)
+            if (dir + headPos < 0)
             {
                 dir = 0;
             }
-            floppy->setPos(floppy->getHead() + dir, floppy->getIndex());
+            headPos += dir;
+            if (headPos >= 40)
+            {
+                headPos = 39;
+            }
+            if (floppy)
+            {
+                floppy->setPos(headPos, floppy->getIndex());
+            }
             if (print_debug)
             {
-                std::string str = "Head is now on track " + std::to_string(floppy->getHead());
+                std::string str = "Head is now on track " + std::to_string(headPos);
                 printDebug(str);
             }
         }
@@ -180,18 +193,21 @@ bool computer::FDD::getData()
             }
             return rand() % 2;
         }
-        uint8_t head = floppy->getHead();
         uint64_t cycleSinceMotor = (cycleCPU - motorTimeCycle);
-        uint32_t index = (lastMotorIndex + (cycleSinceMotor / 2) - 1) % floppy->getBpt();
-        floppy->setPos(head, index);
-        bool tmp1 = floppy->read();
-        bool tmp2 = floppy->read();
-        data = tmp1 ^ tmp2;
+        uint32_t index = (lastMotorIndex + (cycleSinceMotor / 2) - 1);
+        if (floppy)
+        {
+            index %= floppy->getBpt();
+            floppy->setPos(headPos, index);
+            bool tmp1 = floppy->read();
+            bool tmp2 = floppy->read();
+            data = tmp1 ^ tmp2;
+        }
         if (print_debug)
         {
             std::string str = "FDD: read ";
             str += (data ? "1" : "0");
-            str += " at head " + std::to_string(head) + ", index " + std::to_string(floppy->getIndex());
+            str += " at head " + std::to_string(headPos) + ", index " + std::to_string(index);
             printDebug(str);
         }
         return data;
@@ -238,6 +254,10 @@ void computer::FDD::doLastWrite(bool check)
     {
         printError("FDD: Can't write, write head not active");
     }
+    else if (!floppy)
+    {
+        printError("FDD: Can't write, No floppy");
+    }
     else if (!check || (check && motor))
     {
         if (print_debug)
@@ -255,20 +275,19 @@ void computer::FDD::doLastWrite(bool check)
             lastDataCycle = cycleCPU;
             return;
         }
-        uint8_t head = floppy->getHead();
         uint64_t cycleSinceData = (cycleCPU - lastDataCycle);
         uint64_t timesToWrite = (cycleSinceData / 2);
         uint64_t cycleSinceMotor = (cycleCPU - motorTimeCycle);
         uint32_t index = (lastMotorIndex + (cycleSinceMotor / 2) - timesToWrite) % floppy->getBpt();
         //printDebug(std::to_string(cycleCPU) + "  " + std::to_string(lastDataCycle));
-        floppy->setPos(head, index);
+        floppy->setPos(headPos, index);
         for (uint64_t i = 0; i < timesToWrite; i++)
         {
             if (print_debug)
             {
                 std::string str = "FDD: write ";
                 str += (lastData ? "1" : "0");
-                str += " at head " + std::to_string(head) + ", index " + std::to_string(floppy->getIndex());
+                str += " at head " + std::to_string(headPos) + ", index " + std::to_string(floppy->getIndex());
                 printDebug(str);
             }
             floppy->write(lastData);
@@ -406,22 +425,35 @@ bool computer::FDD::FDCget(uint8_t track, uint8_t sector, uint16_t offset)
         {
             printDebug("FDD(FDCget): get Data");
         }
+        if (!floppy)
+        {
+            printWarning("FDD(FDCget): No floppy");
+        }
         FDCLock = true;
         lastFDCCycle = cycleCPU;
 
-        uint8_t head = floppy->getHead();
         uint64_t cycleSinceMotor = (cycleCPU - motorTimeCycle);
-        uint32_t index = (lastMotorIndex + (cycleSinceMotor / 2) - 1) % floppy->getBpt();
+        uint32_t index = (lastMotorIndex + (cycleSinceMotor / 2) - 1);
+        if(floppy)
+        {
+            index %= floppy->getBpt();
+        }
         uint32_t wantedIndex = (sector * 12500) + offset;
         if (wantedIndex < index)
         {
-            index += index + floppy->getBpt() - wantedIndex;
+            if(floppy)
+            {
+                index += index + floppy->getBpt() - wantedIndex;
+            }else
+            {
+                index += index + 100000 - wantedIndex;
+            }
         }
         else
         {
             index = wantedIndex - index;
         }
-        FDCCycleTime = (3333 * std::abs(track - head)) + (index * 2);
+        FDCCycleTime = (3333 * std::abs(track - headPos)) + (index * 2);
 
         stepMotor = false;
 
@@ -447,21 +479,33 @@ bool computer::FDD::FDCget(uint8_t track, uint8_t sector, uint16_t offset)
         else
         {
             uint32_t index = (cycleCPU - motorTimeCycle) / 2;
-            lastMotorIndex = (lastMotorIndex + index) % floppy->getBpt();
+            lastMotorIndex = (lastMotorIndex + index);
+            if(floppy)
+            {
+                lastMotorIndex %= floppy->getBpt();
+            }
         }
     }
 
     bool data = false;
-    floppy->setPos(track, (sector * 12500) + offset);
-    bool tmp1 = floppy->read();
-    bool tmp2 = floppy->read();
-    data = tmp1 ^ tmp2;
+    if (floppy)
+    {
+        floppy->setPos(track, (sector * 12500) + offset);
+        bool tmp1 = floppy->read();
+        bool tmp2 = floppy->read();
+        data = tmp1 ^ tmp2;
+    }
 
     if (print_debug)
     {
+        uint32_t index = 0;
+        if (floppy)
+        {
+            index = floppy->getIndex();
+        }
         std::string str = "FDD(FDCget): read ";
         str += (data ? "1" : "0");
-        str += " at head " + std::to_string(track) + ", index " + std::to_string(floppy->getIndex());
+        str += " at head " + std::to_string(track) + ", index " + std::to_string(index);
         //printDebug(str);
     }
 
@@ -479,6 +523,12 @@ void computer::FDD::FDCset(uint8_t track, uint8_t sector, uint16_t offset, uint8
         return;
     }
 
+    if (!floppy)
+    {
+        printError("FDD(FDCset): Can't write, no floppy");
+        return;
+    }
+
     if (!FDCLock)
     {
         if (print_debug)
@@ -492,7 +542,7 @@ void computer::FDD::FDCset(uint8_t track, uint8_t sector, uint16_t offset, uint8
         uint8_t head = floppy->getHead();
         uint64_t cycleSinceMotor = (cycleCPU - motorTimeCycle);
         uint32_t index = (lastMotorIndex + (cycleSinceMotor / 2) - 1) % bpt;
-        uint32_t wantedIndex = (sector * (bpt/8)) + offset;
+        uint32_t wantedIndex = (sector * (bpt / 8)) + offset;
         if (wantedIndex < index)
         {
             index += index + bpt - wantedIndex;
@@ -612,6 +662,11 @@ bool computer::FDD::isLock()
     return lock;
 }
 
+bool computer::FDD::isFloppyIn()
+{
+    return (floppy != nullptr);
+}
+
 void computer::FDD::refreshCycle(uint64_t cycle)
 {
     lastCPUCycle = cycleCPU;
@@ -643,9 +698,16 @@ void computer::FDD::refreshCycle(uint64_t cycle)
         else
         {
             uint32_t index = (cycleCPU - motorTimeCycle) / 2;
-            lastMotorIndex = (lastMotorIndex + index) % floppy->getBpt();
+            lastMotorIndex = (lastMotorIndex + index);
+            if (floppy)
+            {
+                lastMotorIndex %= floppy->getBpt();
+            }
         }
-        floppy->save("floppy.img");
+        if (floppy)
+        {
+            floppy->save("floppy.img");
+        }
     }
     if (lastCPUCycle > cycleCPU)
     {

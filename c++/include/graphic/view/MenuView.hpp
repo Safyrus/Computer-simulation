@@ -16,8 +16,8 @@ namespace graphic::view
         bool vertical;
         std::shared_ptr<MenuView> subMenu;
 
-        void drawHorinzontal(sf::RenderWindow &window);
-        void drawVertical(sf::RenderWindow &window);
+        void drawHorinzontal(sf::RenderTexture &window);
+        void drawVertical(sf::RenderTexture &window);
 
     public:
         MenuView(std::shared_ptr<data::menu::Menu> menu);
@@ -28,7 +28,7 @@ namespace graphic::view
         void setMousePressed(bool pressed);
         void setMouseReleased(bool released);
 
-        void draw(sf::RenderWindow &window);
+        void draw(sf::RenderTexture &window);
         void setScale(int scale);
     };
 } // namespace graphic::view

@@ -29,11 +29,11 @@
 
 #include "linker/Linker.hpp"
 
-void runMainWindow(bool print_debug, std::string filePath, uint32_t hz, std::string configFile, bool print_cpu)
+void runMainWindow(bool print_debug, std::string filePath, uint32_t hz, std::string configFile, bool print_cpu, bool oneWindowMode)
 {
     printDebug("Create MainWindow");
-    std::shared_ptr<graphic::window::MainWindow> app = std::make_shared<graphic::window::MainWindow>("S257 Dynamic Recompiler - Main Window", print_debug, filePath, hz, print_cpu);
-    if(configFile != "")
+    std::shared_ptr<graphic::window::MainWindow> app = std::make_shared<graphic::window::MainWindow>("S257 Dynamic Recompiler - Main Window", print_debug, oneWindowMode, filePath, hz, print_cpu);
+    if (configFile != "")
     {
         printDebug("Load config");
         app->loadConfig(configFile);
@@ -46,14 +46,15 @@ void runMainWindow(bool print_debug, std::string filePath, uint32_t hz, std::str
 int main(int argc, char const *argv[])
 {
     // define variables
-    std::string filePath = "";
-    std::string configFile = "";
-    std::string linkFile = "";
-    std::string labelFile = "";
-    std::string outFile = "";
-    uint32_t hz = 8;
+    std::string filePath = "default";
+    std::string configFile = "com-config.csv";
+    std::string linkFile = "link";
+    std::string labelFile = "label";
+    std::string outFile = "out";
+    uint32_t hz = 1000000;
     bool test = false;
     bool error = false;
+    bool oneWindowMode = false;
     int choice = 0;
     Linker linker;
 
@@ -62,7 +63,7 @@ int main(int argc, char const *argv[])
     {
         if (strcmp(argv[1], "help") == 0)
         {
-            std::cout << "arg: main [debug][file][hz][test][configFile]\n";
+            std::cout << "arg: main [debug][file][hz][test][comConfigFile][oneWindowMode]\n";
             std::cout << "     link [debug][linkFile][labelFile][outFile]\n";
             return 0;
         }
@@ -81,7 +82,7 @@ int main(int argc, char const *argv[])
         {
             hz = std::stoi(argv[3], NULL, 10);
         }
-        catch(const std::exception& e)
+        catch (const std::exception &e)
         {
             hz = 0;
         }
@@ -94,6 +95,11 @@ int main(int argc, char const *argv[])
     if (argc > 5)
     {
         configFile = argv[5];
+    }
+    if (argc > 6)
+    {
+        if (strcmp(argv[6], "true") == 0 || strcmp(argv[6], "1") == 0)
+            oneWindowMode = true;
     }
 
     // setup console
@@ -135,7 +141,7 @@ int main(int argc, char const *argv[])
             std::cout << "\n###########################\n";
         }
 
-        runMainWindow(print_debug, filePath, hz, configFile, test);
+        runMainWindow(print_debug, filePath, hz, configFile, test, oneWindowMode);
         break;
     case 3: // linker
         linkFile = filePath;
@@ -160,6 +166,13 @@ int main(int argc, char const *argv[])
     // restore console
     if (!print_debug && !error)
         clearConsole();
+    if (error)
+    {
+        std::cin.ignore();
+#ifdef _WIN32
+        std::cin.ignore();
+#endif
+    }
     restoreConsole();
     return error;
 }

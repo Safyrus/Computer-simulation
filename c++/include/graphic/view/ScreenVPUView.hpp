@@ -17,7 +17,7 @@ namespace graphic::view
         ScreenVPUView(std::shared_ptr<computer::VPU> vpu);
         ~ScreenVPUView();
 
-        void draw(sf::RenderWindow &window);
+        void draw(sf::RenderTexture &window);
         void setFilterColor(sf::Color c);
     };
 } // namespace graphic::view

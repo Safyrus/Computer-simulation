@@ -34,6 +34,7 @@ namespace computer
         bool getPower();
         bool isDriveActive();
         bool isDriveLock();
+        bool isFloppyIn();
 
         std::shared_ptr<computer::CPU> getCpu();
         std::shared_ptr<computer::Bus> getBus();

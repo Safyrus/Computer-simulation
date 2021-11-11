@@ -24,6 +24,7 @@ namespace computer
         bool lock;
         bool headWrite;
         bool lastData;
+        uint8_t headPos;
         uint32_t lastMotorIndex;
         uint32_t lastDataIndex;
         uint64_t lastDataCycle;
@@ -68,6 +69,7 @@ namespace computer
         void eject();
         void useLock(bool lock);
         bool isLock();
+        bool isFloppyIn();
 
         bool isActiveLED();
         bool isHeadMoving();

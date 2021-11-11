@@ -37,6 +37,7 @@ namespace computer
 
         bool isFDDLock();
         bool isFDDActive();
+        std::shared_ptr<computer::FDD> getFDD();
     };
 }
 

@@ -47,10 +47,7 @@ void graphic::window::VPUWindow::openTexture(sf::Texture &texture, std::string f
 void graphic::window::VPUWindow::start()
 {
     printDebug("Start");
-
-    // create window
-    window.create(sf::VideoMode(512, 512), windowName);
-    window.setFramerateLimit(60);
+    createRenderingWindow();
 
     // load font
     if (!font.loadFromFile("pix46.ttf"))
@@ -82,47 +79,27 @@ void graphic::window::VPUWindow::start()
     rect.setPosition(0, 0);
     rect.setFillColor(sf::Color::Black);
     rect.setSize(sf::Vector2f(width, height));
-
-    window.setView(fixRatioCenterView());
 }
 
 void graphic::window::VPUWindow::stop()
 {
     vpu.reset();
-    window.close();
+    closeRenderingWindow();
     printDebug("Stop");
 }
 
 void graphic::window::VPUWindow::loop()
 {
-    sf::Event event;
-    while (window.pollEvent(event))
-    {
-        switch (event.type)
-        {
-        case sf::Event::Closed:
-            printDebug("Closing window");
-            run = false;
-            break;
-        case sf::Event::Resized:
-            printDebug("Resize");
-            window.setView(fixRatioCenterView());
-            break;
-        default:
-            break;
-        }
-    }
-
     // Clear screen
-    window.clear(sf::Color(32, 32, 32));
+    windowTexture.clear(sf::Color(32, 32, 32));
 
-    window.draw(rect);
+    windowTexture.draw(rect);
 
     // draw board
     sf::Sprite boardSprite;
     boardSprite.setTexture(board);
     boardSprite.setPosition(sf::Vector2f(0, 0));
-    window.draw(boardSprite);
+    windowTexture.draw(boardSprite);
 
     // draw pwr light
     sf::Sprite pwrLightSprite;
@@ -130,7 +107,7 @@ void graphic::window::VPUWindow::loop()
     {
         pwrLightSprite.setTexture(led_green_on);
         pwrLightSprite.setPosition(sf::Vector2f(79, 21));
-        window.draw(pwrLightSprite);
+        windowTexture.draw(pwrLightSprite);
     }
 
     // draw vblank light
@@ -140,7 +117,7 @@ void graphic::window::VPUWindow::loop()
     {
         vblkSprite.setTexture(led_red_on);
         vblkSprite.setPosition(sf::Vector2f(59, 25));
-        window.draw(vblkSprite);
+        windowTexture.draw(vblkSprite);
     }
 
     // draw states text
@@ -148,15 +125,15 @@ void graphic::window::VPUWindow::loop()
     std::stringstream statesStr;
     statesStr << std::hex << std::uppercase << std::setfill('0') << std::setw(2) << (int)val;
     statesTxt.setString(statesStr.str());
-    window.draw(statesTxt);
+    windowTexture.draw(statesTxt);
 
     // draw mode text
     val = vpu->get(0);
     std::stringstream modeStr;
     modeStr << std::hex << std::uppercase << std::setfill('0') << std::setw(2) << (int)val;
     modeTxt.setString(modeStr.str());
-    window.draw(modeTxt);
+    windowTexture.draw(modeTxt);
 
     // Update the window
-    window.display();
+    windowTexture.display();
 }

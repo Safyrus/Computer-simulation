@@ -19,7 +19,7 @@ namespace graphic::view
         RomView(std::shared_ptr<computer::ROM> rom);
         ~RomView();
 
-        void draw(sf::RenderWindow &window);
+        void draw(sf::RenderTexture &window);
         void setPage(uint8_t page);
         uint8_t getPage();
     };

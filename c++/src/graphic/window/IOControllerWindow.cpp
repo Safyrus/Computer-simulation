@@ -47,8 +47,7 @@ void graphic::window::IOControllerWindow::openTexture(sf::Texture &texture, std:
 void graphic::window::IOControllerWindow::start()
 {
     printDebug("Start");
-    window.create(sf::VideoMode(512, 512), windowName);
-    window.setFramerateLimit(60);
+    createRenderingWindow();
 
     // load font
     if (!font.loadFromFile("pix46.ttf"))
@@ -71,44 +70,25 @@ void graphic::window::IOControllerWindow::start()
     rect.setPosition(0, 0);
     rect.setFillColor(sf::Color::Black);
     rect.setSize(sf::Vector2f(width, height));
-
-    window.setView(fixRatioCenterView());
 }
 
 void graphic::window::IOControllerWindow::stop()
 {
-    window.close();
+    closeRenderingWindow();
     printDebug("Stop");
 }
 
 void graphic::window::IOControllerWindow::loop()
 {
-    sf::Event event;
-    while (window.pollEvent(event))
-    {
-        switch (event.type)
-        {
-        case sf::Event::Closed:
-            printDebug("Closing window");
-            run = false;
-            break;
-        case sf::Event::Resized:
-            printDebug("Resize");
-            window.setView(fixRatioCenterView());
-            break;
-        default:
-            break;
-        }
-    }
     // Clear screen
-    window.clear(sf::Color(32, 32, 32));
-    window.draw(rect);
+    windowTexture.clear(sf::Color(32, 32, 32));
+    windowTexture.draw(rect);
 
     // draw board
     sf::Sprite boardSprite;
     boardSprite.setTexture(board);
     boardSprite.setPosition(sf::Vector2f(0, 0));
-    window.draw(boardSprite);
+    windowTexture.draw(boardSprite);
 
     if (ioCtrl->getPwr())
     {
@@ -117,14 +97,14 @@ void graphic::window::IOControllerWindow::loop()
         str << std::hex << std::uppercase << std::setfill('0') << std::setw(2) << (uint32_t)ioCtrl->get(33);
         txt.setString(str.str());
         txt.setPosition(sf::Vector2f(10, 41));
-        window.draw(txt);
+        windowTexture.draw(txt);
 
         // draw output talk
         str.str("");
         str << std::hex << std::uppercase << std::setfill('0') << std::setw(2) << (uint32_t)ioCtrl->get(34);
         txt.setString(str.str());
         txt.setPosition(sf::Vector2f(10, 85));
-        window.draw(txt);
+        windowTexture.draw(txt);
 
         // draw connected
         uint8_t connected = ioCtrl->get(32);
@@ -136,7 +116,7 @@ void graphic::window::IOControllerWindow::loop()
                 sf::Sprite lightSprite;
                 lightSprite.setTexture(led_red_on);
                 lightSprite.setPosition(sf::Vector2f(27 + (i * 12), 64));
-                window.draw(lightSprite);
+                windowTexture.draw(lightSprite);
             }
             connected = connected >> 1;
         }
@@ -151,7 +131,7 @@ void graphic::window::IOControllerWindow::loop()
             }
             txt.setString(str.str());
             txt.setPosition(sf::Vector2f(25 + (i * 12), 12));
-            window.draw(txt);
+            windowTexture.draw(txt);
 
             // draw out data
             str.str("");
@@ -161,10 +141,10 @@ void graphic::window::IOControllerWindow::loop()
             }
             txt.setString(str.str());
             txt.setPosition(sf::Vector2f(25 + (i * 12), 72));
-            window.draw(txt);
+            windowTexture.draw(txt);
         }
     }
 
     // Update the window
-    window.display();
+    windowTexture.display();
 }

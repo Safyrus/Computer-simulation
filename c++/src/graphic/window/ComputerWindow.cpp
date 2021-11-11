@@ -21,6 +21,8 @@
 #include "data/menu/MenuActionComputerPwr.hpp"
 #include "data/menu/MenuActionHalfCPUHz.hpp"
 #include "data/menu/MenuActionComputerRst.hpp"
+#include "data/menu/MenuActionUseFDDLock.hpp"
+#include "data/menu/MenuActionUseFDDFloppy.hpp"
 
 graphic::window::ComputerWindow::ComputerWindow(std::shared_ptr<computer::Computer> computer)
 {
@@ -33,22 +35,12 @@ graphic::window::ComputerWindow::ComputerWindow(std::shared_ptr<computer::Comput
     printDebug("Creation");
 }
 
-graphic::window::ComputerWindow::ComputerWindow(std::shared_ptr<computer::Computer> computer, std::string windowName)
-{
-    this->computer = computer;
-    this->windowName = windowName;
-    cpuWindowName = "S257 Dynamic Recompiler - CPU Window";
-    width = 128;
-    height = 128;
-    lastDeviceNumer = 0;
-    printDebug("Creation");
-}
-
-graphic::window::ComputerWindow::ComputerWindow(std::shared_ptr<computer::Computer> computer, std::string windowName, bool debug)
+graphic::window::ComputerWindow::ComputerWindow(std::shared_ptr<computer::Computer> computer, std::string windowName, bool debug, bool oneWindow)
 {
     this->debug = debug;
     this->computer = computer;
     this->windowName = windowName;
+    this->oneWindowMode = oneWindow;
     cpuWindowName = "S257 Dynamic Recompiler - CPU Window";
     width = 128;
     height = 128;
@@ -86,10 +78,21 @@ void graphic::window::ComputerWindow::makeMenu()
         }
     }
 
+    std::shared_ptr<data::menu::Menu> floppyMenu = std::make_shared<data::menu::Menu>();
+    std::shared_ptr<computer::FDC> fdc = std::static_pointer_cast<computer::FDC>(computer->getDevice("FDC", 0x0000, 0xFFFF));
+    std::shared_ptr<computer::FDD> fdd = nullptr;
+    if (fdc)
+    {
+        fdd = fdc->getFDD();
+    }
+    floppyMenu->addItem("USE LOCK", std::make_shared<data::menu::MenuActionUseFDDLock>(fdd));
+    floppyMenu->addItem("LOAD/EJECT FLOPPY", std::make_shared<data::menu::MenuActionUseFDDFloppy>(fdd));
+
     menu = std::make_shared<data::menu::Menu>();
     menu->addItem("ACTION", actionMenu);
     menu->addItem("CPU", std::make_shared<data::menu::MenuActionOpenWindow>(shared_from_this(), cpuWindowName));
     menu->addItem("DEVICE", deviceMenu);
+    menu->addItem("FLOPPY", floppyMenu);
     menuView = std::make_shared<graphic::view::MenuView>(menu);
     menuView->setPos(0, 0);
     menuView->setSize(width, 6);
@@ -108,8 +111,7 @@ void graphic::window::ComputerWindow::start()
 {
     printDebug("Start");
 
-    window.create(sf::VideoMode(512, 512), windowName);
-    window.setFramerateLimit(60);
+    createRenderingWindow();
 
     if (!font.loadFromFile("pix46.ttf"))
     {
@@ -126,6 +128,7 @@ void graphic::window::ComputerWindow::start()
     openTexture(dskOn, "data/img/saphyr1_dsk_on.png");
     openTexture(floppyOff, "data/img/saphyr1_floppy_off.png");
     openTexture(floppyOn, "data/img/saphyr1_floppy_on.png");
+    openTexture(floppyDsk, "data/img/saphyr1_floppy_dsk.png");
 
     text.setFont(font);
     text.setCharacterSize(6);
@@ -141,10 +144,9 @@ void graphic::window::ComputerWindow::start()
 
     makeMenu();
 
-    window.setView(fixRatioCenterView());
-
     cursorOnPWR = false;
     cursorOnRST = false;
+    cursorOnLock = false;
     mousePressed = false;
 }
 
@@ -153,90 +155,22 @@ void graphic::window::ComputerWindow::stop()
     computer.reset();
     menu.reset();
     menuView.reset();
-    window.close();
+    closeRenderingWindow();
     printDebug("Stop");
 }
 
 void graphic::window::ComputerWindow::loop()
 {
-    sf::Event event;
-    while (window.pollEvent(event))
-    {
-        sf::Vector2i mousePos;
-        sf::Vector2f viewMousePos;
-        switch (event.type)
-        {
-        case sf::Event::Closed:
-            printDebug("Closing window");
-            run = false;
-            break;
-        case sf::Event::Resized:
-            printDebug("Resize");
-            window.setView(fixRatioCenterView());
-            break;
-        case sf::Event::MouseMoved:
-            mousePos = sf::Vector2i(event.mouseMove.x, event.mouseMove.y);
-            viewMousePos = window.mapPixelToCoords(mousePos);
-            menuView->setMousePos(viewMousePos.x, viewMousePos.y);
-
-            // PWR button collision
-            cursorOnPWR = (viewMousePos.x >= 12 && viewMousePos.x <= 20 && viewMousePos.y >= 8 + 6 && viewMousePos.y <= 15 + 6);
-
-            // RST button collision
-            cursorOnRST = (viewMousePos.x >= 12 && viewMousePos.x <= 20 && viewMousePos.y >= 26 + 6 && viewMousePos.y <= 33 + 6);
-            break;
-        case sf::Event::MouseButtonPressed:
-            menuView->setMousePressed(true);
-            mousePressed = true;
-            break;
-        case sf::Event::MouseButtonReleased:
-            menuView->setMouseReleased(true);
-            mousePressed = false;
-            if(cursorOnPWR)
-            {
-                computer->power();
-            }
-            if(cursorOnRST)
-            {
-                computer->reset();
-            }
-            break;
-        case sf::Event::KeyPressed:
-            printDebug("Key " + std::to_string(event.key.code) + " Pressed");
-            if (event.key.code == sf::Keyboard::F1)
-            {
-                computer->power();
-            }
-            else if (event.key.code == sf::Keyboard::F2)
-            {
-                if (computer->getCpu()->hz / 2 > 0)
-                {
-                    computer->getCpu()->hz /= 2;
-                }
-            }
-            else if (event.key.code == sf::Keyboard::F3)
-            {
-                computer->getCpu()->hz *= 2;
-            }
-            else if (event.key.code == sf::Keyboard::F4)
-            {
-                computer->reset();
-            }
-            break;
-        default:
-            break;
-        }
-    }
     // Clear screen
-    window.clear(sf::Color(32, 32, 32));
+    windowTexture.clear(sf::Color(32, 32, 32));
 
-    window.draw(rect);
+    windowTexture.draw(rect);
 
     sf::Sprite caseSprite;
     // draw case
     caseSprite.setTexture(com);
     caseSprite.setPosition(sf::Vector2f(0, 6));
-    window.draw(caseSprite);
+    windowTexture.draw(caseSprite);
 
     // draw pwr light
     sf::Sprite pwrLightSprite;
@@ -245,7 +179,7 @@ void graphic::window::ComputerWindow::loop()
     else
         pwrLightSprite.setTexture(pwrOff);
     pwrLightSprite.setPosition(sf::Vector2f(12, 25));
-    window.draw(pwrLightSprite);
+    windowTexture.draw(pwrLightSprite);
 
     // draw pwr buttons
     sf::Sprite buttonPwrSprite;
@@ -254,28 +188,38 @@ void graphic::window::ComputerWindow::loop()
     else
         buttonPwrSprite.setTexture(buttonOff);
     buttonPwrSprite.setPosition(sf::Vector2f(12, 14));
-    window.draw(buttonPwrSprite);
+    windowTexture.draw(buttonPwrSprite);
 
     // draw rst buttons
     sf::Sprite buttonRstSprite;
-    if(cursorOnRST && mousePressed)
+    if (cursorOnRST && mousePressed)
     {
         buttonRstSprite.setTexture(buttonOn);
-    }else
+    }
+    else
     {
         buttonRstSprite.setTexture(buttonOff);
     }
     buttonRstSprite.setPosition(sf::Vector2f(12, 32));
-    window.draw(buttonRstSprite);
+    windowTexture.draw(buttonRstSprite);
+
+    // draw floppy disk
+    if (computer->isFloppyIn())
+    {
+        sf::Sprite floppyDiskSprite;
+        floppyDiskSprite.setTexture(floppyDsk);
+        floppyDiskSprite.setPosition(sf::Vector2f(53, 36));
+        windowTexture.draw(floppyDiskSprite);
+    }
 
     // draw floppy drive
-    sf::Sprite floppySprite;
+    sf::Sprite floppyDriveSprite;
     if (computer->isDriveLock())
-        floppySprite.setTexture(floppyOn);
+        floppyDriveSprite.setTexture(floppyOn);
     else
-        floppySprite.setTexture(floppyOff);
-    floppySprite.setPosition(sf::Vector2f(52, 32));
-    window.draw(floppySprite);
+        floppyDriveSprite.setTexture(floppyOff);
+    floppyDriveSprite.setPosition(sf::Vector2f(52, 32));
+    windowTexture.draw(floppyDriveSprite);
 
     // draw floppy drive light
     sf::Sprite dskSprite;
@@ -284,18 +228,124 @@ void graphic::window::ComputerWindow::loop()
     else
         dskSprite.setTexture(dskOff);
     dskSprite.setPosition(sf::Vector2f(56, 32));
-    window.draw(dskSprite);
+    windowTexture.draw(dskSprite);
 
     // display the menu
-    menuView->draw(window);
+    menuView->draw(windowTexture);
 
     // Update the window
-    window.display();
+    windowTexture.display();
 
     if (computer->getAllDevice().size() != lastDeviceNumer)
     {
         lastDeviceNumer = computer->getAllDevice().size();
         makeMenu();
+    }
+}
+
+void graphic::window::ComputerWindow::doEvent(sf::Event &event)
+{
+    Window::doEvent(event);
+    switch (event.type)
+    {
+    case sf::Event::MouseMoved:
+        menuView->setMousePos(mousePos.x, mousePos.y);
+
+        // PWR button collision
+        cursorOnPWR = (mousePos.x >= 12 && mousePos.x <= 20 && mousePos.y >= 8 + 6 && mousePos.y <= 15 + 6);
+
+        // RST button collision
+        cursorOnRST = (mousePos.x >= 12 && mousePos.x <= 20 && mousePos.y >= 26 + 6 && mousePos.y <= 33 + 6);
+
+        // Lock button collision
+        if (computer->isDriveLock())
+        {
+            cursorOnLock = (mousePos.x >= 62 && mousePos.x <= 74 && mousePos.y >= 26 + 6 && mousePos.y <= 33 + 6);
+            cursorOnFloppy = false;
+        }
+        else
+        {
+            cursorOnLock = (mousePos.x >= 62 && mousePos.x <= 74 && mousePos.y >= 26 + 6 && mousePos.y <= 29 + 6);
+            cursorOnFloppy = (mousePos.x >= 52 && mousePos.x <= 84 && mousePos.y >= 29 + 6 && mousePos.y <= 31 + 6);
+        }
+        break;
+    case sf::Event::MouseButtonPressed:
+        menuView->setMousePressed(true);
+        mousePressed = true;
+        break;
+    case sf::Event::MouseButtonReleased:
+        menuView->setMouseReleased(true);
+        mousePressed = false;
+        if (cursorOnPWR)
+        {
+            computer->power();
+        }
+        if (cursorOnRST)
+        {
+            computer->reset();
+        }
+
+        if (cursorOnLock)
+        {
+            std::shared_ptr<computer::FDC> fdc = std::static_pointer_cast<computer::FDC>(computer->getDevice("FDC", 0x0000, 0xFFFF));
+            if (fdc)
+            {
+                std::shared_ptr<computer::FDD> fdd = fdc->getFDD();
+                if (fdd)
+                {
+                    fdd->useLock(!fdd->isLock());
+                }
+            }
+        }
+        if (cursorOnFloppy)
+        {
+            std::shared_ptr<computer::FDC> fdc = std::static_pointer_cast<computer::FDC>(computer->getDevice("FDC", 0x0000, 0xFFFF));
+            if (fdc)
+            {
+                std::shared_ptr<computer::FDD> fdd = fdc->getFDD();
+                if (fdd)
+                {
+                    if (fdd->isFloppyIn())
+                    {
+                        fdd->eject();
+                    }
+                    else
+                    {
+                        std::shared_ptr<data::Floppy> floppy = std::make_shared<data::Floppy>();
+                        floppy->load("floppy.img");
+                        fdd->insert(floppy);
+                    }
+                }
+            }
+        }
+        break;
+    case sf::Event::KeyPressed:
+        if (event.key.code == sf::Keyboard::F1)
+        {
+            computer->power();
+        }
+        else if (event.key.code == sf::Keyboard::F2)
+        {
+            if (computer->getCpu()->hz / 2 > 0)
+            {
+                computer->getCpu()->hz /= 2;
+            }
+        }
+        else if (event.key.code == sf::Keyboard::F3)
+        {
+            computer->getCpu()->hz *= 2;
+        }
+        else if (event.key.code == sf::Keyboard::F4)
+        {
+            computer->reset();
+        }
+        else if (event.key.code == sf::Keyboard::Escape)
+        {
+            run = false;
+        }
+        break;
+    default:
+        break;
     }
 }
 

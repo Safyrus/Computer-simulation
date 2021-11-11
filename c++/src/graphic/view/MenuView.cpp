@@ -31,7 +31,7 @@ graphic::view::MenuView::~MenuView()
 {
 }
 
-void graphic::view::MenuView::drawHorinzontal(sf::RenderWindow &window)
+void graphic::view::MenuView::drawHorinzontal(sf::RenderTexture &window)
 {
     sf::Color textColor = sf::Color(0x56, 0x6c, 0x86);
     sf::Color selectTextColor = sf::Color(0xf4, 0xf4, 0xf4);
@@ -137,7 +137,7 @@ void graphic::view::MenuView::drawHorinzontal(sf::RenderWindow &window)
     }
 }
 
-void graphic::view::MenuView::drawVertical(sf::RenderWindow &window)
+void graphic::view::MenuView::drawVertical(sf::RenderTexture &window)
 {
     sf::Color textColor = sf::Color(0x56, 0x6c, 0x86);
     sf::Color selectTextColor = sf::Color(0xf4, 0xf4, 0xf4);
@@ -265,7 +265,7 @@ void graphic::view::MenuView::setMouseReleased(bool released)
     }
 }
 
-void graphic::view::MenuView::draw(sf::RenderWindow &window)
+void graphic::view::MenuView::draw(sf::RenderTexture &window)
 {
     if (vertical)
     {

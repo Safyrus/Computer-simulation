@@ -23,9 +23,7 @@ namespace graphic::window
         void loop();
 
     public:
-        CPUWindow(std::shared_ptr<computer::CPU> cpu);
-        CPUWindow(std::shared_ptr<computer::CPU> cpu, std::string windowName);
-        CPUWindow(std::shared_ptr<computer::CPU> cpu, std::string windowName, bool debug);
+        CPUWindow(std::shared_ptr<computer::CPU> cpu, std::string windowName = "S257 Dynamic Recompiler - CPU Window", bool debug = false);
         ~CPUWindow();
     };
 } // namespace graphic::window

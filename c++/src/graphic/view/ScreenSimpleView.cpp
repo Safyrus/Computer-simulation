@@ -19,7 +19,7 @@ graphic::view::ScreenSimpleView::~ScreenSimpleView()
 
 }
 
-void graphic::view::ScreenSimpleView::draw(sf::RenderWindow &window)
+void graphic::view::ScreenSimpleView::draw(sf::RenderTexture &window)
 {
     // create pixels array
     unsigned int pxNumber = w*h;

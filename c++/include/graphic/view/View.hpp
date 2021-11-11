@@ -25,7 +25,7 @@ namespace graphic::view
         void setMousePos(int x, int y);
         void setMousePressed(bool pressed);
         void setMouseReleased(bool released);
-        virtual void draw(sf::RenderWindow &window) = 0;
+        virtual void draw(sf::RenderTexture &window) = 0;
     };
 } // namespace graphic::view
 

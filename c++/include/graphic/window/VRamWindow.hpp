@@ -2,7 +2,7 @@
 #define VRAMWINDOW_HPP
 
 #include "graphic/window/Window.hpp"
-#include "graphic/view/VRamView.hpp"
+#include "graphic/view/VramView.hpp"
 
 #include "computer/VRAM.hpp"
 
@@ -18,11 +18,11 @@ namespace graphic::window
         void start();
         void stop();
         void loop();
+        void doEvent(sf::Event &event);
 
     public:
         VramWindow(std::shared_ptr<computer::VRAM> vram);
-        VramWindow(std::shared_ptr<computer::VRAM> vram, std::string windowName);
-        VramWindow(std::shared_ptr<computer::VRAM> vram, std::string windowName, bool debug);
+        VramWindow(std::shared_ptr<computer::VRAM> vram, std::string windowName, bool debug = false);
         ~VramWindow();
     };
 } // namespace graphic::window

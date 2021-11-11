@@ -19,7 +19,7 @@ namespace graphic::view
         RamView(std::shared_ptr<computer::RAM> ram);
         ~RamView();
 
-        void draw(sf::RenderWindow &window);
+        void draw(sf::RenderTexture &window);
         void setPage(uint8_t page);
         uint8_t getPage();
     };

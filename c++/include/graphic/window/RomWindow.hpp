@@ -18,11 +18,11 @@ namespace graphic::window
         void start();
         void stop();
         void loop();
+        void doEvent(sf::Event &event);
 
     public:
         RomWindow(std::shared_ptr<computer::ROM> rom);
-        RomWindow(std::shared_ptr<computer::ROM> rom, std::string windowName);
-        RomWindow(std::shared_ptr<computer::ROM> rom, std::string windowName, bool debug);
+        RomWindow(std::shared_ptr<computer::ROM> rom, std::string windowName, bool debug = false);
         ~RomWindow();
     };
 } // namespace graphic::window

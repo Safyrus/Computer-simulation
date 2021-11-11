@@ -20,7 +20,7 @@ graphic::view::VramView::~VramView()
 {
 }
 
-void graphic::view::VramView::draw(sf::RenderWindow &window)
+void graphic::view::VramView::draw(sf::RenderTexture &window)
 {
     // draw the background
     sf::RectangleShape rect;
@@ -31,9 +31,10 @@ void graphic::view::VramView::draw(sf::RenderWindow &window)
 
     // get ram data
     std::stringstream str;
-    uint8_t max = 8;
+    uint8_t max = 16;
     std::string strChar = "";
     str << "PAGE " << std::hex << std::uppercase << std::setfill('0') << std::setw(2) << (uint16_t)page;
+    str << "      " << vram->getName();
     uint16_t cntY = 0;
     uint16_t cntX = 0;
     for (int i = page * 256; i < (page * 256) + 256; i++)

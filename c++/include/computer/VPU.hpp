@@ -43,6 +43,10 @@ namespace computer
         uint8_t mode;
         uint8_t drawStates;
 
+        bool realTime;
+        bool refreshScreen;
+        uint64_t cycles;
+
         void color2Mode();
         void color16Mode();
         void text256Mode();
@@ -62,6 +66,7 @@ namespace computer
         void run();
         void set(uint16_t adr, uint8_t data);
         uint8_t get(uint16_t adr);
+        void refreshCycle(uint64_t cycle);
 
         uint8_t *getPixArray();
     };

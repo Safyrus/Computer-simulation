@@ -13,6 +13,7 @@ computer::VPU::VPU(std::shared_ptr<computer::VRAM> vram)
     type = "VPU";
     name = "VPU";
     this->vram = vram;
+    realTime = false;
     reset();
 }
 
@@ -188,6 +189,12 @@ void computer::VPU::reset()
     resetDraw();
     mode = 0;
     drawStates = 0;
+    refreshScreen = false;
+    vram->setLock(true);
+
+    unsigned int refreshRate = 60;
+    float vblankTimePerFrame = (1 - (128 / 147.5));
+    cycles = ((uint32_t)((1000000 / refreshRate) * (1 - vblankTimePerFrame)));
 }
 
 void computer::VPU::run()
@@ -196,40 +203,70 @@ void computer::VPU::run()
     {
         if (pwr)
         {
-            auto t1 = std::chrono::high_resolution_clock::now();
-            vram->setLock(true);
-            drawStates &= 0xFE;
-            unsigned int refreshRate = 60;
-            float vblankTimePerFrame = (1 - (128 / 147.5));
-            std::chrono::nanoseconds timePerCycleDraw((uint32_t)((1000000000 / refreshRate) * (1 - vblankTimePerFrame)));
-            switch (mode)
+            if (realTime)
             {
-            case 0:
-                color2Mode();
-                break;
-            case 1:
-                color16Mode();
-                break;
-            case 2:
-                text256Mode();
-                break;
-            case 3:
-                text128Mode();
-                break;
-            default:
-                resetDraw();
-                break;
+                auto t1 = std::chrono::high_resolution_clock::now();
+                vram->setLock(true);
+                drawStates &= 0xFE;
+                unsigned int refreshRate = 60;
+                float vblankTimePerFrame = (1 - (128 / 147.5));
+                std::chrono::nanoseconds timePerCycleDraw((uint32_t)((1000000000 / refreshRate) * (1 - vblankTimePerFrame)));
+                switch (mode)
+                {
+                case 0:
+                    color2Mode();
+                    break;
+                case 1:
+                    color16Mode();
+                    break;
+                case 2:
+                    text256Mode();
+                    break;
+                case 3:
+                    text128Mode();
+                    break;
+                default:
+                    resetDraw();
+                    break;
+                }
+                auto t2 = std::chrono::high_resolution_clock::now();
+                auto ns_int = std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1);
+                std::this_thread::sleep_for(timePerCycleDraw - ns_int);
+                t1 = std::chrono::high_resolution_clock::now();
+                vram->setLock(false);
+                drawStates |= 0x01;
+                std::chrono::nanoseconds timePerCycleVBlank((uint32_t)((1000000000 / refreshRate) * (vblankTimePerFrame)));
+                t2 = std::chrono::high_resolution_clock::now();
+                ns_int = std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1);
+                std::this_thread::sleep_for(timePerCycleVBlank - ns_int);
             }
-            auto t2 = std::chrono::high_resolution_clock::now();
-            auto ns_int = std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1);
-            std::this_thread::sleep_for(timePerCycleDraw - ns_int);
-            t1 = std::chrono::high_resolution_clock::now();
-            vram->setLock(false);
-            drawStates |= 0x01;
-            std::chrono::nanoseconds timePerCycleVBlank((uint32_t)((1000000000 / refreshRate) * (vblankTimePerFrame)));
-            t2 = std::chrono::high_resolution_clock::now();
-            ns_int = std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1);
-            std::this_thread::sleep_for(timePerCycleVBlank - ns_int);
+            else
+            {
+                if (refreshScreen)
+                {
+                    refreshScreen = false;
+                    switch (mode)
+                    {
+                    case 0:
+                        color2Mode();
+                        break;
+                    case 1:
+                        color16Mode();
+                        break;
+                    case 2:
+                        text256Mode();
+                        break;
+                    case 3:
+                        text128Mode();
+                        break;
+                    default:
+                        resetDraw();
+                        break;
+                    }
+                }
+                std::chrono::nanoseconds timeWait(1000000);
+                std::this_thread::sleep_for(timeWait);
+            }
         }
         else
         {
@@ -271,4 +308,27 @@ uint8_t computer::VPU::get(uint16_t adr)
 uint8_t *computer::VPU::getPixArray()
 {
     return pixArray;
+}
+
+void computer::VPU::refreshCycle(uint64_t cycle)
+{
+    cycleCPU = cycle;
+    if (cycleCPU >= cycles)
+    {
+        unsigned int refreshRate = 60;
+        float vblankTimePerFrame = (1 - (128 / 147.5));
+        if(drawStates && 0xFE)
+        {
+            vram->setLock(true);
+            cycles = ((uint32_t)((1000000 / refreshRate) * (1 - vblankTimePerFrame)));
+            drawStates &= 0xFE;
+            refreshScreen = true;
+        }else
+        {
+            vram->setLock(false);
+            cycles = ((uint32_t)((1000000 / refreshRate) * (vblankTimePerFrame)));
+            drawStates |= 0x01;
+        }
+        cycles += cycleCPU;
+    }
 }

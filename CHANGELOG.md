@@ -20,6 +20,67 @@ This project try to follow the [Semantic Versioning](https://semver.org/spec/v2.
 
 -----------------
 
+## **[0.7.5]** - _2021-11-11_
+
+### **Added**
+
+#### Data
+
+- Floppy disk image.
+
+#### Computer
+
+- An "isFloppyIn" function in Computer and FDD.
+- An "getFDD" function in FDC.
+
+#### Graphics
+
+- A new "one window" mode to have only one window with sub windows opening in the same window.
+- An argument in main to use either the normal "multiple windows" mode or the new "one window" mode.
+- Fullscreen by pressing F11.
+
+#### Others
+
+- New MenuActions to use the FDD lock and to insert or eject a floppy.
+- Link script (bat and sh).
+
+### **Changed**
+
+#### Data
+
+- Floppy drive on and off image.
+
+#### Assembler
+
+- Assembler output file to be named "out" if the input file name has no extension.
+
+#### Computer
+
+- The VPU timing to now use CPU cycles instead of real time.
+- The FDD to save the head position instead of relying on the floppy data index.
+- Main default arguments.
+
+#### Graphics
+
+- Replace RenderWindow by RenderTexture in draw functions in views and windows.
+- ROM, RAM and VRAM window size.
+- Windows event is now done in "doEvent" function.
+
+#### Others
+
+- Run scripts.
+
+### **Removed**
+
+- Unused class BaseWindow.
+
+### **Fixed**
+
+- Multiple crash when the FDD have no floppy disk.
+- Windows background not being updated.
+
+-----------------
+
 ## **[0.7.4]** - _2021-11-02_
 
 ### **Added**

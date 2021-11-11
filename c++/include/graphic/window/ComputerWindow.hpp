@@ -25,10 +25,13 @@ namespace graphic::window
         sf::Texture dskOff;
         sf::Texture floppyOn;
         sf::Texture floppyOff;
+        sf::Texture floppyDsk;
         uint32_t lastDeviceNumer;
 
         bool cursorOnPWR;
         bool cursorOnRST;
+        bool cursorOnLock;
+        bool cursorOnFloppy;
         bool mousePressed;
 
         std::shared_ptr<data::menu::Menu> menu;
@@ -39,11 +42,11 @@ namespace graphic::window
         void start();
         void stop();
         void loop();
+        void doEvent(sf::Event &event);
 
     public:
         ComputerWindow(std::shared_ptr<computer::Computer> computer);
-        ComputerWindow(std::shared_ptr<computer::Computer> computer, std::string windowName);
-        ComputerWindow(std::shared_ptr<computer::Computer> computer, std::string windowName, bool debug);
+        ComputerWindow(std::shared_ptr<computer::Computer> computer, std::string windowName = "S257 Dynamic Recompiler - Computer Window", bool debug = false, bool oneWindow = false);
         ~ComputerWindow();
 
         void openSubWindow(std::string windowName);

@@ -17,7 +17,7 @@ namespace graphic::view
         ScreenSimpleView(std::shared_ptr<computer::RAM> ram);
         ~ScreenSimpleView();
 
-        void draw(sf::RenderWindow &window);
+        void draw(sf::RenderTexture &window);
         void setColor(sf::Color c);
         void setBackgroundColor(sf::Color c);
     };

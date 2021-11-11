@@ -338,3 +338,8 @@ bool computer::FDC::isFDDActive()
     }
     return false;
 }
+
+std::shared_ptr<computer::FDD> computer::FDC::getFDD()
+{
+    return fdd;
+}

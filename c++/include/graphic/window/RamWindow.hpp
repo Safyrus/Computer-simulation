@@ -18,11 +18,11 @@ namespace graphic::window
         void start();
         void stop();
         void loop();
+        void doEvent(sf::Event &event);
 
     public:
         RamWindow(std::shared_ptr<computer::RAM> ram);
-        RamWindow(std::shared_ptr<computer::RAM> ram, std::string windowName);
-        RamWindow(std::shared_ptr<computer::RAM> ram, std::string windowName, bool debug);
+        RamWindow(std::shared_ptr<computer::RAM> ram, std::string windowName, bool debug = false);
         ~RamWindow();
     };
 } // namespace graphic::window

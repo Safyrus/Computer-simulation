@@ -25,9 +25,7 @@ namespace graphic::window
         void loop();
 
     public:
-        FDCWindow(std::shared_ptr<computer::FDC> fdc);
-        FDCWindow(std::shared_ptr<computer::FDC> fdc, std::string windowName);
-        FDCWindow(std::shared_ptr<computer::FDC> fdc, std::string windowName, bool debug);
+        FDCWindow(std::shared_ptr<computer::FDC> fdc, std::string windowName = "S257 Dynamic Recompiler - FDC Window", bool debug = false);
         ~FDCWindow();
     };
 } // namespace graphic::window

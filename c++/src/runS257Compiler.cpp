@@ -105,7 +105,12 @@ bool runS257Compiler(std::string filePath)
         printError("Error during Interpreting, cannot continue\n");
         return false;
     }
-    writeHexFile(fileOut, filePath.substr(0, filePath.find_last_of('.')));
+    std::string outFileName = "out";
+    if(filePath.find_last_of('.') != std::string::npos)
+    {
+        outFileName = filePath.substr(0, filePath.find_last_of('.'));
+    }
+    writeHexFile(fileOut, outFileName);
 
     return true;
 }

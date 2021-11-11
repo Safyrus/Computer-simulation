@@ -21,12 +21,13 @@ graphic::window::MainWindow::MainWindow()
     width = 256;
     height = 256;
     showMenu = true;
+    lastShowMenu = showMenu;
     loadConf = false;
     conf = "";
     printDebug("Creation");
 }
 
-graphic::window::MainWindow::MainWindow(std::string windowName, bool debug, std::string prog, uint32_t hz, bool printCPU)
+graphic::window::MainWindow::MainWindow(std::string windowName, bool debug, bool oneWindow, std::string prog, uint32_t hz, bool printCPU) : Window(windowName, debug, oneWindow)
 {
     computer = std::make_shared<computer::Computer>(true, prog, hz, printCPU);
     this->windowName = windowName;
@@ -35,6 +36,7 @@ graphic::window::MainWindow::MainWindow(std::string windowName, bool debug, std:
     width = 256;
     height = 256;
     showMenu = true;
+    lastShowMenu = showMenu;
     loadConf = false;
     conf = "";
     printDebug("Creation");
@@ -48,7 +50,7 @@ graphic::window::MainWindow::~MainWindow()
 void graphic::window::MainWindow::makeMenu()
 {
     std::shared_ptr<data::menu::Menu> fileMenu = std::make_shared<data::menu::Menu>();
-    fileMenu->addItem("LOAD CONFIG", std::make_shared<data::menu::MenuActionLoadConfig>(shared_from_this(), "config.csv"));
+    fileMenu->addItem("LOAD CONFIG", std::make_shared<data::menu::MenuActionLoadConfig>(shared_from_this(), "com-config.csv"));
 
     menu = std::make_shared<data::menu::Menu>();
     menu->addItem("FILE", fileMenu);
@@ -65,8 +67,7 @@ void graphic::window::MainWindow::start()
 {
     printDebug("Start");
 
-    window.create(sf::VideoMode(512, 512), windowName);
-    window.setFramerateLimit(60);
+    createRenderingWindow();
 
     if (!font.loadFromFile("pix46.ttf"))
     {
@@ -106,8 +107,6 @@ void graphic::window::MainWindow::start()
         screenVpu = nullptr;
     }
 
-    window.setView(fixRatioCenterView());
-
     printDebug("Finish Starting");
 }
 
@@ -124,84 +123,84 @@ void graphic::window::MainWindow::stop()
     menuView.reset();
     screenVpu.reset();
     keyboard.reset();
-    window.close();
+    closeRenderingWindow();
     printDebug("Stop");
 }
 
 void graphic::window::MainWindow::loop()
 {
-    sf::Event event;
-    while (window.pollEvent(event))
-    {
-        sf::Vector2i mousePos;
-        sf::Vector2f viewMousePos;
-        switch (event.type)
-        {
-        case sf::Event::Closed:
-            printDebug("Closing window");
-            run = false;
-            break;
-        case sf::Event::Resized:
-            printDebug("Resize");
-            window.setView(fixRatioCenterView());
-            break;
-        case sf::Event::MouseMoved:
-            mousePos = sf::Vector2i(event.mouseMove.x, event.mouseMove.y);
-            viewMousePos = window.mapPixelToCoords(mousePos);
-            menuView->setMousePos(viewMousePos.x, viewMousePos.y);
-            break;
-        case sf::Event::MouseButtonPressed:
-            menuView->setMousePressed(true);
-            break;
-        case sf::Event::MouseButtonReleased:
-            menuView->setMouseReleased(true);
-            break;
-        case sf::Event::KeyPressed:
-            printDebug("Key " + std::to_string(event.key.code) + " Pressed");
-
-            // If F1 is pressed
-            if (event.key.code == sf::Keyboard::F1)
-            {
-                openSubWindow(computerWindowName);
-            }
-            // If F2 is pressed
-            else if (event.key.code == sf::Keyboard::F2)
-            {
-                showMenu = !showMenu;
-            }
-        default:
-            break;
-        }
-        if (keyboard)
-        {
-            keyboard->inputEvent(event);
-        }
-    }
     // Clear screen
-    window.clear(sf::Color(32, 32, 32));
+    windowTexture.clear(sf::Color(32, 32, 32));
 
     //draw vpu screen
     if (screenVpu)
     {
         screenVpu->setPos(0, 0);
-        screenVpu->draw(window);
+        screenVpu->draw(windowTexture);
     }
     else
     {
-        window.draw(text);
+        windowTexture.draw(text);
     }
 
     // draw menu
     if (showMenu)
-        menuView->draw(window);
+        menuView->draw(windowTexture);
 
     // Update the window
-    window.display();
+    windowTexture.display();
 
-    if(loadConf)
+    if (loadConf)
     {
         loadConfig(conf);
         loadConf = false;
+    }
+}
+
+void graphic::window::MainWindow::doEvent(sf::Event &event)
+{
+    Window::doEvent(event);
+    switch (event.type)
+    {
+    case sf::Event::MouseMoved:
+        menuView->setMousePos(mousePos.x, mousePos.y);
+        break;
+    case sf::Event::MouseButtonPressed:
+        menuView->setMousePressed(true);
+        break;
+    case sf::Event::MouseButtonReleased:
+        menuView->setMouseReleased(true);
+        break;
+    case sf::Event::KeyPressed:
+        // If F1 is pressed
+        if (event.key.code == sf::Keyboard::F1)
+        {
+            computer->power();
+            if(computer->getPower())
+            {
+                lastShowMenu = showMenu;
+                showMenu = false;
+            }else
+            {
+                showMenu = lastShowMenu;
+            }
+        }
+        // If F2 is pressed
+        else if (event.key.code == sf::Keyboard::F2)
+        {
+            showMenu = !showMenu;
+        }
+        // If F3 is pressed
+        else if (event.key.code == sf::Keyboard::F3)
+        {
+            openSubWindow(computerWindowName);
+        }
+    default:
+        break;
+    }
+    if (keyboard)
+    {
+        keyboard->inputEvent(event);
     }
 }
 
@@ -212,7 +211,7 @@ void graphic::window::MainWindow::openSubWindow(std::string windowName)
         // if we have not open the Computer window
         if (findSubWinByName(computerWindowName).empty())
         {
-            std::shared_ptr<graphic::window::ComputerWindow> subW = std::make_shared<graphic::window::ComputerWindow>(computer, computerWindowName, debug);
+            std::shared_ptr<graphic::window::ComputerWindow> subW = std::make_shared<graphic::window::ComputerWindow>(computer, computerWindowName, debug, oneWindowMode);
             addSubWindow(subW);
         }
         else
@@ -395,7 +394,7 @@ void graphic::window::MainWindow::loadConfig(std::string filePath)
             {
                 printDebug("Create Floppy");
                 std::shared_ptr<data::Floppy> floppy = std::make_shared<data::Floppy>();
-                if(file != "")
+                if (file != "")
                 {
                     printDebug("Load Floppy file");
                     floppy->load(file);

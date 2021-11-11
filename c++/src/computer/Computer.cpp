@@ -190,6 +190,17 @@ bool computer::Computer::isDriveLock()
     return false;
 }
 
+bool computer::Computer::isFloppyIn()
+{
+    std::shared_ptr<computer::FDC> fdc = std::static_pointer_cast<computer::FDC>(getDevice("FDC", 0x0000, 0xFFFF));
+    if (fdc)
+    {
+        std::shared_ptr<computer::FDD> fdd = fdc->getFDD();
+        return fdd->isFloppyIn();
+    }
+    return false;
+}
+
 std::shared_ptr<computer::CPU> computer::Computer::getCpu()
 {
     return cpu;

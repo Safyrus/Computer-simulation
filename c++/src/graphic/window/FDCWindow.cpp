@@ -3,24 +3,6 @@
 #include <sstream>
 #include <iomanip>
 
-graphic::window::FDCWindow::FDCWindow(std::shared_ptr<computer::FDC> fdc)
-{
-    this->fdc = fdc;
-    windowName = "S257 Dynamic Recompiler - VPU Window";
-    width = 128;
-    height = 128;
-    printDebug("Creation");
-}
-
-graphic::window::FDCWindow::FDCWindow(std::shared_ptr<computer::FDC> fdc, std::string windowName)
-{
-    this->fdc = fdc;
-    this->windowName = windowName;
-    width = 128;
-    height = 128;
-    printDebug("Creation");
-}
-
 graphic::window::FDCWindow::FDCWindow(std::shared_ptr<computer::FDC> fdc, std::string windowName, bool debug)
 {
     this->debug = debug;
@@ -47,10 +29,7 @@ void graphic::window::FDCWindow::openTexture(sf::Texture &texture, std::string f
 void graphic::window::FDCWindow::start()
 {
     printDebug("Start");
-
-    // create window
-    window.create(sf::VideoMode(512, 512), windowName);
-    window.setFramerateLimit(60);
+    createRenderingWindow();
 
     // load font
     if (!font.loadFromFile("pix46.ttf"))
@@ -74,47 +53,27 @@ void graphic::window::FDCWindow::start()
     rect.setPosition(0, 0);
     rect.setFillColor(sf::Color::Black);
     rect.setSize(sf::Vector2f(width, height));
-
-    window.setView(fixRatioCenterView());
 }
 
 void graphic::window::FDCWindow::stop()
 {
     fdc.reset();
-    window.close();
+    closeRenderingWindow();
     printDebug("Stop");
 }
 
 void graphic::window::FDCWindow::loop()
 {
-    sf::Event event;
-    while (window.pollEvent(event))
-    {
-        switch (event.type)
-        {
-        case sf::Event::Closed:
-            printDebug("Closing window");
-            run = false;
-            break;
-        case sf::Event::Resized:
-            printDebug("Resize");
-            window.setView(fixRatioCenterView());
-            break;
-        default:
-            break;
-        }
-    }
-
     // Clear screen
-    window.clear(sf::Color(32, 32, 32));
+    windowTexture.clear(sf::Color(32, 32, 32));
 
-    window.draw(rect);
+    windowTexture.draw(rect);
 
     // draw board
     sf::Sprite boardSprite;
     boardSprite.setTexture(board);
     boardSprite.setPosition(sf::Vector2f(0, 0));
-    window.draw(boardSprite);
+    windowTexture.draw(boardSprite);
 
     // draw pwr light
     sf::Sprite pwrLightSprite;
@@ -122,7 +81,7 @@ void graphic::window::FDCWindow::loop()
     {
         pwrLightSprite.setTexture(led_green_on);
         pwrLightSprite.setPosition(sf::Vector2f(82, 10));
-        window.draw(pwrLightSprite);
+        windowTexture.draw(pwrLightSprite);
     }
 
     // draw memory access light
@@ -132,7 +91,7 @@ void graphic::window::FDCWindow::loop()
     {
         memLedSprite.setTexture(led_red_on);
         memLedSprite.setPosition(sf::Vector2f(18, 106));
-        window.draw(memLedSprite);
+        windowTexture.draw(memLedSprite);
     }
 
     // draw texts
@@ -143,9 +102,9 @@ void graphic::window::FDCWindow::loop()
         statesStr << std::hex << std::uppercase << std::setfill('0') << std::setw(2) << (int)val;
         txt.setString(statesStr.str());
         txt.setPosition(sf::Vector2f(57, 40 + (i * 7)));
-        window.draw(txt);
+        windowTexture.draw(txt);
     }
 
     // Update the window
-    window.display();
+    windowTexture.display();
 }

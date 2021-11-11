@@ -47,10 +47,7 @@ void graphic::window::HwStatesWindow::openTexture(sf::Texture &texture, std::str
 void graphic::window::HwStatesWindow::start()
 {
     printDebug("Start");
-
-    // create window
-    window.create(sf::VideoMode(512, 512), windowName);
-    window.setFramerateLimit(60);
+    createRenderingWindow();
 
     // load font
     if (!font.loadFromFile("pix46.ttf"))
@@ -82,47 +79,27 @@ void graphic::window::HwStatesWindow::start()
     rect.setPosition(0, 0);
     rect.setFillColor(sf::Color::Black);
     rect.setSize(sf::Vector2f(width, height));
-
-    window.setView(fixRatioCenterView());
 }
 
 void graphic::window::HwStatesWindow::stop()
 {
     hwstats.reset();
-    window.close();
+    closeRenderingWindow();
     printDebug("Stop");
 }
 
 void graphic::window::HwStatesWindow::loop()
 {
-    sf::Event event;
-    while (window.pollEvent(event))
-    {
-        switch (event.type)
-        {
-        case sf::Event::Closed:
-            printDebug("Closing window");
-            run = false;
-            break;
-        case sf::Event::Resized:
-            printDebug("Resize");
-            window.setView(fixRatioCenterView());
-            break;
-        default:
-            break;
-        }
-    }
-
     // Clear screen
-    window.clear(sf::Color(32, 32, 32));
+    windowTexture.clear(sf::Color(32, 32, 32));
 
-    window.draw(rect);
+    windowTexture.draw(rect);
 
     // draw board
     sf::Sprite boardSprite;
     boardSprite.setTexture(board);
     boardSprite.setPosition(sf::Vector2f(0, 0));
-    window.draw(boardSprite);
+    windowTexture.draw(boardSprite);
 
     // draw pwr light
     sf::Sprite pwrLightSprite;
@@ -130,7 +107,7 @@ void graphic::window::HwStatesWindow::loop()
     {
         pwrLightSprite.setTexture(led_green_on);
         pwrLightSprite.setPosition(sf::Vector2f(17, 17));
-        window.draw(pwrLightSprite);
+        windowTexture.draw(pwrLightSprite);
     }
 
     // draw connected devices led
@@ -142,7 +119,7 @@ void graphic::window::HwStatesWindow::loop()
             sf::Sprite ledSprite;
             ledSprite.setTexture(led_red_on);
             ledSprite.setPosition(sf::Vector2f(25 + (6 * i), 99));
-            window.draw(ledSprite);
+            windowTexture.draw(ledSprite);
         }
         connected = connected << 1;
     }
@@ -152,15 +129,15 @@ void graphic::window::HwStatesWindow::loop()
     std::stringstream timerStr;
     timerStr << std::hex << std::uppercase << std::setfill('0') << std::setw(2) << (int)val;
     timerTxt.setString(timerStr.str());
-    window.draw(timerTxt);
+    windowTexture.draw(timerTxt);
 
     // draw buzzer text
     val = hwstats->get(2);
     std::stringstream buzerStr;
     buzerStr << std::hex << std::uppercase << std::setfill('0') << std::setw(2) << (int)val;
     buzzerTxt.setString(buzerStr.str());
-    window.draw(buzzerTxt);
+    windowTexture.draw(buzzerTxt);
 
     // Update the window
-    window.display();
+    windowTexture.display();
 }

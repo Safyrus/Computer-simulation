@@ -13,7 +13,7 @@ graphic::view::ScreenVPUView::~ScreenVPUView()
 
 }
 
-void graphic::view::ScreenVPUView::draw(sf::RenderWindow &window)
+void graphic::view::ScreenVPUView::draw(sf::RenderTexture &window)
 {
     // display the screen
     uint8_t* pixArray = vpu->getPixArray();

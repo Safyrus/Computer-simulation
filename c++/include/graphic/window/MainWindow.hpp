@@ -25,6 +25,7 @@ namespace graphic::window
         std::shared_ptr<graphic::view::MenuView> menuView;
         void makeMenu();
         bool showMenu;
+        bool lastShowMenu;
         bool loadConf;
         std::string conf;
 
@@ -34,10 +35,11 @@ namespace graphic::window
         void start();
         void stop();
         void loop();
+        void doEvent(sf::Event &event);
 
     public:
         MainWindow();
-        MainWindow(std::string windowName, bool debug = false, std::string prog = "prog/verifCPU/verifCPU", uint32_t hz = 0, bool printCPU = true);
+        MainWindow(std::string windowName, bool debug = false, bool oneWindow = false, std::string prog = "prog/verifCPU/verifCPU", uint32_t hz = 0, bool printCPU = true);
         ~MainWindow();
 
         void openSubWindow(std::string windowName);
