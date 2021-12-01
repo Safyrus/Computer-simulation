@@ -31,6 +31,9 @@ namespace dynarec
         const uint16_t MAX_BLOCK_SIZE = 256;
         uint16_t blockSize;
 
+        bool pause;
+        std::vector<uint16_t> breakpoints;
+
     public:
         static const uint8_t CODE_RET = 1;
         static const uint8_t CODE_JMP = 2;
@@ -49,6 +52,13 @@ namespace dynarec
         void initStep(uint16_t pc);
         int runStep();
         void printCPUState();
+
+        void setPause(bool pause);
+        bool getPause();
+        void stepOnce();
+        void setBreakpoint(uint16_t adr);
+        void removeBreakpoint(uint16_t adr);
+        std::vector<uint16_t> getBreakpoints();
     };
 } // namespace dynarec
 

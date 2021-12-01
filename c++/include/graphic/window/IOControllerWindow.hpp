@@ -22,6 +22,7 @@ namespace graphic::window
         void start();
         void stop();
         void loop();
+        void doEvent(sf::Event &event);
 
     public:
         IOControllerWindow(std::shared_ptr<computer::IOController> ioCtrl);

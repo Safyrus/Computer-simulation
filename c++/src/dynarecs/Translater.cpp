@@ -10,6 +10,7 @@
 #include <iostream>
 #include <sstream>
 #include <iomanip>
+#include <algorithm>
 #ifndef _WIN32
 #include <thread>
 #else
@@ -21,6 +22,7 @@ dynarec::Translater::Translater(std::shared_ptr<computer::CPU> cpu, bool rawBus)
     this->cpu = cpu;
     this->rawBus = rawBus;
     running = false;
+    pause = false;
     for (int i = 0; i < 1024 * 64; i++)
     {
         blocks.push_back(nullptr);
@@ -51,24 +53,12 @@ void dynarec::Translater::deleteBlocks()
 
 void dynarec::Translater::deleteBlocks(uint16_t adr)
 {
-    if (print)
+    for (uint16_t i = 0; i < blockSize; i++)
     {
-        for (uint16_t i = 0; i < blockSize; i++)
+        uint16_t index = adr - i;
+        if (blocks[index] != nullptr)
         {
-            uint16_t index = adr - i;
-            if (blocks[index] != nullptr)
-            {
-                printDebug(ansi(WHITE_FG) + "delete block " + std::to_string(index));
-                delete blocks[index];
-                blocks[index] = nullptr;
-            }
-        }
-    }
-    else
-    {
-        for (uint16_t i = 0; i < blockSize; i++)
-        {
-            int index = (uint16_t)(adr - i);
+            printDebug(ansi(WHITE_FG) + "delete block " + std::to_string(index));
             delete blocks[index];
             blocks[index] = nullptr;
         }
@@ -201,32 +191,33 @@ void dynarec::Translater::waitInst()
 {
     if (cpu->hz != 0)
     {
+        uint32_t cpuHz = cpu->hz;
         // if the cpu frequency has change
-        if (lastHz != cpu->hz)
+        if (lastHz != cpuHz)
         {
             if (print)
                 printDebug(ansi(WHITE_FG) + "reset time");
 
             // reset blocks
             std::chrono::steady_clock::time_point timeNow = std::chrono::steady_clock::now();
-            std::chrono::nanoseconds timeCpu((cpu->cycle * 1000000000) / cpu->hz);
+            std::chrono::nanoseconds timeCpu((cpu->cycle * 1000000000) / cpuHz);
 
             startTime = timeNow - timeCpu;
             //cpu->cycle = 0;
-            blockSize = std::min((uint32_t)MAX_BLOCK_SIZE, cpu->hz);
+            blockSize = std::min((uint32_t)MAX_BLOCK_SIZE, cpuHz);
             deleteBlocks();
             e = getBlock(cpu->pc);
         }
 
         // update lastHz
-        lastHz = cpu->hz;
+        lastHz = cpuHz;
 
         // find the time since the start (or the last reset or the last hz change)
         std::chrono::steady_clock::time_point timeNow = std::chrono::steady_clock::now();
         std::chrono::duration<long long, std::nano> timeSinceStart = std::chrono::duration_cast<std::chrono::duration<long long, std::nano>>(timeNow - startTime);
 
         // find the time that had past base in "instruction time"
-        uint64_t nbInstTime = (timeSinceStart.count()) / (1000000000 / cpu->hz);
+        uint64_t nbInstTime = (timeSinceStart.count()) / (1000000000 / cpuHz);
 
         // print debug the isntructions time
         if (print)
@@ -241,7 +232,7 @@ void dynarec::Translater::waitInst()
         if (cpu->cycle > nbInstTime)
         {
             // then find the time to wait (the number of cycle - the total "instruction time")
-            std::chrono::nanoseconds waiting((cpu->cycle - nbInstTime) * (1000000000 / cpu->hz));
+            std::chrono::nanoseconds waiting((cpu->cycle - nbInstTime) * (1000000000 / cpuHz));
 
             // print debug how many nansecond we wait
             if (print)
@@ -263,6 +254,16 @@ int dynarec::Translater::runStep()
     // if translater not running do nothing
     if (!running)
         return 0;
+
+    // if the translater is paused
+    if (pause)
+    {
+        // wait a moment
+        std::chrono::nanoseconds timeWait(1000000);
+        std::this_thread::sleep_for(timeWait);
+        // and then do nothing
+        return 0;
+    }
 
     // setup variables
     int res = 0;
@@ -315,6 +316,22 @@ int dynarec::Translater::runStep()
 
     // handle the response of the block
     e = handlerEndBlock(res);
+
+    // is their a breakpoint at the next instruction ?
+    uint16_t cpuPC = cpu->pc;
+    for (auto &&b : breakpoints)
+    {
+        if (b == cpuPC || b == cpuPC + 1 || b == cpuPC + 2 || b == cpuPC + 3)
+        {
+            if (print)
+            {
+                std::stringstream debugStr;
+                debugStr << ansi(WHITE_FG) << "| breakpoint find at adr " << std::hex << std::setfill('0') << std::setw(4) << b << ", pausing execution" << ansi(RESET);
+            }
+            pause = true;
+            break;
+        }
+    }
 
     return res;
 }
@@ -379,14 +396,111 @@ void dynarec::Translater::printCPUState()
     printDebug(debugStr.str());
 }
 
+void dynarec::Translater::setPause(bool pause)
+{
+    this->pause = pause;
+    if (!this->pause)
+    {
+        std::chrono::steady_clock::time_point timeNow = std::chrono::steady_clock::now();
+        std::chrono::nanoseconds timeCpu((cpu->cycle * 1000000000) / cpu->hz);
+        startTime = timeNow - timeCpu;
+    }
+}
+
+bool dynarec::Translater::getPause()
+{
+    return pause;
+}
+
+void dynarec::Translater::stepOnce()
+{
+    // if the translater is not running or paused, do nothing
+    if (!running || !pause)
+        return;
+
+    // setup res
+    int res = 0;
+
+    // print debug what adr we will run
+    if (print)
+    {
+        std::stringstream debugStr;
+        debugStr.str("");
+        debugStr << ansi(WHITE_FG) << "| run adr " << std::hex << std::setfill('0') << std::setw(4) << cpu->pc << " ...";
+        printDebug(debugStr.str());
+    }
+
+    deleteBlocks(cpu->pc);
+    e = getBlock(cpu->pc);
+
+    // print debug what block we execute
+    if (print)
+    {
+        std::stringstream debugStr;
+        debugStr.str("");
+        debugStr << ansi(WHITE_FG) << "|     Execute block adr " << std::hex << std::setfill('0') << std::setw(4) << e->getStartAdr() << " with " << e->getInsCount() << " ins";
+        printDebug(debugStr.str());
+    }
+
+    //execute the block
+    res = e->execute();
+
+    // update cpu registers
+    uint16_t insCount = e->getInsCount();
+    cpu->pc += insCount * 4;
+    cpu->cycle += insCount;
+    cpu->refreshCycle(0);
+
+    // print the cpu state after the block execution
+    if (print)
+        printCPUState();
+
+    // handle the response of the block
+    e = handlerEndBlock(res);
+
+    return;
+}
+
+void dynarec::Translater::setBreakpoint(uint16_t adr)
+{
+    std::stringstream debugStr;
+    debugStr << ansi(WHITE_FG) << "Add breakpoint at adress " << std::hex << std::setfill('0') << std::setw(4) << adr << ansi(RESET);
+    printDebug(debugStr.str());
+    breakpoints.push_back(adr);
+    deleteBlocks(adr);
+    e = getBlock(cpu->pc);
+}
+
+void dynarec::Translater::removeBreakpoint(uint16_t adr)
+{
+    int i = 0;
+    for (auto &&b : breakpoints)
+    {
+        if (b == adr)
+        {
+            std::stringstream debugStr;
+            debugStr << ansi(WHITE_FG) << "Remove breakpoint at adress " << std::hex << std::setfill('0') << std::setw(4) << adr << ansi(RESET);
+            printDebug(debugStr.str());
+            breakpoints.erase(breakpoints.begin() + i);
+        }
+        i++;
+    }
+}
+
+std::vector<uint16_t> dynarec::Translater::getBreakpoints()
+{
+    return breakpoints;
+}
+
 void dynarec::Translater::recompile(uint16_t pc)
 {
     std::stringstream debugStr;
-
     // print debug what block we want to recompile
-    debugStr << ansi(WHITE_FG) << "| recompile adr " << std::hex << std::setfill('0') << std::setw(4) << pc << " ...";
     if (print)
+    {
+        debugStr << ansi(WHITE_FG) << "| recompile adr " << std::hex << std::setfill('0') << std::setw(4) << pc << " ...";
         printDebug(debugStr.str());
+    }
 
     // if the block already exist
     if (blocks[pc] != nullptr)
@@ -802,15 +916,40 @@ void dynarec::Translater::recompile(uint16_t pc)
         // increment the program counter to the next instruction
         pc += 4;
 
-        // if we had compile too many instruction for one block
-        if (emitter->getInsCount() >= blockSize)
+        // is their a breakpoint at the next instruction ?
+        bool breakpointFound = false;
+        for (auto &&b : breakpoints)
         {
-            printDebug(ansi(WHITE_FG) + "|     Compile: block too big, stop ");
+            if (b == pc || b == pc + 1 || b == pc + 2 || b == pc + 3)
+            {
+                breakpointFound = true;
+                break;
+            }
+        }
+
+        // if we had compile too many instruction for one block
+        if (emitter->getInsCount() >= blockSize || pause || breakpointFound)
+        {
+            if (print)
+            {
+                if (pause)
+                {
+                    printDebug(ansi(WHITE_FG) + "|     Compile: pause is active, stop ");
+                }
+                else if (breakpointFound)
+                {
+                    printDebug(ansi(WHITE_FG) + "|     Compile: breakpoint found, stop ");
+                }
+                else
+                {
+                    printDebug(ansi(WHITE_FG) + "|     Compile: block too big, stop ");
+                }
+            }
             emitter->NXT();
             recompile = false;
         }
     }
 
-    if(print)
+    if (print)
         printDebug(ansi(WHITE_FG) + "| recompile done");
 }

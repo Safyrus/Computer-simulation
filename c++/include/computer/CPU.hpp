@@ -14,6 +14,11 @@ typedef unsigned long uint64_t;
 typedef unsigned long long uint64_t;
 #endif
 
+namespace dynarec
+{
+    class Translater;
+}
+
 namespace computer
 {
     class CPU : public computer::Device, public std::enable_shared_from_this<CPU>
@@ -25,19 +30,23 @@ namespace computer
         bool hasReset;
         bool printInstructions;
 
+        std::shared_ptr<dynarec::Translater> translater;
+
     public:
         uint16_t pc;
         uint16_t reg[16];
         uint32_t hz;
         uint64_t cycle;
 
-        CPU(std::shared_ptr<computer::Bus> bus);
-        CPU(std::shared_ptr<computer::Bus> bus, bool threadWanted);
+        CPU(std::shared_ptr<computer::Bus> bus, bool threadWanted = false);
         ~CPU();
 
         void reset();
         void resetReg();
         void setPwr(bool pwr);
+        void pause();
+        bool isPause();
+        void step();
 
         void run();
         uint8_t get(uint16_t adr);
@@ -49,6 +58,10 @@ namespace computer
         void refreshCycle(uint64_t cycle);
         void doPrintInstructions(bool print);
         bool getPrintInstructions();
+
+        void setBreakpoint(uint16_t adr);
+        void removeBreakpoint(uint16_t adr);
+        std::vector<uint16_t> getBreakpoints();
     };
 } // namespace computer
 

@@ -34,9 +34,9 @@ graphic::window::Window::~Window()
 
 void graphic::window::Window::addSubWindow(std::shared_ptr<graphic::window::Window> subWindow)
 {
+    subWindow->oneWindowMode = oneWindowMode;
     if (oneWindowMode)
     {
-        subWindow->oneWindowMode = oneWindowMode;
         doResize = true;
     }
     subWindow->run = true;

@@ -13,8 +13,7 @@ namespace graphic::window
     protected:
         std::shared_ptr<computer::Computer> computer;
         std::string cpuWindowName;
-        sf::Font font;
-        sf::Text text;
+        std::string debugerWindowName;
         sf::RectangleShape rect;
         sf::Texture com;
         sf::Texture pwrOn;
@@ -45,7 +44,6 @@ namespace graphic::window
         void doEvent(sf::Event &event);
 
     public:
-        ComputerWindow(std::shared_ptr<computer::Computer> computer);
         ComputerWindow(std::shared_ptr<computer::Computer> computer, std::string windowName = "S257 Dynamic Recompiler - Computer Window", bool debug = false, bool oneWindow = false);
         ~ComputerWindow();
 

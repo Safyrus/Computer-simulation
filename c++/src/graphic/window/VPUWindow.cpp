@@ -65,14 +65,14 @@ void graphic::window::VPUWindow::start()
     modeTxt.setFont(font);
     modeTxt.setCharacterSize(6);
     modeTxt.setString("");
-    modeTxt.setFillColor(sf::Color::White);
+    modeTxt.setFillColor(sf::Color(0xf4, 0xf4, 0xf4));
     modeTxt.setPosition(sf::Vector2f(47, 48));
 
     // setup states text
     statesTxt.setFont(font);
     statesTxt.setCharacterSize(6);
     statesTxt.setString("");
-    statesTxt.setFillColor(sf::Color::White);
+    statesTxt.setFillColor(sf::Color(0xf4, 0xf4, 0xf4));
     statesTxt.setPosition(sf::Vector2f(47, 41));
 
     // setup background
@@ -136,4 +136,20 @@ void graphic::window::VPUWindow::loop()
 
     // Update the window
     windowTexture.display();
+}
+
+void graphic::window::VPUWindow::doEvent(sf::Event &event)
+{
+    Window::doEvent(event);
+    switch (event.type)
+    {
+    case sf::Event::KeyPressed:
+        if (event.key.code == sf::Keyboard::Escape)
+        {
+            run = false;
+        }
+        break;
+    default:
+        break;
+    }
 }

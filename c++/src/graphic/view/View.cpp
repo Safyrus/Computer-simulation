@@ -59,3 +59,23 @@ void graphic::view::View::setMouseReleased(bool released)
     pressed = false;
 }
 
+int graphic::view::View::getPosX()
+{
+    return x;
+}
+
+int graphic::view::View::getPosY()
+{
+    return y;
+}
+
+int graphic::view::View::getWidth()
+{
+    return w;
+}
+
+int graphic::view::View::getHeight()
+{
+    return h;
+}
+

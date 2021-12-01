@@ -65,14 +65,14 @@ void graphic::window::HwStatesWindow::start()
     timerTxt.setFont(font);
     timerTxt.setCharacterSize(6);
     timerTxt.setString("");
-    timerTxt.setFillColor(sf::Color::White);
+    timerTxt.setFillColor(sf::Color(0xf4, 0xf4, 0xf4));
     timerTxt.setPosition(sf::Vector2f(61, 32));
 
     // setup buzzer text
     buzzerTxt.setFont(font);
     buzzerTxt.setCharacterSize(6);
     buzzerTxt.setString("");
-    buzzerTxt.setFillColor(sf::Color::White);
+    buzzerTxt.setFillColor(sf::Color(0xf4, 0xf4, 0xf4));
     buzzerTxt.setPosition(sf::Vector2f(98, 36));
 
     // setup background
@@ -140,4 +140,20 @@ void graphic::window::HwStatesWindow::loop()
 
     // Update the window
     windowTexture.display();
+}
+
+void graphic::window::HwStatesWindow::doEvent(sf::Event &event)
+{
+    Window::doEvent(event);
+    switch (event.type)
+    {
+    case sf::Event::KeyPressed:
+        if (event.key.code == sf::Keyboard::Escape)
+        {
+            run = false;
+        }
+        break;
+    default:
+        break;
+    }
 }

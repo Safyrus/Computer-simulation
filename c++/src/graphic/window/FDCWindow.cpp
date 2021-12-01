@@ -47,7 +47,7 @@ void graphic::window::FDCWindow::start()
     txt.setFont(font);
     txt.setCharacterSize(6);
     txt.setString("");
-    txt.setFillColor(sf::Color::White);
+    txt.setFillColor(sf::Color(0xf4, 0xf4, 0xf4));
 
     // setup background
     rect.setPosition(0, 0);
@@ -107,4 +107,20 @@ void graphic::window::FDCWindow::loop()
 
     // Update the window
     windowTexture.display();
+}
+
+void graphic::window::FDCWindow::doEvent(sf::Event &event)
+{
+    Window::doEvent(event);
+    switch (event.type)
+    {
+    case sf::Event::KeyPressed:
+        if (event.key.code == sf::Keyboard::Escape)
+        {
+            run = false;
+        }
+        break;
+    default:
+        break;
+    }
 }

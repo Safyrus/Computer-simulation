@@ -8,15 +8,56 @@ This project try to follow the [Semantic Versioning](https://semver.org/spec/v2.
 
 -----------------
 
-## *[Unreleased]*
+## **[0.7.6]** - _2021-12-01_
 
 ### **Added**
 
+#### Data
+
+- Two menu actions to pause the CPU and to step one instruction forward.
+
+#### Computer
+
+- Multiple functions to the Translater:
+  - setPause/getPause: pause the execution.
+  - stepOnce: execute only one instruction.
+  - setBreakpoint/removeBreakpoint: add/remove a breakpoint at a specific address.
+  - getBreakpoints: return all breakpoints address.
+- CPU functions to use the new Translater features.
+
+#### Graphics
+
+- A new window named the Debugger. It can:
+  - show a part of the bus data from a certain address.
+    Values can be viewed has hexadecimal numbers or in SASM instructions.
+    Display mode of the bus can be switched by pressing the F3 key.
+  - Pause the CPU with the "PAUSE" option in the menu or with the F1 key.
+  - Step one instruction forward with the "STEP" option in the menu or with the F2 key.
+  - Scroll the bus data with the mouse wheel or by writing an address in the "SCROLL TO" field and pressing enter.
+  - Place/Remove a breakpoint by writing an address in the corresponding field and pressing enter.
+  - Show the current CPU PC by changing the back color of the instruction at the corresponding address.
+  - Show breakpoints in the bus data display.
+- A menu option in computer window to open the debugger window.
+- A new view "TextInputView" to input text with the keyboard, when it is active, and show it graphically.
+- Getters in View (x, y, width, height).
+- Other windows can now be closed by pressing the escape key (VPU, HWSTATS, IOCTRL, FDC, CPU).
+
 ### **Changed**
+
+#### Graphics
+
+- Some white texts to use a white from the Sweetie 16 palette.
+- "LOAD/EJECT FLOPPY" menu text in ComputerWindow to "USE FLOPPY".
 
 ### **Fixed**
 
+- Occasional very long freeze when changing frequency in waitInst function of the Translater.
+- Crash when changing CPU frequency through the computer window.
+- Sub windows not being open in the correct window mode.
+
 ### **Removed**
+
+- Unused font and text variables in ComputerWindow.
 
 -----------------
 

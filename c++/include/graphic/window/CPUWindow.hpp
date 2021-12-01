@@ -21,6 +21,7 @@ namespace graphic::window
         void start();
         void stop();
         void loop();
+        void doEvent(sf::Event &event);
 
     public:
         CPUWindow(std::shared_ptr<computer::CPU> cpu, std::string windowName = "S257 Dynamic Recompiler - CPU Window", bool debug = false);

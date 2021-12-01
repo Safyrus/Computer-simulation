@@ -12,6 +12,7 @@
 #include "graphic/window/HwStatesWindow.hpp"
 #include "graphic/window/VPUWindow.hpp"
 #include "graphic/window/FDCWindow.hpp"
+#include "graphic/window/DebugerWindow.hpp"
 
 #include "utils/console.hpp"
 
@@ -24,17 +25,6 @@
 #include "data/menu/MenuActionUseFDDLock.hpp"
 #include "data/menu/MenuActionUseFDDFloppy.hpp"
 
-graphic::window::ComputerWindow::ComputerWindow(std::shared_ptr<computer::Computer> computer)
-{
-    this->computer = computer;
-    windowName = "S257 Dynamic Recompiler - Computer Window";
-    cpuWindowName = "S257 Dynamic Recompiler - CPU Window";
-    width = 128;
-    height = 128;
-    lastDeviceNumer = 0;
-    printDebug("Creation");
-}
-
 graphic::window::ComputerWindow::ComputerWindow(std::shared_ptr<computer::Computer> computer, std::string windowName, bool debug, bool oneWindow)
 {
     this->debug = debug;
@@ -42,6 +32,7 @@ graphic::window::ComputerWindow::ComputerWindow(std::shared_ptr<computer::Comput
     this->windowName = windowName;
     this->oneWindowMode = oneWindow;
     cpuWindowName = "S257 Dynamic Recompiler - CPU Window";
+    debugerWindowName = "S257 Dynamic Recompiler - Debuger Window";
     width = 128;
     height = 128;
     lastDeviceNumer = 0;
@@ -54,6 +45,8 @@ graphic::window::ComputerWindow::~ComputerWindow()
 
 void graphic::window::ComputerWindow::makeMenu()
 {
+    printDebug("Make menu");
+
     std::shared_ptr<data::menu::Menu> actionMenu = std::make_shared<data::menu::Menu>();
     actionMenu->addItem("PWR(F1)", std::make_shared<data::menu::MenuActionComputerPwr>(computer));
     actionMenu->addItem("HZ+(F3)", std::make_shared<data::menu::MenuActionDoubleCPUHz>(computer->getCpu()));
@@ -86,13 +79,14 @@ void graphic::window::ComputerWindow::makeMenu()
         fdd = fdc->getFDD();
     }
     floppyMenu->addItem("USE LOCK", std::make_shared<data::menu::MenuActionUseFDDLock>(fdd));
-    floppyMenu->addItem("LOAD/EJECT FLOPPY", std::make_shared<data::menu::MenuActionUseFDDFloppy>(fdd));
+    floppyMenu->addItem("USE FLOPPY", std::make_shared<data::menu::MenuActionUseFDDFloppy>(fdd));
 
     menu = std::make_shared<data::menu::Menu>();
     menu->addItem("ACTION", actionMenu);
     menu->addItem("CPU", std::make_shared<data::menu::MenuActionOpenWindow>(shared_from_this(), cpuWindowName));
     menu->addItem("DEVICE", deviceMenu);
     menu->addItem("FLOPPY", floppyMenu);
+    menu->addItem("DEBUG", std::make_shared<data::menu::MenuActionOpenWindow>(shared_from_this(), "CMPDEBUG"));
     menuView = std::make_shared<graphic::view::MenuView>(menu);
     menuView->setPos(0, 0);
     menuView->setSize(width, 6);
@@ -113,12 +107,6 @@ void graphic::window::ComputerWindow::start()
 
     createRenderingWindow();
 
-    if (!font.loadFromFile("pix46.ttf"))
-    {
-        printError("Cannot open font");
-    }
-    const_cast<sf::Texture &>(font.getTexture(6)).setSmooth(false);
-
     openTexture(com, "data/img/saphyr_I_case.png");
     openTexture(pwrOff, "data/img/saphyr1_pwr_off.png");
     openTexture(pwrOn, "data/img/saphyr1_pwr_on.png");
@@ -129,14 +117,6 @@ void graphic::window::ComputerWindow::start()
     openTexture(floppyOff, "data/img/saphyr1_floppy_off.png");
     openTexture(floppyOn, "data/img/saphyr1_floppy_on.png");
     openTexture(floppyDsk, "data/img/saphyr1_floppy_dsk.png");
-
-    text.setFont(font);
-    text.setCharacterSize(6);
-
-    text.setString("");
-    text.setFillColor(sf::Color::White);
-    sf::Vector2f pos(0, 32);
-    text.setPosition(pos);
 
     rect.setPosition(0, 0);
     rect.setFillColor(sf::Color::Black);
@@ -333,7 +313,13 @@ void graphic::window::ComputerWindow::doEvent(sf::Event &event)
         }
         else if (event.key.code == sf::Keyboard::F3)
         {
-            computer->getCpu()->hz *= 2;
+            if (computer->getCpu()->hz > 500000000)
+            {
+                computer->getCpu()->hz = 1000000000;
+            }else
+            {
+                computer->getCpu()->hz *= 2;
+            }
         }
         else if (event.key.code == sf::Keyboard::F4)
         {
@@ -464,6 +450,19 @@ void graphic::window::ComputerWindow::openSubWindow(std::string windowName)
         else
         {
             printDebug("no device window with name: " + windowName);
+        }
+    }
+    else if (windowName.compare("CMPDEBUG") == 0)
+    {
+        // if we have not open the Debuger window
+        if (findSubWinByName(debugerWindowName).empty())
+        {
+            std::shared_ptr<graphic::window::DebugerWindow> subW = std::make_shared<graphic::window::DebugerWindow>(computer->getCpu(), debugerWindowName, debug);
+            addSubWindow(subW);
+        }
+        else
+        {
+            printDebug(debugerWindowName + " window already open");
         }
     }
     else

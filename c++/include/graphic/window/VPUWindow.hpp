@@ -24,6 +24,7 @@ namespace graphic::window
         void start();
         void stop();
         void loop();
+        void doEvent(sf::Event &event);
 
     public:
         VPUWindow(std::shared_ptr<computer::VPU> vpu);

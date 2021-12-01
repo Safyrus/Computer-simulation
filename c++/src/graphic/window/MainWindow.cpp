@@ -79,7 +79,7 @@ void graphic::window::MainWindow::start()
     text.setCharacterSize(6);
 
     text.setString("NO SCREEN FOUND");
-    text.setFillColor(sf::Color::White);
+    text.setFillColor(sf::Color(0xf4, 0xf4, 0xf4));
     sf::Vector2f pos(4, 12);
     text.setPosition(pos);
 

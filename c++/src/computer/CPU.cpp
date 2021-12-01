@@ -14,22 +14,6 @@
 
 #include "utils/console.hpp"
 
-computer::CPU::CPU(std::shared_ptr<computer::Bus> bus) : Device()
-{
-    printDebug("CPU Creation");
-    threadWanted = false;
-    type = "CPU";
-    name = "S257-01";
-    this->bus = bus;
-    hz = 0;
-    printInstructions = true;
-    resetReg();
-    for (unsigned int i = 0; i < 1024 * 64; i++)
-    {
-        rawBus[i] = 0;
-    }
-}
-
 computer::CPU::CPU(std::shared_ptr<computer::Bus> bus, bool threadWanted) : Device()
 {
     printDebug("CPU Creation");
@@ -53,11 +37,11 @@ computer::CPU::~CPU()
 
 void computer::CPU::run()
 {
-    dynarec::Translater t(shared_from_this(), false);
-    t.print = printInstructions;
+    translater = std::make_shared<dynarec::Translater>(shared_from_this(), false);
+    translater->print = printInstructions;
     if (!threadWanted)
     {
-        t.run(pc);
+        translater->run(pc);
     }
     else
     {
@@ -78,9 +62,9 @@ void computer::CPU::run()
                         resetReg();
                     }
                     hasReset = false;
-                    t.initStep(pc);
+                    translater->initStep(pc);
                 }
-                t.runStep();
+                translater->runStep();
             }
             else
             {
@@ -93,6 +77,7 @@ void computer::CPU::run()
             }
         }
     }
+    translater = nullptr;
 }
 
 uint8_t computer::CPU::get(uint16_t adr)
@@ -136,6 +121,31 @@ void computer::CPU::setPwr(bool pwr)
     }
 }
 
+void computer::CPU::pause()
+{
+    if (translater)
+    {
+        translater->setPause(!translater->getPause());
+    }
+}
+
+bool computer::CPU::isPause()
+{
+    if(translater)
+    {
+        return translater->getPause();
+    }
+    return false;
+}
+
+void computer::CPU::step()
+{
+    if(translater)
+    {
+        return translater->stepOnce();
+    }
+}
+
 uint8_t computer::CPU::getBusData(uint16_t adr)
 {
     return rawBus[adr];
@@ -157,7 +167,7 @@ void computer::CPU::loadOnBus(uint16_t start, std::vector<uint8_t> data)
 void computer::CPU::refreshCycle(uint64_t)
 {
     cycleCPU = this->cycle;
-    if(bus)
+    if (bus)
     {
         bus->refreshCycle(this->cycle);
     }
@@ -171,4 +181,30 @@ void computer::CPU::doPrintInstructions(bool print)
 bool computer::CPU::getPrintInstructions()
 {
     return printInstructions;
+}
+
+void computer::CPU::setBreakpoint(uint16_t adr)
+{
+    if (translater)
+    {
+        translater->setBreakpoint(adr);
+    }
+}
+
+void computer::CPU::removeBreakpoint(uint16_t adr)
+{
+    if (translater)
+    {
+        translater->removeBreakpoint(adr);
+    }
+}
+
+std::vector<uint16_t> computer::CPU::getBreakpoints()
+{
+    std::vector<uint16_t> breakpoints;
+    if (translater)
+    {
+        breakpoints = translater->getBreakpoints();
+    }
+    return breakpoints;
 }

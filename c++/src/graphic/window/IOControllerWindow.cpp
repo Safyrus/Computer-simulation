@@ -64,7 +64,7 @@ void graphic::window::IOControllerWindow::start()
     txt.setFont(font);
     txt.setCharacterSize(6);
     txt.setString("");
-    txt.setFillColor(sf::Color::White);
+    txt.setFillColor(sf::Color(0xf4, 0xf4, 0xf4));
 
     // setup background
     rect.setPosition(0, 0);
@@ -147,4 +147,20 @@ void graphic::window::IOControllerWindow::loop()
 
     // Update the window
     windowTexture.display();
+}
+
+void graphic::window::IOControllerWindow::doEvent(sf::Event &event)
+{
+    Window::doEvent(event);
+    switch (event.type)
+    {
+    case sf::Event::KeyPressed:
+        if (event.key.code == sf::Keyboard::Escape)
+        {
+            run = false;
+        }
+        break;
+    default:
+        break;
+    }
 }

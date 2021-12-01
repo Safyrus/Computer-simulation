@@ -23,6 +23,7 @@ namespace graphic::window
         void start();
         void stop();
         void loop();
+        void doEvent(sf::Event &event);
 
     public:
         FDCWindow(std::shared_ptr<computer::FDC> fdc, std::string windowName = "S257 Dynamic Recompiler - FDC Window", bool debug = false);
