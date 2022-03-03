@@ -1,0 +1,99 @@
+# define adresses
+@origin 1C08
+FDC_CMD:
+@origin 1C09
+FDC_DATA:
+@origin 1C0A
+FDC_TRACK:
+@origin 1C0B
+FDC_SECTOR:
+@origin 1C0C
+FDC_STATS:
+@origin 1C0D
+FDC_CTRL:
+@origin 1E00
+MEM_P1:
+@origin 1F00
+MEM_P2:
+@origin 0200
+DATA:
+
+
+@origin 0000
+START:
+# sector index to write
+MOV $D 02
+# page to copy from
+MOV $E :DATA:h
+WRITE_SECTOR:
+ # copy the page into mem
+ MOV $A $E
+ MOV $B :MEM_P1:h
+ JMP $F :RT_CP_PAGE
+ ADD $A $E 01
+ MOV $B :MEM_P2:h
+ JMP $F :RT_CP_PAGE
+
+ # write sector $D
+ SET 00 :FDC_TRACK
+ SET $D :FDC_SECTOR
+ SET 08 :FDC_CMD
+ JMP $F :RT_WAIT_FDC
+
+ # inc sector
+ ADD $D $D 01
+ # inc ram page
+ ADD $E $E 02
+
+ # loop until $D = 8
+ CMP $D 08
+ AND $F $F 04
+ JMP 00 :WRITE_SECTOR
+
+
+# the end
+END: JMP $F :END
+
+
+# Desc: copy the content of a
+#  page into another one
+# Param:
+#  $A=page to copy from
+#  $B=page to copy to
+RT_CP_PAGE:
+ # save call location
+ MOV $G4 $J1
+ MOV $G5 $J2
+ # init counter
+ MOV $C 00
+ RT_CP_PAGE_LOOP:
+  # copy a byte
+  GET $F $A $C
+  SET $F $B $C
+  # inc counter
+  ADD $C $C 01
+  # while (counter != 0) loop
+  CMP $C 00
+  AND $F $F 04
+  JMP 00 :RT_CP_PAGE_LOOP
+ RT_CP_PAGE_END:
+ # return to caller
+ JMP $F $G4 $G5
+
+
+
+# Desc: return when fdc is
+#  not busy
+RT_WAIT_FDC:
+ # save call location
+ MOV $G4 $J1
+ MOV $G5 $J2
+ # loop until vsync
+ RT_WAIT_FDC_WAIT:
+  GET $F :FDC_CMD
+  AND $F $F 80
+  CMP $F 80
+  AND $F $F 04
+  JMP 04 :RT_WAIT_FDC_WAIT
+ # return to caller
+ JMP $F $G4 $G5

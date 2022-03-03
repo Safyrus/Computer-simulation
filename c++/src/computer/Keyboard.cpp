@@ -9,11 +9,11 @@
 #include "mingw.thread.h"
 #endif
 
-computer::Keyboard::Keyboard()
+computer::Keyboard::Keyboard(bool keyLayoutMode)
 {
     type = "IOKEY";
     name = "KEYBOARD";
-    keyLayoutMode = true;
+    this->keyLayoutMode = keyLayoutMode;
     reset();
 }
 
@@ -42,29 +42,69 @@ void computer::Keyboard::reset()
 
 void computer::Keyboard::runStep()
 {
-    if (talkCPU || bufCurs == 0)
+    if (!connectedDevice)
+        return;
+    talkCPU = connectedDevice->getTalk(defaultPort);
+    if (talkCPU)
     {
         if (talk)
         {
+            printDebug("Keyboard: listen to computer");
             talk = false;
             connectedDevice->setTalk(defaultPort, talk);
         }
     }
-    else if (connectedDevice)
+    else
     {
-        if (!talk)
+        if (cmdCurs > 0)
         {
-            talk = true;
-            connectedDevice->setTalk(defaultPort, talk);
+            printDebug("Keyboard: interpreting command...");
+            if (cmdBuf[0] == 0x08)
+            {
+                printDebug("Keyboard: ID command");
+                for (uint8_t i = 7; i > 0; i--)
+                {
+                    keyBuf[i] = keyBuf[i - 1];
+                    speBuf[i] = speBuf[i - 1];
+                }
+                keyBuf[0] = 0x02;
+                speBuf[0] = 0x00;
+                bufCurs++;
+            }
+            for (uint8_t i = 0; i < 7; i++)
+            {
+                cmdBuf[i] = cmdBuf[i + 1];
+            }
+            cmdCurs--;
+            printDebug("Keyboard: done");
         }
-        connectedDevice->send(defaultPort, keyBuf[0]);
-        //connectedDevice->send(defaultPort, speBuf[0]);
-        for (uint8_t i = 0; i < 7; i++)
+        if (bufCurs != 0)
         {
-            keyBuf[i] = keyBuf[i + 1];
-            speBuf[i] = speBuf[i + 1];
+            if (!talk)
+            {
+                printDebug("Keyboard: talking to computer");
+                talk = true;
+                connectedDevice->setTalk(defaultPort, talk);
+            }
+            printDebug("Keyboard: sending data " + std::to_string(keyBuf[0]));
+            connectedDevice->send(defaultPort, keyBuf[0]);
+            // connectedDevice->send(defaultPort, speBuf[0]);
+            for (uint8_t i = 0; i < 7; i++)
+            {
+                keyBuf[i] = keyBuf[i + 1];
+                speBuf[i] = speBuf[i + 1];
+            }
+            bufCurs--;
         }
-        bufCurs--;
+        else
+        {
+            if (talk)
+            {
+                printDebug("Keyboard: stop talking");
+                talk = false;
+                connectedDevice->setTalk(defaultPort, talk);
+            }
+        }
     }
 }
 
@@ -126,31 +166,37 @@ void computer::Keyboard::run()
     }
 }
 
-void computer::Keyboard::set(uint16_t adr, uint8_t data)
+void computer::Keyboard::set(uint16_t, uint8_t)
 {
 }
 
-uint8_t computer::Keyboard::get(uint16_t adr)
+uint8_t computer::Keyboard::get(uint16_t)
 {
     return 0;
 }
 
-bool computer::Keyboard::getTalk(uint8_t port)
+bool computer::Keyboard::getTalk(uint8_t)
 {
     return talk;
 }
 
-void computer::Keyboard::setTalk(uint8_t port, bool talk)
+void computer::Keyboard::setTalk(uint8_t, bool talk)
 {
     talkCPU = talk;
 }
 
-void computer::Keyboard::send(uint8_t port, uint8_t data)
+void computer::Keyboard::send(uint8_t, uint8_t data)
 {
+    printDebug("Keyboard: receive data " + std::to_string(data));
+    talkCPU = connectedDevice->getTalk(defaultPort);
     if (!talk && talkCPU && cmdCurs < 7)
     {
         cmdBuf[cmdCurs] = data;
         cmdCurs++;
+    }
+    else
+    {
+        printDebug("Keyboard: can't receive data");
     }
 }
 
@@ -171,9 +217,9 @@ void computer::Keyboard::inputEvent(sf::Event event)
     {
         if (event.type == sf::Event::KeyPressed || event.type == sf::Event::KeyReleased)
         {
-            //std::string ev = (event.type == sf::Event::KeyPressed) ? "PRESSED" : "RELEASED";
-            //std::string str = "KEY " + ev + ":" + std::to_string(event.key.code) + " ctrl:" + std::to_string(event.key.control) + " shft:" + std::to_string(event.key.shift) + " alt:" + std::to_string(event.key.alt);
-            //printInfo(str);
+            // std::string ev = (event.type == sf::Event::KeyPressed) ? "PRESSED" : "RELEASED";
+            // std::string str = "KEY " + ev + ":" + std::to_string(event.key.code) + " ctrl:" + std::to_string(event.key.control) + " shft:" + std::to_string(event.key.shift) + " alt:" + std::to_string(event.key.alt);
+            // printInfo(str);
 
             speKey = 0;
             if (event.key.shift)
@@ -238,7 +284,7 @@ void computer::Keyboard::inputEvent(sf::Event event)
                     {
                         keyFinal += 128;
                     }
-                    //printInfo("KEY:" + std::to_string(keyCode) + " CODE:" + std::to_string(keyFinal));
+                    // printInfo("KEY:" + std::to_string(keyCode) + " CODE:" + std::to_string(keyFinal));
                     keyPressed(keyFinal, speKey);
                 }
             }
@@ -246,6 +292,35 @@ void computer::Keyboard::inputEvent(sf::Event event)
     }
     else
     {
-        printInfo("TODO");
+        uint8_t code = 0;
+        switch (event.type)
+        {
+        case sf::Event::KeyReleased:
+        case sf::Event::KeyPressed:
+            speKey = 0;
+            if (event.key.shift)
+            {
+                speKey |= 0x01;
+            }
+            if (event.key.control)
+            {
+                speKey |= 0x02;
+            }
+            if (event.key.alt)
+            {
+                speKey |= 0x04;
+            }
+            if (event.type == sf::Event::KeyReleased)
+            {
+                speKey |= 0x08;
+            }
+            break;
+        case sf::Event::TextEntered:
+            code = (event.text.unicode & 0xFF);
+            keyPressed(code, speKey);
+            break;
+        default:
+            break;
+        }
     }
 }

@@ -1,0 +1,301 @@
+################################
+#                              #
+#    NAME: SAPHYR DOS          #
+#                              #
+#  AUTHOR: Safyrus             #
+#                              #
+# VERSION: 1                   #
+#                              #
+#    FILE: KERNEL_STACK        #
+#                              #
+#    DESC: Kernel of the       #
+#          SAPHYR Disk         #
+#          Operating System    #
+#                              #
+#          This part is for all#
+#          stack related fct,  #
+#          rt and srt          #
+################################
+
+
+@const PG_BELOW_RAM 17
+@const PG_ABOVE_RAM 1C
+
+
+################################
+# Subroutine SRT_RETURN
+# - - - - - - - - - - - - - - -
+# Params: None
+# - - - - - - - - - - - - - - -
+# Return: None
+# - - - - - - - - - - - - - - -
+# Errors: None
+# - - - - - - - - - - - - - - -
+SRT_RETURN:
+ GET $J1 :VAR_RTRET_H
+ GET $J2 :VAR_RTRET_L
+ JMP $F $J1 $J2
+################################
+
+
+
+################################
+# Subroutine SRT_PUSH
+# - - - - - - - - - - - - - - -
+# Params:
+#  VAR_STK_VAL= value to push
+# - - - - - - - - - - - - - - -
+# Return: None
+# - - - - - - - - - - - - - - -
+# Errors: ERR_STK_FULL
+# - - - - - - - - - - - - - - -
+SRT_PUSH:
+ # save call location
+ SET $J1 :VAR_SRT_H
+ SET $J2 :VAR_SRT_L
+
+ # check if stack is full
+ GET $J1 :VAR_STK_H
+ CMP $J1 PG_BELOW_RAM
+ JMP UEQ :ERR_STK_FULL
+
+ # push value
+ GET $J2 :VAR_STK_L
+ GET $F :VAR_STK_VAL
+ SET $F $J1 $J2
+
+ # decrease stack pointer
+ CMP $J2 01
+ AND $F $F CFL
+ XOR $F $F 01
+ SUB $J1 $J1 $F
+ SET $J1 :VAR_STK_H
+ SUB $J2 $J2 01
+ SET $J2 :VAR_STK_L
+
+ # return to caller
+ GET $J1 :VAR_SRT_H
+ GET $J2 :VAR_SRT_L
+ JMP $F $J1 $J2
+################################
+
+
+
+################################
+# Subroutine SRT_PULL
+# - - - - - - - - - - - - - - -
+# Params: None
+# - - - - - - - - - - - - - - -
+# Return:
+#  VAR_STK_VAL= value pulled
+# - - - - - - - - - - - - - - -
+# Errors: ERR_STK_EMPTY
+# - - - - - - - - - - - - - - -
+SRT_PULL:
+ # save call location
+ SET $J1 :VAR_SRT_H
+ SET $J2 :VAR_SRT_L
+
+ # get stack pointer
+ GET $J1 :VAR_STK_H
+ GET $J2 :VAR_STK_L
+
+ # increase stack pointer
+ CMP $J2 FF
+ AND $F $F CFL
+ ADD $J1 $J1 $F
+ SET $J1 :VAR_STK_H
+ ADD $J2 $J2 01
+ SET $J2 :VAR_STK_L
+
+ # check if stack is empty
+ CMP $J1 PG_ABOVE_RAM
+ JMP UEQ :ERR_STK_EMPTY
+
+ # pull value
+ GET $F $J1 $J2
+ SET $F :VAR_STK_VAL
+
+ # return to caller
+ GET $J1 :VAR_SRT_H
+ GET $J2 :VAR_SRT_L
+ JMP $F $J1 $J2
+################################
+
+
+
+################################
+# Routine RT_PUSH_G
+# - - - - - - - - - - - - - - -
+# Params: $G0-5, regs to push
+# - - - - - - - - - - - - - - -
+# Return: None
+# - - - - - - - - - - - - - - -
+# Errors: ERR_STK_FULL
+# - - - - - - - - - - - - - - -
+RT_PUSH_G:
+ # save call location
+ SET $J1 :VAR_RTRET_H
+ SET $J2 :VAR_RTRET_L
+ # push all G registers
+ RT_PUSH_G_LOOP:
+ SET $G0 :VAR_STK_VAL
+ JMP $F :SRT_PUSH
+ SET $G1 :VAR_STK_VAL
+ JMP $F :SRT_PUSH
+ SET $G2 :VAR_STK_VAL
+ JMP $F :SRT_PUSH
+ SET $G3 :VAR_STK_VAL
+ JMP $F :SRT_PUSH
+ SET $G4 :VAR_STK_VAL
+ JMP $F :SRT_PUSH
+ SET $G5 :VAR_STK_VAL
+ JMP $F :SRT_PUSH
+ # return to caller
+ JMP $F :SRT_RETURN
+################################
+
+
+
+################################
+# Subroutine RT_PULL_G
+# - - - - - - - - - - - - - - -
+# Params: None
+# - - - - - - - - - - - - - - -
+# Return:
+#  $G0-5, regs to pull
+# - - - - - - - - - - - - - - -
+# Errors: ERR_STK_EMPTY
+# - - - - - - - - - - - - - - -
+RT_PULL_G:
+ # save call location
+ SET $J1 :VAR_RTRET_H
+ SET $J2 :VAR_RTRET_L
+ # pull all G registers
+ JMP $F :SRT_PULL
+ GET $G5 :VAR_STK_VAL
+ JMP $F :SRT_PULL
+ GET $G4 :VAR_STK_VAL
+ JMP $F :SRT_PULL
+ GET $G3 :VAR_STK_VAL
+ JMP $F :SRT_PULL
+ GET $G2 :VAR_STK_VAL
+ JMP $F :SRT_PULL
+ GET $G1 :VAR_STK_VAL
+ JMP $F :SRT_PULL
+ GET $G0 :VAR_STK_VAL
+ # return to caller
+ JMP $F :SRT_RETURN
+################################
+
+
+
+################################
+# Routine RT_PUSH_ABCDE
+# - - - - - - - - - - - - - - -
+# Params: $A-E, regs to push
+# - - - - - - - - - - - - - - -
+# Return: None
+# - - - - - - - - - - - - - - -
+# Errors: ERR_STK_FULL
+# - - - - - - - - - - - - - - -
+RT_PUSH_ABCDE:
+ # save call location
+ SET $J1 :VAR_RTRET_H
+ SET $J2 :VAR_RTRET_L
+ # push all registers
+ SET $A :VAR_STK_VAL
+ JMP $F :SRT_PUSH
+ SET $B :VAR_STK_VAL
+ JMP $F :SRT_PUSH
+ SET $C :VAR_STK_VAL
+ JMP $F :SRT_PUSH
+ SET $D :VAR_STK_VAL
+ JMP $F :SRT_PUSH
+ SET $E :VAR_STK_VAL
+ JMP $F :SRT_PUSH
+ # return to caller
+ JMP $F :SRT_RETURN
+################################
+
+
+
+################################
+# Subroutine RT_PULL_ABCDE
+# - - - - - - - - - - - - - - -
+# Params: None
+# - - - - - - - - - - - - - - -
+# Return:
+#  $A-E, regs to pull
+# - - - - - - - - - - - - - - -
+# Errors: ERR_STK_EMPTY
+# - - - - - - - - - - - - - - -
+RT_PULL_ABCDE:
+ # save call location
+ SET $J1 :VAR_RTRET_H
+ SET $J2 :VAR_RTRET_L
+ # pull all registers
+ JMP $F :SRT_PULL
+ GET $E :VAR_STK_VAL
+ JMP $F :SRT_PULL
+ GET $D :VAR_STK_VAL
+ JMP $F :SRT_PULL
+ GET $C :VAR_STK_VAL
+ JMP $F :SRT_PULL
+ GET $B :VAR_STK_VAL
+ JMP $F :SRT_PULL
+ GET $A :VAR_STK_VAL
+ # return to caller
+ JMP $F :SRT_RETURN
+################################
+
+
+
+################################
+# Routine for function prologue
+# - - - - - - - - - - - - - - -
+# Params:
+#  VAR_FCTRET= the address that
+#   called the function
+# - - - - - - - - - - - - - - -
+# Return: None
+# - - - - - - - - - - - - - - -
+# Errors: None
+# - - - - - - - - - - - - - - -
+PROLOGUE:
+ # save call location
+ SET $J1 :VAR_RTRET_H
+ SET $J2 :VAR_RTRET_L
+ # push the adress
+ GET $F :VAR_FCTRET_H
+ SET $F :VAR_STK_VAL
+ JMP $F :SRT_PUSH
+ GET $F :VAR_FCTRET_L
+ SET $F :VAR_STK_VAL
+ JMP $F :SRT_PUSH
+ # return to caller
+ JMP $F :SRT_RETURN
+################################
+
+
+
+################################
+# Routine for function epilogue
+# - - - - - - - - - - - - - - -
+# Params: None
+# - - - - - - - - - - - - - - -
+# Return: None
+# - - - - - - - - - - - - - - -
+# Errors: None
+# - - - - - - - - - - - - - - -
+EPILOGUE:
+ # pull the adress
+ JMP $F :SRT_PULL
+ GET $F :VAR_STK_VAL
+ SET $F :VAR_RTRET_L
+ JMP $F :SRT_PULL
+ GET $F :VAR_STK_VAL
+ SET $F :VAR_RTRET_H
+ # jump to the adress
+ JMP $F :SRT_RETURN
+################################

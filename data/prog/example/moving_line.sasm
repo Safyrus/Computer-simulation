@@ -1,0 +1,131 @@
+# ####################
+# # For the Saphyr I #
+# ####################
+#
+# Draw a moving line
+# that move randomly
+# across the screen
+
+@origin 1C01
+HW_TIME:
+# VRAM adress
+@origin 2000
+VRAM:
+# Adress for the VPU
+@origin 1C18
+VPU_MODE:
+@origin 1C19
+VPU_STATE:
+
+@origin 0000
+# VPU mode
+SET 01 :VPU_MODE
+
+MOV $G0 3F # X
+MOV $G1 3F # Y
+MOV $G2 02 # DIR
+MOV $G3 0F # COLOR
+# G4 & G5 use for SRT return
+
+LOOP:
+ # random number between 1 and 4
+ AND $E $R ~00000111
+ ADD $E $E 01
+ # and multiply by 8
+ MUL $E $E 02
+
+ # random color & dir
+ AND $G3 $R 0F
+ AND $G2 $R 03
+
+ MOVE:
+  JMP $F :WAIT_VSYNC
+
+  # find pixel Y
+  DIV $A $G1 04
+  ADD $A $A 20
+  MUL $B $G1 40
+  # find pixel X
+  DIV $C $G0 02
+  ADD $B $B $C
+  # left or right pixel
+  GET $C $A $B
+  AND $F $G0 01
+  CMP $F 01
+  JMP 05 :RIGHT
+  LEFT:
+   AND $C $C 0F
+   MUL $C $G3 10
+   ADD $C $G3 $C
+   JMP $F :DRAW
+  RIGHT:
+   AND $C $C F0
+   ADD $C $G3 $C
+  DRAW:
+  # draw
+  SET $C $A $B
+
+  # find where to move
+  AND $A $G2 03
+  CMP $A 00
+  JMP 05 :ADD_Y
+  CMP $A 01
+  JMP 05 :SUB_Y
+  CMP $A 02
+  JMP 05 :ADD_X
+  JMP $A :SUB_X
+
+  # move down
+  ADD_Y:
+   ADD $G1 $G1 01
+   JMP $F :AND_POS
+  # move up
+  SUB_Y:
+   SUB $G1 $G1 01
+   JMP $F :AND_POS
+  # move right
+  ADD_X:
+   ADD $G0 $G0 01
+   JMP $F :AND_POS
+  # move left
+  SUB_X:
+   SUB $G0 $G0 01
+
+  AND_POS:
+  # keep X & Y inside the screen
+  AND $G0 $G0 7F
+  AND $G1 $G1 7F
+  # wait some time
+  JMP $F :WAIT
+  # loop
+  SUB $E $E 01
+  CMP $E 00
+  AND $F $F 04
+  JMP 00 :MOVE
+ # loop
+ JMP $F :LOOP
+
+# wait some time
+WAIT:
+ MOV $G4 $J1
+ MOV $G5 $J2
+ GET $A :HW_TIME
+ AND $A $A FC
+ WAIT_LOOP:
+  GET $F :HW_TIME
+  AND $F $F FC
+  CMP $A $F
+  JMP 05 :WAIT_LOOP
+ JMP $F $G4 $G5
+
+
+# wait for the vsync
+WAIT_VSYNC:
+ MOV $G4 $J1
+ MOV $G5 $J2
+ WAIT_VSYNC_LOOP:
+  GET $F :VPU_STATE
+  AND $F $F 01
+  CMP $F 01
+  JMP 05 $G4 $G5
+ JMP $F :WAIT_VSYNC_LOOP

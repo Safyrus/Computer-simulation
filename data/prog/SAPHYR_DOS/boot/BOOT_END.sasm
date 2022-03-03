@@ -1,0 +1,22 @@
+################################
+#                              #
+#    NAME: SAPHYR DOS          #
+#                              #
+#  AUTHOR: Safyrus             #
+#                              #
+# VERSION: 1                   #
+#                              #
+#    FILE: BOOT_END            #
+#                              #
+#    DESC: End of the boot file#
+#                              #
+################################
+
+01 # version
+
+00 # padding
+00
+
+# magic number to tell that
+# this floppy if bootable
+5A

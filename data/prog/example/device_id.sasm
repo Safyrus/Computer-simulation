@@ -1,0 +1,72 @@
+# ####################
+# # For the Saphyr I #
+# ####################
+#
+# Identity device on port 0
+
+@const ID 08
+
+@origin 1C11
+IO_CPU:
+@origin 1C12
+IO_DEV:
+
+@origin 1D00
+DEV_0_G:
+@origin 1D01
+DEV_0_S:
+@origin 1D02
+DEV_0_GS:
+@origin 1D03
+DEV_0_SS:
+
+@origin 0000
+START:
+    # tell the device 0 that we send data
+    GET $A :IO_CPU
+    OR  $A $A 01
+    SET $A :IO_CPU
+
+    MOV $E 01
+
+    # wait for device to be ready
+    WAIT_DEV:
+        GET $A :IO_DEV
+        AND $A $A 01
+        CMP $A 01
+        JMP 05 :WAIT_DEV
+
+    # send the ID cmd to device 0
+    SET ID :DEV_0_S
+
+    MOV $E 02
+
+    # wait for data to be send
+    WAIT_SEND:
+        GET $A :DEV_0_SS
+        CMP $A 00
+        AND $F $F 04
+        JMP 00 :WAIT_SEND
+
+    # tell the device 0 that we have finished sending data
+    GET $A :IO_CPU
+    AND $A $A FE
+    SET $A :IO_CPU
+
+    MOV $E 03
+
+    # wait for a response
+    WAIT_RECV:
+        GET $A :DEV_0_GS
+        CMP $A 00
+        JMP 05 :WAIT_RECV
+
+    # device 0 type is now in $A
+    GET $A :DEV_0_G
+    MOV $B $A
+    MOV $C $A
+    MOV $D $A
+    MOV $E 04
+
+END:
+    JMP $F :END

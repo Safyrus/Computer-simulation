@@ -7,7 +7,7 @@
 #include "graphic/window/CPUWindow.hpp"
 #include "graphic/window/RamWindow.hpp"
 #include "graphic/window/RomWindow.hpp"
-#include "graphic/window/VramWindow.hpp"
+#include "graphic/window/VRamWindow.hpp"
 #include "graphic/window/IOControllerWindow.hpp"
 #include "graphic/window/HwStatesWindow.hpp"
 #include "graphic/window/VPUWindow.hpp"

@@ -8,6 +8,94 @@ This project try to follow the [Semantic Versioning](https://semver.org/spec/v2.
 
 -----------------
 
+## **[0.8.0]** - _2022-03-03_
+
+### **Added**
+
+#### SAPHYR_DOS
+
+- Added the first version of the SAPHYR_DOS program. A Disk Operating System for the SAPHYR I (or SDOS for short).
+  Features include:
+  - A BOOT program to load the SDOS kernel. This program will:
+    1. Check if the computer has enough ram, if not then it beeps and crash.
+    2. Copy itself into the RAM.
+    3. Jump to the boot copy to continue execution.
+    4. Read and copy sectors 2 to 6 on track 0 (the place where the kernel is) to the memory.
+    5. Pass the execution to the kernel.
+  - The Kernel that have/can:
+    - A stack to push/pull values from/to.
+    - Call subroutines, routines and functions.
+    - Disk read and write functions.
+    - A file system. Actual features are: find a file, read a file, find a file location, get the size of a file.
+    - Virtual RAM access. Programs can get and set memory without needed to know their addresses, only their virtual ones.
+    - Run programs with the file system that have virtual RAM. Programs can also run other programs.
+    - Some 16 bits instructions routines.
+    - Compare two strings.
+    - A default ROOT directory.
+- Non OS files to build SDOS:
+  - "prog" program to test if SDOS can run other programs. It only does one thing: stop when the keyboard is pressed twice.
+  - write_xxx programs to write a defined program on the floppy disk. For example "write_root" will write the root directory to sector 1 track 0.
+  - All link and label files to link the different programs.
+- note.md file to keep notes.
+- "assemble.bat" and "link.bat" for convenience.
+
+#### Computer
+
+- Keyboard Default layout.
+
+#### Manual
+
+- Missing section:
+  - chapter 5 (Hardware specifications).
+  - more programs.
+  - SINC section (Safyrus Industry Naming Convention).
+  - "The floppy drive" section
+  - "Some programming conventions" section.
+  - "extern" compiler instruction.
+- A README.
+- Figures images for the markdown version.
+
+#### Others
+
+- gitattributes
+
+### **Changed**
+
+#### Data
+
+- square.wav to a 488,28125 Hz square wave.
+- Some CSV config files.
+- Example programs:
+  - device_id: Identity device on port 0.
+  - moving_line: Draw a moving line that move randomly across the screen.
+- A floppy disk image with the SAPHYR I DOS. SDOS run a program that stop when the keyboard is pressed twice.
+
+#### Computer
+
+- Keyboard SAPHYR-I layout.
+- Keyboard logic to respect the basic IO device protocol.
+
+#### Graphics
+
+- In MainWindow: keyboard CSV config to select keyboard layout.
+
+#### Manual
+
+- Updated markdown version.
+
+#### Others
+
+- gitignore
+
+### **Fixed**
+
+- Typo when including "graphic/window/VramWindow.hpp"
+- Unnecessary call to the getStatus function of the buzzer.
+- Texts position on IOControllerWindow.
+- Some typos in the manual.
+
+-----------------
+
 ## **[0.7.6]** - _2021-12-01_
 
 ### **Added**

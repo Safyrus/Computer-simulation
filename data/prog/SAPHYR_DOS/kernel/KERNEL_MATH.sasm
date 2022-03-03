@@ -1,0 +1,161 @@
+################################
+#                              #
+#    NAME: SAPHYR DOS          #
+#                              #
+#  AUTHOR: Safyrus             #
+#                              #
+# VERSION: 1                   #
+#                              #
+#    FILE: KERNEL_MATH         #
+#                              #
+#    DESC: kernel math code    #
+################################
+
+
+
+################################
+# Subroutine SRT_INC_AB
+# - - - - - - - - - - - - - - -
+# Params:
+#  $AB= 16bits number to inc
+# - - - - - - - - - - - - - - -
+# Return:
+#  $AB= 16bits number
+# - - - - - - - - - - - - - - -
+# Errors: None
+# - - - - - - - - - - - - - - -
+SRT_INC_AB:
+ # increase the high part
+ # if needed
+ CMP $B FF
+ AND $F $F CFL
+ ADD $A $A $F
+ # increase the low part
+ ADD $B $B 01
+ # return to caller
+ JMP $F $J1 $J2
+################################
+
+
+
+################################
+# Subroutine SRT_INC_CD
+# - - - - - - - - - - - - - - -
+# Params:
+#  $CD= 16bits number to inc
+# - - - - - - - - - - - - - - -
+# Return:
+#  $CD= 16bits number
+# - - - - - - - - - - - - - - -
+# Errors: None
+# - - - - - - - - - - - - - - -
+SRT_INC_CD:
+ # increase the high part
+ # if needed
+ CMP $D FF
+ AND $F $F CFL
+ ADD $C $C $F
+ # increase the low part
+ ADD $D $D 01
+ # return to caller
+ JMP $F $J1 $J2
+################################
+
+
+
+################################
+# Routine RT_ADD_16
+# - - - - - - - - - - - - - - -
+# Params:
+#  $AB= first 16bits number
+#  $CD= second 16bits number
+# - - - - - - - - - - - - - - -
+# Return:
+#  $AB= 16bits result
+# - - - - - - - - - - - - - - -
+# Errors: None
+# - - - - - - - - - - - - - - -
+RT_ADD_16:
+ # save call location
+ SET $J1 :VAR_RTRET_H
+ SET $J2 :VAR_RTRET_L
+ # add 16bits numbers
+ CMP $D 00
+ JMP UEQ :RT_ADD_16_NXT
+ XOR $F $D FF
+ ADD $F $F 01
+ CMP $B $F
+ AND $F $F CFL
+ ADD $A $A $F
+ RT_ADD_16_NXT:
+ ADD $B $B $D
+ ADD $A $A $C
+ # return to caller
+ JMP $F :SRT_RETURN
+################################
+
+
+
+################################
+# Routine RT_SUB_16
+# - - - - - - - - - - - - - - -
+# Params:
+#  $AB= first 16bits number
+#  $CD= second 16bits number
+# - - - - - - - - - - - - - - -
+# Return:
+#  $AB= 16bits result
+# - - - - - - - - - - - - - - -
+# Errors: None
+# - - - - - - - - - - - - - - -
+RT_SUB_16:
+ # save call location
+ SET $J1 :VAR_RTRET_H
+ SET $J2 :VAR_RTRET_L
+ # add 16bits numbers
+ CMP $D 00
+ JMP UEQ :RT_SUB_16_NXT
+ CMP $B $D
+ AND $F $F CFL
+ XOR $F $F 01
+ SUB $A $A $F
+ RT_SUB_16_NXT:
+ SUB $B $B $D
+ SUB $A $A $C
+ # return to caller
+ JMP $F :SRT_RETURN
+################################
+
+
+
+################################
+# Routine RT_CMP_16
+# - - - - - - - - - - - - - - -
+# Params:
+#  $AB= first 16bits number
+#  $CD= second 16bits number
+# - - - - - - - - - - - - - - -
+# Return:
+#  $E = compare result
+# - - - - - - - - - - - - - - -
+# Errors: None
+# - - - - - - - - - - - - - - -
+RT_CMP_16:
+ # save call location
+ SET $J1 :VAR_RTRET_H
+ SET $J2 :VAR_RTRET_L
+
+ # compare high part
+ CMP $A $C
+ JMP UEQ :RT_CMP_16_LOW
+ JMP $F :RT_CMP_16_END
+
+ # compare low part
+ RT_CMP_16_LOW:
+ CMP $B $D
+
+ RT_CMP_16_END:
+ MOV $E $F
+ # return to caller
+ JMP $F :SRT_RETURN
+################################

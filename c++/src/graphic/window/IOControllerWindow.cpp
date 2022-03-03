@@ -96,14 +96,14 @@ void graphic::window::IOControllerWindow::loop()
         std::stringstream str;
         str << std::hex << std::uppercase << std::setfill('0') << std::setw(2) << (uint32_t)ioCtrl->get(33);
         txt.setString(str.str());
-        txt.setPosition(sf::Vector2f(10, 41));
+        txt.setPosition(sf::Vector2f(10, 85));
         windowTexture.draw(txt);
 
         // draw output talk
         str.str("");
         str << std::hex << std::uppercase << std::setfill('0') << std::setw(2) << (uint32_t)ioCtrl->get(34);
         txt.setString(str.str());
-        txt.setPosition(sf::Vector2f(10, 85));
+        txt.setPosition(sf::Vector2f(10, 41));
         windowTexture.draw(txt);
 
         // draw connected

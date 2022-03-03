@@ -1,0 +1,179 @@
+################################
+#                              #
+#    NAME: SAPHYR DOS          #
+#                              #
+#  AUTHOR: Safyrus             #
+#                              #
+# VERSION: 1                   #
+#                              #
+#    FILE: BOOT                #
+#                              #
+#    DESC: boot file           #
+#                              #
+################################
+
+# define some adresses
+@origin 1C00
+HW_CONNECT:
+@origin 1C02
+HW_BUZZER:
+@origin 1C08
+FDC_CMD:
+@origin 1C0A
+FDC_TRACK:
+@origin 1C0B
+FDC_SECTOR:
+@origin 1E00
+MEM_P1:
+@origin 1F00
+MEM_P2:
+@origin 4000
+RAM_P1:
+@origin 4100
+RAM_P2:
+@origin 4200
+RAM_P3:
+@origin 4204
+KERNEL:
+
+# define some variables
+@origin 1800
+RT_RET_H:
+@origin 1801
+RT_RET_L:
+
+
+# - - - - - - - - - - - - - -
+# This part should be executed
+# in the MEM ram after 
+@origin 1E00
+
+# Check if 1K and 16K RAM
+# are presents
+GET $A :HW_CONNECT
+AND $B $A 0C
+CMP $B 0C
+AND $F $F 04
+JMP 04 :BOOT_CP_MEM
+
+# else activate the buzzer and
+# loop indefinitly
+BOOT_ERROR:
+ SET 44 :HW_BUZZER
+ BOOT_ERROR_LOOP:
+  MOV $E 03
+  JMP $F :BOOT_ERROR_LOOP
+
+# Copy this boot sector to RAM
+BOOT_CP_MEM:
+# copy the first page
+MOV $A :MEM_P1:h
+MOV $B :RAM_P1:h
+JMP $F :BOOT_RT_CP_PAGE
+# copy the second page
+MOV $A :MEM_P2:h
+MOV $B :RAM_P2:h
+JMP $F :BOOT_RT_CP_PAGE
+
+# Jump to the RAM
+JMP $F :BOOT_RAM_JMP
+
+
+# - - - - - - - - - - - - - -
+# This next part should be
+# executed in the RAM
+@origin 403C
+BOOT_RAM_JMP:
+
+# Change BOOT_RT_CP_PAGE
+# internal JMP adress to match
+# its position in the RAM
+SET 40 40 AA
+
+# We now need to load the
+# kernel into RAM
+
+# sector to read
+MOV $D 02
+# ram page to copy to
+MOV $E :RAM_P3:h
+BOOT_LOAD_SECTOR:
+ # read sector $D
+ SET 00 :FDC_TRACK
+ SET $D :FDC_SECTOR
+ SET 04 :FDC_CMD
+ JMP $F :BOOT_RT_WAIT_FDC
+
+ # copy the sector into ram
+ MOV $A :MEM_P1:h
+ MOV $B $E
+ JMP $F 40 :BOOT_RT_CP_PAGE:l
+ MOV $A :MEM_P2:h
+ ADD $B $E 01
+ JMP $F 40 :BOOT_RT_CP_PAGE:l
+
+ # inc sector
+ ADD $D $D 01
+ # inc ram page
+ ADD $E $E 02
+
+ # loop until $D = 8
+ CMP $D 08
+ AND $F $F 04
+ JMP 00 :BOOT_LOAD_SECTOR
+
+# Jump to the kernel
+JMP $F :KERNEL
+
+# - - - - - - - - - - - - - -
+# First routine section
+@origin 1E88
+
+# Desc: copy the content of a
+#  page into another one
+# Param:
+#  $A=page to copy from
+#  $B=page to copy to
+BOOT_RT_CP_PAGE:
+ # save call location
+ SET $J1 :RT_RET_H
+ SET $J2 :RT_RET_L
+ # init counter
+ MOV $C 00
+ BOOT_RT_CP_PAGE_LOOP:
+  # copy a byte
+  GET $F $A $C
+  SET $F $B $C
+  # inc counter
+  ADD $C $C 01
+  # while (counter != 0) loop
+  CMP $C 00
+  AND $F $F 04
+  JMP 00 :BOOT_RT_CP_PAGE_LOOP
+ BOOT_RT_CP_PAGE_END:
+ # return to caller
+ GET $J1 :RT_RET_H
+ GET $J2 :RT_RET_L
+ JMP $F $J1 $J2
+
+# - - - - - - - - - - - - - -
+# Second routine section
+@origin 40B8
+
+# Desc: return when fdc is
+#  not busy
+BOOT_RT_WAIT_FDC:
+ # save call location
+ SET $J1 :RT_RET_H
+ SET $J2 :RT_RET_L
+ # loop until fdc not busy
+ BOOT_RT_WAIT_FDC_WAIT:
+  GET $F :FDC_CMD
+  AND $F $F 80
+  CMP $F 80
+  AND $F $F 04
+  JMP 04 :BOOT_RT_WAIT_FDC_WAIT
+ # return to caller
+ GET $J1 :RT_RET_H
+ GET $J2 :RT_RET_L
+ JMP $F $J1 $J2

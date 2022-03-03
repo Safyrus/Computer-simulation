@@ -1,0 +1,9 @@
+rom4k,1,prog/SAPHYR_DOS/nonOS/write_prog
+ram1k,1
+rom2k,0
+ram16k,0
+extrom32k,0
+io,1
+keyboard,1
+vpu,1
+dsk,1,floppy.img

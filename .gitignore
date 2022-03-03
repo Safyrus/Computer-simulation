@@ -43,3 +43,4 @@
 # Other files
 .markdownlint.json
 *ignore/
+*.sasmlb

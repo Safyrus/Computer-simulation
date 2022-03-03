@@ -65,10 +65,12 @@ void computer::HardwareStates::set(uint16_t adr, uint8_t data)
             {
                 pitch = 1.0 * (pitch+1);
             }
-            if(buzzer.getStatus() != sf::Sound::Playing)
+            buzzerStatus = buzzer.getStatus();
+            if(buzzerStatus != sf::Sound::Playing)
             {
                 printDebug("HWSTATES(SND): START");
                 buzzer.play();
+                buzzerStatus = buzzer.getStatus();
             }
             //buzzer.setPlayingOffset(sf::seconds(sec));
             buzzer.setPitch(pitch);
@@ -239,10 +241,16 @@ void computer::HardwareStates::refreshCycle(uint64_t cycle)
     {
         buzzerRemaining = ((lastBuzzerCycle + (buzzerTime * 125000)) - cycleCPU);
     }
-    buzzerReg = (buzzerReg & 0x0F) | ((int)(ceil(buzzerRemaining/125000.0)) << 4);
-    if((buzzerReg & 0xF0) == 0 && buzzer.getStatus() == sf::Sound::Playing)
+    int tmp = 0;
+    if (buzzerRemaining != 0)
+    {
+        tmp = (buzzerRemaining/125000)+1;
+    }
+    buzzerReg = (buzzerReg & 0x0F) | (tmp << 4);
+    if((buzzerReg & 0xF0) == 0 && buzzerStatus != sf::Sound::Stopped && (buzzerStatus = buzzer.getStatus()) == sf::Sound::Playing)
     {
         printDebug("HWSTATES(SND): STOP");
         buzzer.stop();
+        buzzerStatus = buzzer.getStatus();
     }
 }

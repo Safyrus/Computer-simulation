@@ -1,0 +1,99 @@
+################################
+#                              #
+#    NAME: SAPHYR DOS          #
+#                              #
+#  AUTHOR: Safyrus             #
+#                              #
+# VERSION: 1                   #
+#                              #
+#    FILE: KERNEL              #
+#                              #
+#    DESC: Kernel of the       #
+#          SAPHYR Disk         #
+#          Operating System    #
+################################
+
+
+################################
+#    SAPHYR DOS 16K RAM MAP    #
+# - - - - - - - - - - - - - - -#
+#  Note: the 1K RAM (LOWRAM)   #
+#        is used for the stack #
+# - - - - - - - - - - - - - - -#
+# 0000 |                       #
+# .... | KERNEL and OS vars    #
+# 01FF |                       #
+#                              #
+# 0200 |                       #
+# .... | KERNEL location       #
+# 0FFF |                       #
+#                              #
+# 1000 |                       #
+# .... | General RAM           #
+# 3FFF |                       #
+#                              #
+################################
+
+
+
+@origin 4200
+################################
+# File header
+# - - - - - - - - - - - - - - -
+# file flags
+#    7: is it a directory
+#  6-0: reserved
+~00000000
+# - - - - - - - - - - - - - - -
+# next file block/sector
+# 0,0 = BOOT sector = nothing
+00 # next track
+00 # next sector
+# - - - - - - - - - - - - - - -
+# padding
+00
+################################
+
+
+
+# - - - - - - - - - - - - - - -
+# Kernel init phase
+# - - - - - - - - - - - - - - -
+KERNEL_INIT:
+ # init stack pointer
+ SET :STACK:h :VAR_STK_H
+ SET :STACK:l :VAR_STK_L
+
+ # init current program
+ # file location
+ SET 00 :VAR_FILE_T
+ SET 00 :VAR_FILE_S
+
+ # init virtual RAM
+ SET 7F :VAR_RAM_BS_H
+ SET FF :VAR_RAM_BS_L
+ SET 7F :VAR_RAM_TK_H
+ SET FF :VAR_RAM_TK_L
+
+ # run file FILENAME
+ MOV $A $B :DT_FILENAME
+ JMP $F :PRG_RUN
+
+# infinite loop
+KERNEL_END:
+ JMP $F :KERNEL_END
+
+# - - - - - - - - - - - - - - -
+# Inports
+# - - - - - - - - - - - - - - -
+@import kernel/KERNEL_STACK.sasm
+@import kernel/KERNEL_ERROR.sasm
+@import kernel/KERNEL_DSK.sasm
+@import kernel/KERNEL_FS.sasm
+@import kernel/KERNEL_MATH.sasm
+@import kernel/KERNEL_STR.sasm
+@import kernel/KERNEL_RAM.sasm
+@import kernel/KERNEL_PRG.sasm
+@import kernel/KERNEL_DATA.sasm
+
+@import kernel/KERNEL_DEF.sasm

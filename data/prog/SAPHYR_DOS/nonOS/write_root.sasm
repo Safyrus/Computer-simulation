@@ -1,0 +1,101 @@
+# define adresses
+@origin 1C08
+FDC_CMD:
+@origin 1C09
+FDC_DATA:
+@origin 1C0A
+FDC_TRACK:
+@origin 1C0B
+FDC_SECTOR:
+@origin 1C0C
+FDC_STATS:
+@origin 1C0D
+FDC_CTRL:
+@origin 1E00
+RAM_MEM:
+
+# Jump to start
+@origin 0000
+JMP $F :START
+
+# - - - - - - - -
+# Editable part
+@const TRACK 00
+@const SECTOR 01
+data:
+@import kernel/DIR_ROOT
+# - - - - - - - -
+
+
+
+START:
+# set data pointer
+MOV $G0 :data:h
+MOV $G1 :data:l
+# set memory pointer
+MOV $G2 1E
+MOV $G3 00
+
+LOOP:
+ # get the next data
+ GET $A $G0 $G1
+
+ SET $A $G2 $G3
+
+ # inc data pointer
+ ADD $G3 $G3 01
+ CMP $G3 01
+ AND $F $F 01
+ JMP 01 :INC_DATA
+ ADD $G2 $G2 01
+
+ # inc data pointer
+ INC_DATA:
+  ADD $G1 $G1 01
+  CMP $G1 01
+  AND $F $F 01
+  JMP 01 :LOOP
+  CMP $G0 :data:h
+  AND $F $F 04
+  JMP 00 :END
+  ADD $G0 $G0 01
+  JMP $F :LOOP
+
+
+END:
+ SET 5A 1F FF
+ SET TRACK :FDC_TRACK
+ SET SECTOR :FDC_SECTOR
+ SET 08 :FDC_CMD
+
+ MOV $A :RAM_MEM:h
+ MOV $B :RAM_MEM:l
+ LOOP2:
+  SET 00 $A $B
+  ADD $B $B 01
+  CMP $B 00
+  AND $F $F 04
+  JMP 00 :LOOP2
+ ADD $A $A 01
+ LOOP22:
+  SET 00 $A $B
+  ADD $B $B 01
+  CMP $B 00
+  AND $F $F 04
+  JMP 00 :LOOP22
+
+ WAIT:
+  GET $F :FDC_CMD
+  AND $F $F 80
+  CMP $F 80
+  AND $F $F FE
+  JMP 04 :WAIT
+
+ # Read back sector to check data
+ SET TRACK :FDC_TRACK
+ SET SECTOR :FDC_SECTOR
+ SET 04 :FDC_CMD
+
+ # the end
+ END_LOOP:
+  JMP $F :END_LOOP

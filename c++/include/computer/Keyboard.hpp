@@ -24,7 +24,7 @@ namespace computer
         void runStep();
 
     public:
-        Keyboard();
+        Keyboard(bool keyLayoutMode = true);
         ~Keyboard();
 
         void reset();

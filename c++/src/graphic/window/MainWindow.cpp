@@ -363,8 +363,9 @@ void graphic::window::MainWindow::loadConfig(std::string filePath)
         {
             if (insert)
             {
-                printDebug("Add keyboard to port 0");
-                keyboard = std::make_shared<computer::Keyboard>();
+                bool keyLayout = (tokens[2] == "1") || (tokens[2] == "true");
+                printDebug("Add keyboard to port 0 with real layout " + keyLayout?"ON":"OFF");
+                keyboard = std::make_shared<computer::Keyboard>(keyLayout);
                 computer->connectIODevice(keyboard, 0);
             }
         }

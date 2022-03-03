@@ -102,17 +102,17 @@ uint8_t sfmlKeyToSAPHYRKey(sf::Keyboard::Key key)
     case sf::Keyboard::Tilde:
         return 0x5E;
     case sf::Keyboard::Slash:
-        return 0x3F;
+        return 0x40;
     case sf::Keyboard::SemiColon:
-        return 0x3A;
+        return 0x3F;
     case sf::Keyboard::Quote:
-        return 0x3B;
-    case sf::Keyboard::Backslash:
         return 0x5C;
+    case sf::Keyboard::Backslash:
+        return 0x3B;
     case sf::Keyboard::Equal:
         return 0x3D;
     case sf::Keyboard::Hyphen:
-        return 0x40;
+        return 0x3A;
 
     // special
     case sf::Keyboard::Backspace:

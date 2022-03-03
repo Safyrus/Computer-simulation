@@ -1,0 +1,99 @@
+################################
+#                              #
+#    NAME: SAPHYR DOS          #
+#                              #
+#  AUTHOR: Safyrus             #
+#                              #
+# VERSION: 1                   #
+#                              #
+#    FILE: KERNEL_DSK          #
+#                              #
+#    DESC: disk fct,rt and srt #
+#          of the kernel       #
+################################
+
+
+
+
+################################
+# Routine RT_FDC_WAIT
+# - - - - - - - - - - - - - - -
+# Params: None
+# - - - - - - - - - - - - - - -
+# Return: None
+# - - - - - - - - - - - - - - -
+# Errors: None
+# - - - - - - - - - - - - - - -
+RT_FDC_WAIT:
+ # save call location
+ SET $J1 :VAR_RTRET_H
+ SET $J2 :VAR_RTRET_L
+ # loop until fdc not busy
+ RT_FDC_WAIT_LOOP:
+  GET $F :FDC_CMD
+  AND $F $F FDC_BUSY
+  CMP $F FDC_BUSY
+  JMP UEQ :RT_FDC_WAIT_LOOP
+ # return to caller
+ JMP $F :SRT_RETURN
+################################
+
+
+
+################################
+# Function FCT_DSK_RD
+# - - - - - - - - - - - - - - -
+# Params:
+#  $A= track
+#  $B= sector
+# - - - - - - - - - - - - - - -
+# Return: None
+# - - - - - - - - - - - - - - -
+# Errors: None
+# - - - - - - - - - - - - - - -
+FCT_DSK_RD:
+ # prologue
+ SET $J1 :VAR_FCTRET_H
+ SET $J2 :VAR_FCTRET_L
+ JMP $F :PROLOGUE
+ # wait for FDC to be ready
+ JMP $F :RT_FDC_WAIT
+ # read the sector
+ SET $A :FDC_TRACK
+ SET $B :FDC_SECTOR
+ SET FDC_READ :FDC_CMD
+ # wait for FDC to finish reading
+ JMP $F :RT_FDC_WAIT
+ # epilogue
+ JMP $F :EPILOGUE
+################################
+
+
+
+################################
+# Function FCT_DSK_WR
+# - - - - - - - - - - - - - - -
+# Params:
+#  $A= track
+#  $B= sector
+# - - - - - - - - - - - - - - -
+# Return: None
+# - - - - - - - - - - - - - - -
+# Errors: None
+# - - - - - - - - - - - - - - -
+FCT_DSK_WR:
+ # prologue
+ SET $J1 :VAR_FCTRET_H
+ SET $J2 :VAR_FCTRET_L
+ JMP $F :PROLOGUE
+ # wait for FDC to be ready
+ JMP $F :RT_FDC_WAIT
+ # write the sector
+ SET $A :FDC_TRACK
+ SET $B :FDC_SECTOR
+ SET FDC_WRITE :FDC_CMD
+ # wait for FDC to finish writing
+ JMP $F :RT_FDC_WAIT
+ # epilogue
+ JMP $F :EPILOGUE
+################################

@@ -1,0 +1,15 @@
+################################
+#                              #
+#    NAME: SAPHYR DOS          #
+#                              #
+#  AUTHOR: Safyrus             #
+#                              #
+# VERSION: 1                   #
+#                              #
+#    FILE: KERNEL_DATA         #
+#                              #
+#    DESC: all kernel data     #
+################################
+
+DT_FILENAME:
+"PROG"

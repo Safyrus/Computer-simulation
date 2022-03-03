@@ -1,0 +1,436 @@
+################################
+#                              #
+#    NAME: SAPHYR DOS          #
+#                              #
+#  AUTHOR: Safyrus             #
+#                              #
+# VERSION: 1                   #
+#                              #
+#    FILE: KERNEL_FS           #
+#                              #
+#    DESC: file system related #
+#          code of the kernel  #
+################################
+
+
+
+################################
+# Function FCT_FS_01
+# - - - - - - - - - - - - - - -
+# Params: None
+# - - - - - - - - - - - - - - -
+# Return: None
+# - - - - - - - - - - - - - - -
+# Errors:
+#  $E= 0: no error
+#      2: root folder corrupted
+# - - - - - - - - - - - - - - -
+FCT_FS_01:
+ # prologue
+ SET $J1 :VAR_FCTRET_H
+ SET $J2 :VAR_FCTRET_L
+ JMP $F :PROLOGUE
+
+ # save D
+ MOV $G3 $D
+
+ # save location
+ MOV $G0 $A
+ MOV $G1 $B
+
+ # read root directory
+ MOV $A 00
+ MOV $B 01
+ JMP $F :FCT_DSK_RD
+
+ # is root folder OK ?
+ GET $F :MEM
+ AND $F $F 80
+ CMP $F 80
+ MOV $E 00
+ JMP UEQ :FCT_FS_01_END
+ MOV $E 02
+
+ FCT_FS_01_END:
+ # epilogue
+ JMP $F :EPILOGUE
+################################
+
+
+
+################################
+# Routine RT_FS_01
+# - - - - - - - - - - - - - - -
+# Params: None
+# - - - - - - - - - - - - - - -
+# Return: None
+# - - - - - - - - - - - - - - -
+# Errors: None
+# - - - - - - - - - - - - - - -
+RT_FS_01:
+ # save call location
+ SET $J1 :VAR_RTRET_H
+ SET $J2 :VAR_RTRET_L
+ # inc CD by 2 and
+ # get data in $G45
+ GET $G4 $C $D
+ JMP $F :SRT_INC_CD
+ GET $G5 $C $D
+ JMP $F :SRT_INC_CD
+ # return to caller
+ JMP $F :SRT_RETURN
+################################
+
+
+################################
+# Function FCT_FS_FIND
+# - - - - - - - - - - - - - - -
+# Params:
+#  $AB= file name to find
+# - - - - - - - - - - - - - - -
+# Return:
+#  $A= file track number
+#  $B= file sector number
+# - - - - - - - - - - - - - - -
+# Errors:
+#  $E= 0: no error
+#      1: file not found
+#      2: root folder corrupted
+# - - - - - - - - - - - - - - -
+FCT_FS_FIND:
+ # prologue
+ SET $J1 :VAR_FCTRET_H
+ SET $J2 :VAR_FCTRET_L
+ JMP $F :PROLOGUE
+
+ # push all G registers
+ JMP $F :RT_PUSH_G
+
+ # save C
+ SET $C :VAR_STK_VAL
+ JMP $F :SRT_PUSH
+
+ JMP $F :FCT_FS_01
+ CMP $E 02
+ JMP UEQ :FCT_FS_FIND_ERR_ROOT
+
+ # set first entry location
+ MOV $G2 00
+ MOV $C :MEM:h
+ ADD $D :MEM:l 04
+ # for each file entry
+ FCT_FS_FIND_LOOP:
+  # get file location
+  JMP $F :RT_FS_01
+
+  # compare the file entry name
+  # with the wanted file name
+  MOV $A $G0
+  MOV $B $G1
+  JMP $F :FCT_STR_CMP
+
+  # if it is a match, return
+  # the file location
+  CMP $E 00
+  JMP UEQ :FCT_FS_FIND_YES
+
+  # add 9 to $CD
+  MOV $A 00
+  MOV $B 09
+  JMP $F :RT_ADD_16
+  MOV $C $A
+  MOV $D $B
+
+  # inc $G2
+  ADD $G2 $G2 01
+  # loop 46 times (max number
+  # of entries)
+  CMP $G2 %46
+  AND $F $F EQU
+  JMP NEQ :FCT_FS_FIND_LOOP
+
+ FCT_FS_FIND_ERR_FOUND:
+  MOV $E 01
+ FCT_FS_FIND_ERR_ROOT:
+  MOV $A $G0
+  MOV $B $G1
+  JMP $F :FCT_FS_FIND_END
+ FCT_FS_FIND_YES:
+  MOV $E 00
+  MOV $A $G4
+  MOV $B $G5
+ FCT_FS_FIND_END:
+ # restore C and D
+ JMP $F :SRT_PULL
+ GET $C :VAR_STK_VAL
+ MOV $D $G3
+ # pull all G registers
+ JMP $F :RT_PULL_G
+ # epilogue
+ JMP $F :EPILOGUE
+################################
+
+
+
+################################
+# Function FCT_FS_NAME
+# - - - - - - - - - - - - - - -
+# Params:
+#  $A= file track number
+#  $B= file sector number
+# - - - - - - - - - - - - - - -
+# Return:
+#  $AB= file name
+# - - - - - - - - - - - - - - -
+# Errors:
+#  $E= 0: no error
+#      1: file not found
+#      2: root folder corrupted
+# - - - - - - - - - - - - - - -
+FCT_FS_NAME:
+ # prologue
+ SET $J1 :VAR_FCTRET_H
+ SET $J2 :VAR_FCTRET_L
+ JMP $F :PROLOGUE
+
+ # push all G registers
+ JMP $F :RT_PUSH_G
+
+ # save C
+ SET $C :VAR_STK_VAL
+ JMP $F :SRT_PUSH
+
+ JMP $F :FCT_FS_01
+ CMP $E 02
+ JMP UEQ :FCT_FS_NAME_ERR_ROOT
+
+ # set first entry location
+ MOV $G2 00
+ MOV $C :MEM:h
+ ADD $D :MEM:l 04
+ # for each file entry
+ FCT_FS_NAME_LOOP:
+  # get file location
+  JMP $F :RT_FS_01
+
+  # compare the file location
+  # with the wanted location
+  CMP $G0 $G4
+  JMP UEQ :FCT_FS_NAME_MAYBE
+  JMP $F :FCT_FS_NAME_NXT
+  FCT_FS_NAME_MAYBE:
+  CMP $G1 $G5
+  JMP UEQ :FCT_FS_NAME_YES
+
+  FCT_FS_NAME_NXT:
+  # add 9 to $CD
+  MOV $A 00
+  MOV $B 09
+  JMP $F :RT_ADD_16
+  MOV $C $A
+  MOV $D $B
+
+  # inc $G2
+  ADD $G2 $G2 01
+  # loop 46 times (max number
+  # of entries)
+  CMP $G2 %46
+  AND $F $F EQU
+  JMP NEQ :FCT_FS_NAME_LOOP
+
+ FCT_FS_NAME_ERR_FOUND:
+  MOV $E 01
+ FCT_FS_NAME_ERR_ROOT:
+  MOV $A $G0
+  MOV $B $G1
+  JMP $F :FCT_FS_NAME_END
+ FCT_FS_NAME_YES:
+  MOV $E 00
+  MOV $A $C
+  MOV $B $D
+ FCT_FS_NAME_END:
+ # restore C and D
+ JMP $F :SRT_PULL
+ GET $C :VAR_STK_VAL
+ MOV $D $G3
+ # pull all G registers
+ JMP $F :RT_PULL_G
+ # epilogue
+ JMP $F :EPILOGUE
+################################
+
+
+################################
+# Function FCT_FS_RD
+# - - - - - - - - - - - - - - -
+# Params:
+#  $AB= file name to read
+#  $CD= adress where to write
+#       the file
+# - - - - - - - - - - - - - - -
+# Return: None
+# - - - - - - - - - - - - - - -
+# Errors:
+#  $E= 0: no error
+#      1: file not found
+#      2: root folder corrupted
+#      3: can't read directory
+# - - - - - - - - - - - - - - -
+FCT_FS_RD:
+ # prologue
+ SET $J1 :VAR_FCTRET_H
+ SET $J2 :VAR_FCTRET_L
+ JMP $F :PROLOGUE
+ # push all G registers
+ JMP $F :RT_PUSH_G
+ # move regs
+ MOV $G0 $A
+ MOV $G1 $B
+ MOV $G2 $C
+ MOV $G3 $D
+
+ # find the file location
+ JMP $F :FCT_FS_FIND
+ CMP $E 00
+ JMP UEQ :FCT_FS_RD_LOOP
+ JMP $F :FCT_FS_RD_END
+
+ # do 
+ FCT_FS_RD_LOOP:
+  # read the file block
+  JMP $F :FCT_DSK_RD
+  # check if block is valid
+  GET $F :MEM:h 00
+  CMP $F 00
+  JMP UEQ :FCT_FS_RD_CP
+   # if not, then return with
+   # an error
+   MOV $E 03
+   JMP $F :FCT_FS_RD_END
+
+  # copy block to ram
+  FCT_FS_RD_CP:
+   # copy the first part
+   MOV $A :MEM:h
+   MOV $B 04
+   MOV $E FC
+   JMP $F :FCT_RAM_CP
+   # add FC to CD
+   MOV $A 00
+   MOV $B FC
+   JMP $F :RT_ADD_16
+   MOV $C $A
+   MOV $D $B
+   # copy the second part
+   MOV $A 1F
+   MOV $B 00
+   MOV $E 00
+   JMP $F :FCT_RAM_CP
+   # add 100 to CD
+   MOV $A 01
+   MOV $B 00
+   JMP $F :RT_ADD_16
+   MOV $C $A
+   MOV $D $B
+
+  # get next block location
+  GET $A :MEM:h 01
+  GET $B :MEM:h 02
+  # while next file block != 0
+  CMP $A 00
+  AND $F $F EQU
+  JMP NEQ :FCT_FS_RD_LOOP
+  CMP $B 00
+  AND $F $F EQU
+  JMP NEQ :FCT_FS_RD_LOOP
+
+ # no error
+ MOV $E 00
+ FCT_FS_RD_END:
+ # move regs
+ MOV $A $G0
+ MOV $B $G1
+ MOV $C $G2
+ MOV $D $G3
+ # pull all G registers
+ JMP $F :RT_PULL_G
+ # epilogue
+ JMP $F :EPILOGUE
+################################
+
+
+
+################################
+# Function FCT_FS_SIZE
+# - - - - - - - - - - - - - - -
+# Params:
+#  $AB= file name to find
+# - - - - - - - - - - - - - - -
+# Return:
+#  $C = file size in sector
+# - - - - - - - - - - - - - - -
+# Errors:
+#  $E= 0: no error
+#      1: file not found
+#      2: root folder corrupted
+#      3: can't read directory
+# - - - - - - - - - - - - - - -
+FCT_FS_SIZE:
+ # prologue
+ SET $J1 :VAR_FCTRET_H
+ SET $J2 :VAR_FCTRET_L
+ JMP $F :PROLOGUE
+ # push A and B
+ SET $A :VAR_STK_VAL
+ JMP $F :SRT_PUSH
+ SET $B :VAR_STK_VAL
+ JMP $F :SRT_PUSH
+
+ # find the file location
+ JMP $F :FCT_FS_FIND
+ CMP $E 00
+ JMP UEQ :FCT_FS_SIZE_LOOP
+ JMP $F :FCT_FS_SIZE_END
+
+ MOV $C 00
+
+ # do 
+ FCT_FS_SIZE_LOOP:
+  # read the file block
+  JMP $F :FCT_DSK_RD
+  # check if block is valid
+  GET $F :MEM:h 00
+  CMP $F 00
+  JMP UEQ :FCT_FS_SIZE_INC
+   # if not, then return with
+   # an error
+   MOV $E 03
+   JMP $F :FCT_FS_SIZE_END
+
+  # increment $C
+  FCT_FS_SIZE_INC:
+  ADD $C $C 01
+
+  # get next block location
+  GET $A :MEM:h 01
+  GET $B :MEM:h 02
+  # while next file block != 0
+  CMP $A 00
+  AND $F $F EQU
+  JMP NEQ :FCT_FS_SIZE_LOOP
+  CMP $B 00
+  AND $F $F EQU
+  JMP NEQ :FCT_FS_SIZE_LOOP
+
+ # no error
+ MOV $E 00
+ FCT_FS_SIZE_END:
+ # pull A and B
+ JMP $F :SRT_PULL
+ GET $B :VAR_STK_VAL
+ JMP $F :SRT_PULL
+ GET $A :VAR_STK_VAL
+ # epilogue
+ JMP $F :EPILOGUE
+################################
+

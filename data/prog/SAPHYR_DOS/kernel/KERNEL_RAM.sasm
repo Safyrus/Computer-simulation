@@ -1,0 +1,296 @@
+################################
+#                              #
+#    NAME: SAPHYR DOS          #
+#                              #
+#  AUTHOR: Safyrus             #
+#                              #
+# VERSION: 1                   #
+#                              #
+#    FILE: KERNEL_RAM          #
+#                              #
+#    DESC: memory related part #
+#          of the kernel       #
+################################
+
+
+
+################################
+# Function FCT_RAM_CP
+# - - - - - - - - - - - - - - -
+# Params:
+#  $AB= adress to copy from
+#  $CD= adress to copy to
+#  $E = number of bytes to copy
+#       (0 byte is 256 bytes)
+# - - - - - - - - - - - - - - -
+# Return: None
+# - - - - - - - - - - - - - - -
+# Errors: None
+# - - - - - - - - - - - - - - -
+FCT_RAM_CP:
+ # prologue
+ SET $J1 :VAR_FCTRET_H
+ SET $J2 :VAR_FCTRET_L
+ JMP $F :PROLOGUE
+ # push regs
+ JMP $F :RT_PUSH_ABCDE
+
+ FCT_RAM_CP_LOOP:
+  # copy 1 byte
+  GET $F $A $B
+  SET $F $C $D
+  JMP $F :SRT_INC_AB
+  JMP $F :SRT_INC_CD
+  # loop
+  SUB $E $E 01
+  CMP $E 00
+  AND $F $F EQU
+  JMP NEQ :FCT_RAM_CP_LOOP
+
+ # pull regs
+ JMP $F :RT_PULL_ABCDE
+ # epilogue
+ JMP $F :EPILOGUE
+################################
+
+
+
+################################
+# Function FCT_RAM_TAKE
+# - - - - - - - - - - - - - - -
+# Params:
+#  $D = bytes to take from ram
+# - - - - - - - - - - - - - - -
+# Return: None
+# - - - - - - - - - - - - - - -
+# Errors:
+#  $E= 0: no error
+#      1: not enought ram
+# - - - - - - - - - - - - - - -
+FCT_RAM_TAKE:
+ # prologue
+ SET $J1 :VAR_FCTRET_H
+ SET $J2 :VAR_FCTRET_L
+ JMP $F :PROLOGUE
+ # push regs
+ JMP $F :RT_PUSH_ABCDE
+ 
+ # sub bytes from ram_take
+ GET $A :VAR_RAM_TK_H
+ GET $B :VAR_RAM_TK_L
+ MOV $C 00
+ JMP $F :RT_SUB_16
+
+ # if ram_take < 5000 then error
+ CMP $A 50
+ AND $F $F LES
+ JMP LES :FCT_RAM_TAKE_ERR
+
+ # save new ram_take
+ SET $A :VAR_RAM_TK_H
+ SET $B :VAR_RAM_TK_L
+
+ FCT_RAM_TAKE_END:
+ # pull regs
+ JMP $F :RT_PULL_ABCDE
+ # epilogue
+ JMP $F :EPILOGUE
+
+ FCT_RAM_TAKE_ERR:
+ # pull regs
+ JMP $F :RT_PULL_ABCDE
+ # error 1
+ MOV $E 01
+ # epilogue
+ JMP $F :EPILOGUE
+################################
+
+
+
+################################
+# Function FCT_RAM_FREE
+# - - - - - - - - - - - - - - -
+# Params:
+#  $D = bytes to free from ram
+# - - - - - - - - - - - - - - -
+# Return: None
+# - - - - - - - - - - - - - - -
+# Errors:
+#  $E= 0: no error
+#      1: can't free ram
+# - - - - - - - - - - - - - - -
+FCT_RAM_FREE:
+ # prologue
+ SET $J1 :VAR_FCTRET_H
+ SET $J2 :VAR_FCTRET_L
+ JMP $F :PROLOGUE
+ # push regs
+ JMP $F :RT_PUSH_ABCDE
+ 
+ # add bytes from ram_take
+ GET $A :VAR_RAM_TK_H
+ GET $B :VAR_RAM_TK_L
+ MOV $C 00
+ JMP $F :RT_ADD_16
+ 
+ # if ram_take > ram_base then error
+ GET $C :VAR_RAM_BS_H
+ GET $D :VAR_RAM_BS_L
+ JMP $F :RT_CMP_16
+ MOV $F $E
+ AND $F $F GRE
+ JMP GRE :FCT_RAM_TAKE_ERR
+
+ # save new ram_take
+ SET $A :VAR_RAM_TK_H
+ SET $B :VAR_RAM_TK_L
+
+ FCT_RAM_FREE_END:
+ # pull regs
+ JMP $F :RT_PULL_ABCDE
+ # epilogue
+ JMP $F :EPILOGUE
+
+ FCT_RAM_FREE_ERR:
+ # pull regs
+ JMP $F :RT_PULL_ABCDE
+ # error 1
+ MOV $E 01
+ # epilogue
+ JMP $F :EPILOGUE
+################################
+
+
+
+################################
+# Function FCT_RAM_XET
+#  sub-function for the RAM_SET
+#  and RAM_GET functions
+# - - - - - - - - - - - - - - -
+# Params:
+# - - - - - - - - - - - - - - -
+# Return:
+# - - - - - - - - - - - - - - -
+# Errors:
+#  $E = 0: no error
+#       1: out of range
+# - - - - - - - - - - - - - - -
+FCT_RAM_XET:
+ # prologue
+ SET $J1 :VAR_FCTRET_H
+ SET $J2 :VAR_FCTRET_L
+ JMP $F :PROLOGUE
+ # move AB
+ MOV $G0 $A
+ MOV $G1 $B
+ MOV $G2 $C
+ MOV $G3 $D
+
+ # check if adr in range
+  # get virtual ram size
+  GET $A :VAR_RAM_BS_H
+  GET $B :VAR_RAM_BS_L
+  GET $C :VAR_RAM_TK_H
+  GET $D :VAR_RAM_TK_L
+  JMP $F :RT_SUB_16
+  # compare virtual size to adr
+  MOV $C $G0
+  MOV $D $G1
+  JMP $F :RT_CMP_16
+  MOV $F $E
+  AND $F $F LES
+  MOV $E 01
+  JMP LES :EPILOGUE
+  MOV $E 00
+
+ # sub virtual adr
+ GET $A :VAR_RAM_BS_H
+ GET $B :VAR_RAM_BS_L
+ JMP $F :RT_SUB_16
+ # epilogue
+ JMP $F :EPILOGUE
+################################
+
+
+
+################################
+# Function FCT_RAM_GET
+# - - - - - - - - - - - - - - -
+# Params:
+#  $AB= virtual adress to get
+# - - - - - - - - - - - - - - -
+# Return:
+#  VAR_RAM_VAL = value
+# - - - - - - - - - - - - - - -
+# Errors:
+#  $E = 0: no error
+#       1: out of range
+# - - - - - - - - - - - - - - -
+FCT_RAM_GET:
+ # prologue
+ SET $J1 :VAR_FCTRET_H
+ SET $J2 :VAR_FCTRET_L
+ JMP $F :PROLOGUE
+ # push G
+ JMP $F :RT_PUSH_G
+
+ JMP $F :FCT_RAM_XET
+ CMP $E 01
+ JMP UEQ :FCT_RAM_GET_END
+ # get val
+ GET $F $A $B
+ SET $F :VAR_RAM_VAL
+
+ FCT_RAM_GET_END:
+ # move AB
+ MOV $A $G0
+ MOV $B $G1
+ MOV $C $G2
+ MOV $D $G3
+ # pull G
+ JMP $F :RT_PULL_G
+ # epilogue
+ JMP $F :EPILOGUE
+################################
+
+
+
+################################
+# Function FCT_RAM_SET
+# - - - - - - - - - - - - - - -
+# Params:
+#  $AB= virtual adress to set
+#  VAR_RAM_VAL
+# - - - - - - - - - - - - - - -
+# Return: None
+# - - - - - - - - - - - - - - -
+# Errors:
+#  $E = 0: no error
+#       1: out of range
+# - - - - - - - - - - - - - - -
+FCT_RAM_SET:
+ # prologue
+ SET $J1 :VAR_FCTRET_H
+ SET $J2 :VAR_FCTRET_L
+ JMP $F :PROLOGUE
+ # push G
+ JMP $F :RT_PUSH_G
+
+ JMP $F :FCT_RAM_XET
+ CMP $E 01
+ JMP UEQ :FCT_RAM_SET_END
+ # set val
+ GET $F :VAR_RAM_VAL
+ SET $F $A $B
+
+ FCT_RAM_SET_END:
+ # move AB
+ MOV $A $G0
+ MOV $B $G1
+ MOV $C $G2
+ MOV $D $G3
+ # pull G
+ JMP $F :RT_PULL_G
+ # epilogue
+ JMP $F :EPILOGUE
+################################

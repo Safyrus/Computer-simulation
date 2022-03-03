@@ -1,0 +1,57 @@
+################################
+#                              #
+#    NAME: SAPHYR DOS          #
+#                              #
+#  AUTHOR: Safyrus             #
+#                              #
+# VERSION: 1                   #
+#                              #
+#    FILE: KERNEL_STR          #
+#                              #
+#    DESC: kernel string code  #
+################################
+
+
+
+################################
+# Function FCT_STR_CMP
+# - - - - - - - - - - - - - - -
+# Params:
+#  $AB= first string adress
+#  $CD= second string adress
+# - - - - - - - - - - - - - - -
+# Return: None
+# - - - - - - - - - - - - - - -
+# Errors:
+#  $E= 0: string are equal
+#      1: string are not equal
+# - - - - - - - - - - - - - - -
+FCT_STR_CMP:
+ # prologue
+ SET $J1 :VAR_FCTRET_H
+ SET $J2 :VAR_FCTRET_L
+ JMP $F :PROLOGUE
+ # push A-E registers
+ JMP $F :RT_PUSH_ABCDE
+
+ FCT_STR_CMP_LOOP:
+  GET $E $A $B
+  GET $F $C $D
+  CMP $E $F
+  AND $F $F EQU
+  JMP NEQ :FCT_STR_CMP_NO
+  CMP $E 00
+  JMP UEQ :FCT_STR_CMP_YES
+  JMP $F :SRT_INC_AB
+  JMP $F :SRT_INC_CD
+  JMP $F :FCT_STR_CMP_LOOP
+
+ FCT_STR_CMP_NO:
+  JMP $F :RT_PULL_ABCDE
+  MOV $E 01
+  JMP $F :EPILOGUE
+ FCT_STR_CMP_YES:
+  JMP $F :RT_PULL_ABCDE
+  MOV $E 00
+  JMP $F :EPILOGUE
+################################

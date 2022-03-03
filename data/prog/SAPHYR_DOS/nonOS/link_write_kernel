@@ -1,0 +1,2 @@
+write_kernel 0 200
+../kernel/KERNEL 200 C00

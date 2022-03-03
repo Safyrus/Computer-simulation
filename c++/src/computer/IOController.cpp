@@ -89,6 +89,7 @@ void computer::IOController::runStep()
     {
         if (outBufState[i] != 0 && getTalk(i) && !getTalkDev(i))
         {
+            printDebug("IOController: sending data " + std::to_string(outBuffer[i][0]) + " to port " + std::to_string(i));
             devices[i]->send(0, outBuffer[i][0]);
             for (uint8_t j = 0; j < OUT_SIZE - 1; j++)
             {

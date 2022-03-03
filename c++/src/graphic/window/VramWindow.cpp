@@ -1,4 +1,4 @@
-#include "graphic/window/VramWindow.hpp"
+#include "graphic/window/VRamWindow.hpp"
 
 #include <sstream>
 #include <iomanip>

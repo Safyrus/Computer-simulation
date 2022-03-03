@@ -2,12 +2,16 @@
 
 ![saphyr_I](Saphyr-I_3d.png)
 
+TO-DO: update
+
 --------------------
 
 > **Attention ! This document is not the final version !**
 
 --------------------
 
+>Version 1.1
+>
 > Published by
 >
 >████████
@@ -38,7 +42,8 @@
     4. [Default programs](#4-Default-programs)
         1. [DEBUG](#a--DEBUG)
         2. [PROG](#b--PROG)
-    5. [Optional programs](#5--Optional-programs)
+    5. [Some software](#5--Some-software)
+        1. [SAPHYR DOS](#a--SAHYR-DOS)
 3. [Programming with the SASM language](#III-Programming-with-the-SASM-language)
     1. [Basic organization of a program](#1--Basic-organization-of-a-program)
         1. [Instruction](#a--Instruction)
@@ -67,6 +72,7 @@
         1. [Import](#a--Import)
         2. [Origin](#b--Origin)
         3. [Const](#c--Const)
+        4. [Extern](#d--Extern)
     7. [Programming tips](#7--Programming-tips)
         1. [Shortcut instruction](#a--Shortcut-instruction)
         2. [Useful default functions, routines and subroutines](#b--Useful-default-functions,-routines-and-subroutines)
@@ -82,32 +88,64 @@
     6. [The floppy drive](#6--The-floppy-drive)
     7. [The EXT connection](#7--The-EXT-connection)
 5. [Hardware specifications](#V--Hardware-specifications)
-    1. [S257-01](#1--S257-01)
-    2. [HWSTATS](#2--HWSTATS)
-    3. [ROM4K](#3--ROM4K)
-    4. [ROM2K](#4--ROM2K)
-    5. [RAM1K](#5--RAM1K)
-    6. [RAM16K](#6--RAM16K)
-    7. [VRAM8K](#7--VRAM8K)
-    8. [VPU](#8--VPU)
-    9. [EXT](#9--EXT)
-    10. [FDC](#10--FDC)
-    11. [FDD](#11-FDD)
-    12. [IO](#12--IO)
-        1. [Keyboard](#a--Keyboard)
-    13. [Screen](#13--Screen)
+    1. [SAPHYR I architecture]()
+    2. [S257-01 (CPU)]()
+        1. [Chip pins]()
+        2. [Simplify view of the internal Architecture]()
+    3. [HWSTATS (Hardware States)]()
+        1. [Registers]()
+    4. [S400-4K (Rom 4K)]()
+        1. [Specification]()
+        2. [Chip pins]()
+    5. [S400-2K (Rom 2K)]()
+        1. [Specification]()
+        2. [Chip pins]()
+    6. [S300-1K (Ram 1K)]()
+        1. [Specification]()
+        2. [Chip pins]()
+    7. [S300-16K (Ram 16K)]()
+        1. [Specification]()
+        2. [Chip pins]()
+    8. [S301-8K (VRAM 8K)]()
+        1. [Specification]()
+        2. [Chip pins]()
+    9. [VPU (Video Processing Unit)]()
+        1. [Architecture]()
+        2. [Registers]()
+    10. [EXT (EXTention connector)]()
+        1. [Connector Pins]()
+    11. [FDC (Floppy Disk Controller)]()
+        1. [Registers]()
+    12. [FDD (Floppy Disk Drive)]()
+        1. [Diagram]()
+        2. [Control and state]()
+    13. [IOCTRL (Input Output Controller)]()
+        1. [Architecture]()
+        2. [Registers]()
+        3. [DIN Connecter pins]()
+        4. [Protocol]()
+    14. [Keyboard]()
+        1. [Key code to ASCII]()
+        2. [Signals]()
+    15. [Screen]()
 6. [Appendix](#VI--Appendix)
     1. [Binary](#1--Binary)
         1. [Description](#a--Description)
         2. [Logical operations](#b--Logical-operations)
     2. [Hexadecimal](#2--Hexadecimal)
     3. [Some programs](#3--Some-programs)
-        1. [Pretty screen](#a--Pretty-screen)
+        1. [Random screen]()
+        2. [Keyboard reading]()
+        3. [Sound Pattern]()
+        4. [Write to the floppy]()
+        5. [Read from the Floppy]()
+        6. [Moving line]()
     4. [Instructions set](#4--Instructions-set)
     5. [Memory map](#5--Memory-map)
     6. [SAPHYR I ASCII](#6--SAPHYR-I-ASCII)
-    7. [Palette](#7--Palette)
-    8. [Pix46 Font](#8--Pix46-Font)
+    7. [Safyrus Industry Naming Convention (SINC)]()
+    8. [Palette](#7--Palette)
+    9. [Pix46 Font](#8--Pix46-Font)
 
 &nbsp;
 
@@ -125,8 +163,6 @@ This manual and his content are made and own by _"Safyrus Industry"_ and cannot 
 
 Special thanks are due for M. Alas Diablo for the valuable assistance provided in regard to the _"SAPHYR I"_ final design and final testing.
 
-_**To-do: thanks programs authors, book authors, pictures authors, other helpers.**_
-
 &nbsp;
 
 ### 2- Goal of this manual
@@ -136,7 +172,7 @@ This manual will teach you how to use your new possession and all there is to kn
 
 The manual that you are actually reading is composed of multiple chapters represent by roman number. You are actually in the first chapter named Introduction that will tell you general information about your computer and how to install it.
 Chapter II will show you how to perform basic action on your machine.
-Chapter III will teach you how to make basic programs (don’t worry about it now if you don’t know what it is) in the SASM programming language (again don’t worry).
+Chapter III will teach you how to make basic programs (don’t worry for now if you don’t know what it is) in the SASM programming language (again don’t worry).
 Chapter IV is design for learning about the different devices inside and outside the machine and how to use them.
 Chapter V will explain in great detail each component of the computer. You don’t need to read this chapter if you are not an engineer, or you don’t intend to modify, or make very advance and complex things with the SAPHYR I.
 Chapter VI contain additional information and resources.
@@ -151,7 +187,7 @@ We think that you have figure out that "SAPHYR I" is the name of the computer ne
 But what is a computer? Basically, a computer is an electronic machine that is capable of performing a lot of operations on numbers.
 For example, The SAPHYR I can do 1 000 000 operations per second!
 
-The SAPHYR I come in 3 main part:
+The SAPHYR I come in 3 main parts:
 
 - The main case, also call "the computer"
 - The keyboard
@@ -175,20 +211,20 @@ The 3 "official" models are "ESSENTIAL", "BASIC" and "COMPLETE".
 The difference between each is described in the table below.
 The "custom" model is quite special, and is made to answer for the need of everyone.
 You can choose what devices you want in your SAPHYR I to make it correspond to your need (note: due to hardware and production limitation, there is a small upfront cost to order a custom SAPHYR I but can result in a cheaper price than another official model depending on your configuration).
-If you have ordered a custom configuration you can note his configuration in the table below:
+If you have ordered a custom configuration, you can note his configuration in the table below:
 
 |Models |ESSENTIAL|BASIC|COMPLETE|YOUR CONFIG|
 |-------|:-------:|:---:|:------:|:---------:|
-|ROM 4K |X        |X    |X       |           |
-|ROM 2K |         |?    |X       |           |
-|RAM 1K |        X|    X|       X|           |
-|RAM 16K|         |     |       X|           |
-|VRAM 8K|         |    X|       X|           |
-|VPU    |         |    X|       X|           |
-|IOCTRL |         |    X|       X|           |
-|FDD    |         |     |       X|           |
-|FDC    |         |     |       X|           |
-|EXT    |        X|    X|       X|           |
+|ROM 4K |    X    |  X  |   X    |           |
+|ROM 2K |         |  ?  |   X    |           |
+|RAM 1K |    X    |  X  |   X    |           |
+|RAM 16K|         |     |   X    |           |
+|VRAM 8K|         |  X  |   X    |           |
+|VPU    |         |  X  |   X    |           |
+|IOCTRL |         |  X  |   X    |           |
+|FDD    |         |     |   X    |           |
+|FDC    |         |     |   X    |           |
+|EXT    |    X    |  X  |   X    |           |
 
 Table I 1: The different types of models
 
@@ -239,7 +275,7 @@ Steps to follow:
 
 ### 1- Computer Interface
 
-After the installation process. It is now the time to power the computer on. But how exactly? Well let’s first take a look at the numerous buttons and other interfaces.
+After the installation process. It is now the time to power the computer on. But how exactly? Well, let’s first take a look at the numerous buttons and other interfaces.
 
 ![Computer_interface](computer_front.png)
 
@@ -247,11 +283,11 @@ Figure II 1: Different interfaces on the front of the computer
 
 The most important button is the PWR button in the top left. It will, when push back, power the computer and allow it to start. You can know when the computer is powered when the green light below the PWR button turn on. The other button called the RST button will reset the computer at its initial state.
 
-The 8 connectors at the bottom are used to connect multiple devices that can be used to send information to the computer or receive information from it. These connectors are now as “the IO ports” and are labels from 1 to 8.
+The 8 connectors at the bottom are used to connect multiple devices that can be used to send information to the computer or receive information from it. These connectors are now as "the IO ports" and are labels from 1 to 8.
 
 There is a 5.25inch floppy disk drive in the middle and is used to insert floppy disk in the computer to read or write data on them.
 
-And finally, in the top center there is the “EXT port” (EXT stand for Extended) that can be used to plug anything with the same interface and extend the capability of the computer.
+And finally, in the top center there is the "EXT port" (EXT stand for Extended) that can be used to plug anything with the same interface and extend the capability of the computer.
 
 &nbsp;
 
@@ -269,12 +305,12 @@ The computer is trying to tell you something on the screen! Let’s read the fir
 
 >NO BOOTABLE MEDIA FOUND
 
-Ah, yes. The computer is telling you that it has not found a device, like a floppy disk, that is “bootable”. But what does that mean? Let’s explain what the computer is trying to do when power up:
+Ah, yes. The computer is telling you that it has not found a device, like a floppy disk, that is "bootable". But what does that mean? Let’s explain what the computer is trying to do when power up:
 
 - First it checks if the necessary component to start are present in the computer.
 - Then it tries to find a bootable device. By bootable it means a device or a program that the computer can give the control to.
 - If it does not find one then it will display a message on the screen to tell you and emit a sound in case you don’t have a screen.
-- After that, it will enter a state named “PROMPT” mode.
+- After that, it will enter a state named "PROMPT" mode.
 
 Ok, so the computer has not found something to start, but notice the next sentence:
 
@@ -295,7 +331,7 @@ You can type any characters and the cursor will move forward accordingly. If you
 We will now see what command you can type.
 
 - <u>STOP</u>: The STOP command will turn off the computer, simple as that. (it’s just a lazy way to not get up and press the PWR button)
-- <u>DEBUG</u>: The DEBUG command will change the current mode to the DEBUG mode. This mode is useful if you want to fix a “bug” (technical term to signify an unwanted behavior) in case your computer can’t boot but should. In most of the case, you will not use this program.
+- <u>DEBUG</u>: The DEBUG command will change the current mode to the DEBUG mode. This mode is useful if you want to fix a "bug" (technical term to signify an unwanted behavior) in case your computer can’t boot but should. In most of the case, you will not use this program.
 - <u>PROG</u>: The PROG command will change the current mode to the PROG mode. This mode will allow you to enter program directly into the computer. This is where we will learn how to program the Saphyr I.
 
 &nbsp;
@@ -310,19 +346,19 @@ The DEBUG mode will take an 8 character long hexadecimal value that will be exec
 
 Figure II 3: Screen showing the DEBUG mode
 
-Here we have entered the value “040E2500” which is the hexadecimal code for the instruction “MOV $G4 25” (you can know the code for each instruction by referring to the Instruction set section of the Appendix chapter). After pressing enter, the computer has executed this instruction and placed the hexadecimal value 25 (37 in decimal) into the G4 register.
+Here we have entered the value "040E2500" which is the hexadecimal code for the instruction "MOV $G4 25" (you can know the code for each instruction by referring to the Instruction set section of the Appendix chapter). After pressing enter, the computer has executed this instruction and placed the hexadecimal value 25 (37 in decimal) into the G4 register.
 
 Be aware that the executed instruction will be followed by others from the DEBUG program and the result of your instruction may be overwritten.
 
 #### _b- PROG_
 
-The PROG program will take an instruction in the SASM language (we will learn this in the next chapter) and will store it to be executed later. The program can save up to 123 instruction. Due to the program needed to run on a minimum hardware, it is not able to understand the whole SASM language, but the minimum needed to enter any program. It can only recognize basic instruction with argument that are a hexadecimal value or a register.
+The PROG program will take an instruction in the SASM language (we will learn this in the next chapter) and will store it to be executed later. The program can save up to 123 instructions. Due to the program needed to run on a minimum hardware, it is not able to understand the whole SASM language, but the minimum needed to enter any program. It can only recognize basic instruction with argument that are a hexadecimal value or a register.
 
 ![prog](prog.PNG)
 
 Figure II 4: Screen showing the PROG mode
 
-This program is very strict on the syntax. Imagine that the text you enter is divide into 4 boxes with 4 character for each box. Each instruction or argument must fit into one box. So, if you have an argument “$A”, the next argument must be separated with 2 space to add up to 4 characters.
+This program is very strict on the syntax. Imagine that the text you enter is divide into 4 boxes with 4 characters for each box. Each instruction or argument must fit into one box. So, if you have an argument "$A", the next argument must be separated with 2 space to add up to 4 characters.
 
     +---+---+---+---++---+---+---+---++---+---+---+---++---+---+---+---+
     [ A | D | D |   || $ | A |   |   || $ | G | 0 |   || C | 4 |   |   ]
@@ -332,12 +368,14 @@ Figure II 5: Spacing of characters for the PROG program
 
 The program adds two new instruction to interact with your instructions.
 
-- GO: Each time you enter an instruction, a cursor that retains at which line you’re at increment. And to go back (or forward) you can use the GO instruction. It takes two number that make an address that will be the new cursor location (your program starts at address 1A10 and each instruction take 4 bytes. So, if you want to go to line 10 you need to GO to address 1A10+0A*4=1A38)
+- GO: Each time you enter an instructions, a cursor that retains at which line you’re at increment. And to go back (or forward) you can use the GO instruction. It takes two number that make an address that will be the new cursor location (your program starts at address 1A10 and each instruction take 4 bytes. So, if you want to go to line 10 you need to GO to address 1A10+0A*4=1A38)
 - RUN: execute your program from the first line and return to the prog program when your program has finished its execution.
 
 &nbsp;
 
-### 5- Optional programs
+### 5- Some software
+
+#### a- SAPHYR DOS
 
 _**TODO**_
 
@@ -363,7 +401,7 @@ This is what an instruction looks like:
 
     1. CMP 5 4
 
-This program read as “the line n°1 compare the number 5 with the number 4” and you can see that the line n°1 contain the instruction “CMP” with 2 argument, the first being “5” and the second “4”. We will go through the possible instructions and their argument step by step.
+This program read as "the line n°1 compare the number 5 with the number 4" and you can see that the line n°1 contain the instruction "CMP" with 2 arguments, the first being "5" and the second "4". We will go through the possible instructions and their argument step by step.
 
 NOTE: numbers in program are written in hexadecimal base by default. If you don’t know what Hexadecimal is, please refer to the hexadecimal part in the Appendix chapter.
 
@@ -392,7 +430,7 @@ Before we can start writing program, we need to talk a bit about how your comput
 
 #### _a- Registers_
 
-The SAPHYR I have what is called a CPU (Central Processing Unit). This is the most complex part of the computer and can be compared as the brain of the computer. It tells to other component what to do like save a value into memory, print something on the screen, etc. This is the same CPU that will execute the instruction in your program, and it possesses what is known as registers. A register is like a box that can hold a number. There can be used for example to save temporarily numbers for an operation. There are 16 different 8bit (that is 8 character in binary and can represent 256 value) registers in the CPU.
+The SAPHYR I have what is called a CPU (Central Processing Unit). This is the most complex part of the computer and can be compared as the brain of the computer. It tells to other component what to do like save a value into memory, print something on the screen, etc. This is the same CPU that will execute the instruction in your program, and it possesses what is known as registers. A register is like a box that can hold a number. There can be used for example to save temporarily numbers for an operation. There are 16 different 8bit (that is 8 characters in binary and can represent 256 value) registers in the CPU.
 
 |   |   |   |   |   |   |   |   |
 |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
@@ -424,7 +462,7 @@ Registers in program will be written as a $ follow by the name of the register:
 
 _NOTE: It is advised but not obligatory to read the binary part of the appendix if you don’t know anything about it before reading this part._
 
-But there is one register know as F that is very special. This register contains “flags” that each have special meaning. These flags can be on (represented by a 1) or off (represented by a 0). The F register will be updated when the instruction “CMP” (compare two number) is used and by consequence will replace any value that was in the register before.
+But there is one register know as F that is very special. This register contains "flags" that each have special meaning. These flags can be on (represented by a 1) or off (represented by a 0). The F register will be updated when the instruction "CMP" (compare two number) is used and by consequence will replace any value that was in the register before.
 
 Let’s see the structure of the F register:
 
@@ -433,7 +471,7 @@ Let’s see the structure of the F register:
 |Position  | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
 |Flag Name |   |   |   |   | L | Z | G | C |
 
-Table III 2: flags position and name
+Table III 2: Flags position and name
 
 The register has 4 flags, for their explication we will call the first number of the CMP instruction ‘A’ and the second ‘B’:
 
@@ -584,7 +622,7 @@ Example:
 
     1. TEST: # We declare a label named TEST, because
     2. :TEST # We are writing the address of this label.
-    3. # Note that there’s two value written because an 
+    3. # Note that there’s two values written because an 
     4. # address is 2 bytes
 
 #### _b- Basic jump_
@@ -642,7 +680,7 @@ A Hexadecimal value is written as a normal number. Example:
 
 #### _b- Decimal_
 
-A Decimal value is written as a number precede by a “%”. Example:
+A Decimal value is written as a number precede by a "%". Example:
 
     1. # Write the value 123
     2. %123
@@ -651,7 +689,7 @@ A Decimal value is written as a number precede by a “%”. Example:
 
 #### _c- Binary_
 
-A binary value is written as a string of 0 and 1 precede by a “~”. Example:
+A binary value is written as a string of 0 and 1 precede by a "~". Example:
 
     1. # write the value 37
     2. ~100101
@@ -671,8 +709,8 @@ A char value is written as a character surrounded by simple quote. Each characte
 
 A String value is a string of characters surrounded by double quotes. It is an easier way to write multiple characters. A NULL character is added after the end of the string. Example:
 
-    1. # write “TEXT”
-    2. “TEXT” # equal to 54 45 58 54 00
+    1. # write "TEXT"
+    2. "TEXT" # equal to 54 45 58 54 00
 
 #### _f- Label high/low address_
 
@@ -691,13 +729,13 @@ A Label can be written as showed in the Branch Instruction section, but you can 
 
 #### _6- Compilation instructions_
 
-Some instructions are not really for the CPU but for the program itself. Every instruction of this type start with a ‘@’.
+Some instructions are not really for the CPU but for the program itself. Every instruction of this type starts with a ‘@’.
 
 #### _a- Import_
 
-Say you have written a program on a file, and you want to reuse in a new program, but you don’t want to write it all over again. That’s where the import instruction come into play. It is used to say “copy all the instructions of a certain file into the current one”. Example:
+Say you have written a program on a file, and you want to reuse in a new program, but you don’t want to write it all over again. That’s where the import instruction come into play. It is used to say "copy all the instructions of a certain file into the current one". Example:
 
-    1. # Program “addTwoNumber”
+    1. # Program "addTwoNumber"
     2. MOV $A 05
     3. MOV $B 07
     4. ADD $C $A $B
@@ -725,6 +763,14 @@ A const (short for constant) is a word that will be replaced by a number that yo
     2. MOV $A FIVE # will be replace by MOV $A 05
     3. MOV $B 07
     4. ADD $C $A $B
+
+#### _d- Extern_
+
+The "extern" instruction can be used to define something without knowing it’s value
+
+    1. @extern PRINT
+    2. JMP $F :PRINT # jump to the print function
+    3.               # without knowing its address
 
 &nbsp;
 
@@ -754,45 +800,48 @@ A const (short for constant) is a word that will be replaced by a number that yo
 
 Table III 3: Difference between functions, routines and subroutines
 
-|name|type|address|description
-|------------------------------|---|---|---|
-|FCT_CMD|Function|0484|Let the user type a command and send it to the current mode.
-|FCT_DEBUG|Function|06C0|The DEBUG mode that executes raw hex instructions.
-|FCT_OPREGVAL|Function|0AD4|
-|FCT_PRINT|Function|039C|Print a string (at address $C$D) to the screen.
-|FCT_PROG|Function|07D8|The PROG mode that executes basic SASM instructions.
-|FCT_PROMPT|Function|0738|The PROMPT mode that chooses what mode to enter.
-|FCT_SCROLLUP|Function|0628|Scroll all the characters on the screen one line up.
-|FCT_STRTOREG|Function|0B2C|Convert a string ($A$B) to a register index.
-|FCT_STRTOVAL|Function|0C84|Convert a string($C$D) to a hexadecimal value.
-|RT_ADD16|Routine|0304|Add two 16bits number. ($AB = $AB + $CD)
-|RT_CMP16|Routine|02E8|Compare two 16bits number. (CMP $AB $CD)
-|RT_CMPSTR|Routine|0210|Compare two string ($A$B and $C$D) and tell if there are the sames. ($A=1 mean yes and $A=0 mean no)
-|RT_COPYMEM|Routine|034C|Copy data of size $E from address $AB to the address $CD.
-|RT_CURSDEC|Routine|0198|Decrease the cursor variable.
-|RT_CURSINC|Routine|0154|Increase the cursor variable.
-|RT_DEC16|Routine|02C8|Decrease a 16bits number. ($AB)
-|RT_EPILOGUE|Routine|00C8|Epilogue of a function. Return to the address on the stack. (normally the value saved at RT_PROLOGUE)
-|RT_HEXTOVAL|Routine|01D0|Convert a char ($A) into a number. (result in $A)
-|RT_INC16|Routine|02A8|Increase a 16bits number. ($AB)
-|RT_POPABCDE|Routine|0124|Pop all the registers from A to E.
-|RT_PROLOGUE|Routine|008C|Prologue of a function. Save VAR_CALL into the stack.
-|RT_PUSHABCDE|Routine|00F4|Push all the registers from A to E.
-|RT_VSYNC|Routine|028C|Return when the v-sync flag is on.
-|RT_WAITKEY|Routine|0330|Return when a key was pressed.
-|SRT_ENDSTR_AB|Subroutine|006C|$A=0 if the value at $A$B is 0 and a non 0 value otherwise.
-|SRT_ENDSTR_CD|Subroutine|007C|$A=0 if the value at $C$D is 0 and a non 0 value otherwise.
-|SRT_GETCURS|Subroutine|0014|Get the cursor position ($AB).
-|SRT_POP|Subroutine|004C|Pop a value from the stack.
-|SRT_PUSH|Subroutine|002C|Push a value into the stack.
-|SRT_RETURN|Subroutine|0020|Return from a subroutine.
-|SRT_SETCURS|Subroutine|0008|Set the cursor position ($AB).
+|name               |type       |address|description
+|-------------------|-----------|-------|-----------
+|FCT_CMD            |Function   |0484   |Let the user type a command and send it to the current mode.
+|FCT_DEBUG          |Function   |06C0   |The DEBUG mode that executes raw hex instructions.
+|FCT_OPREGVAL       |Function   |0AD4   |
+|FCT_PRINT          |Function   |039C   |Print a string (at address $C$D) to the screen.
+|FCT_PROG           |Function   |07D8   |The PROG mode that executes basic SASM instructions.
+|FCT_PROMPT         |Function   |0738   |The PROMPT mode that chooses what mode to enter.
+|FCT_SCROLLUP       |Function   |0628   |Scroll all the characters on the screen one line up.
+|FCT_STRTOREG       |Function   |0B2C   |Convert a string ($A$B) to a register index.
+|FCT_STRTOVAL       |Function   |0C84   |Convert a string($C$D) to a hexadecimal value.
+|RT_ADD16           |Routine    |0304   |Add two 16bits number. ($AB = $AB + $CD)
+|RT_CMP16           |Routine    |02E8   |Compare two 16bits number. (CMP $AB $CD)
+|RT_CMPSTR          |Routine    |0210   |Compare two string ($A$B and $C$D) and tell if there are the sames. ($A=1 mean yes and $A=0 mean no)
+|RT_COPYMEM         |Routine    |034C   |Copy data of size $E from address $AB to the address $CD.
+|RT_CURSDEC         |Routine    |0198   |Decrease the cursor variable.
+|RT_CURSINC         |Routine    |0154   |Increase the cursor variable.
+|RT_DEC16           |Routine    |02C8   |Decrease a 16bits number. ($AB)
+|RT_EPILOGUE        |Routine    |00C8   |Epilogue of a function. Return to the address on the stack. (normally the value saved at RT_PROLOGUE)
+|RT_HEXTOVAL        |Routine    |01D0   |Convert a char ($A) into a number. (result in $A)
+|RT_INC16           |Routine    |02A8   |Increase a 16bits number. ($AB)
+|RT_POPABCDE        |Routine    |0124   |Pop all the registers from A to E.
+|RT_PROLOGUE        |Routine    |008C   |Prologue of a function. Save VAR_CALL into the stack.
+|RT_PUSHABCDE       |Routine    |00F4   |Push all the registers from A to E.
+|RT_VSYNC           |Routine    |028C   |Return when the v-sync flag is on.
+|RT_WAITKEY         |Routine    |0330   |Return when a key was pressed.
+|SRT_ENDSTR_AB      |Subroutine |006C   |$A=0 if the value at $A$B is 0 and a non 0 value otherwise.
+|SRT_ENDSTR_CD      |Subroutine |007C   |$A=0 if the value at $C$D is 0 and a non 0 value otherwise.
+|SRT_GETCURS        |Subroutine |0014   |Get the cursor position ($AB).
+|SRT_POP            |Subroutine |004C   |Pop a value from the stack.
+|SRT_PUSH           |Subroutine |002C   |Push a value into the stack.
+|SRT_RETURN         |Subroutine |0020   |Return from a subroutine.
+|SRT_SETCURS        |Subroutine |0008   |Set the cursor position ($AB).
 
 Table III 4: Default program functions and routines
 
 #### _c- Some programming conventions_
 
-_**TODO**_
+- **Indent you code** to indicate section of code that may loop or is related to a specific task.
+- **Add comments** to describe each block of code.
+- **Name your labels correctly** to tell, without reading the code, what this section is doing.
+- Split your data and code section.
 
 &nbsp;
 
@@ -824,7 +873,8 @@ Figure IV 2: Shift mode of the keyboard
 
 ### _2- The RAM and the ROM_
 
-A memory in a computer is like a big table that contain multiple values unlike registers that can only hold one value. Each cell is in table is known as a memory cell. Each cell has a unique address. You can split a memory in multiple “pages” that represent 256 bytes of data. You can see one example of a page of a memory in the table below.
+A memory in a computer is like a big table that contain multiple values unlike registers that can only hold one value. Each cell is in table is known as a memory cell. Each cell has a unique address. You can split a memory in multiple "pages" that represent 256 bytes of data. You can see one example of a page of a memory in the table below.
+
 |   | X0 | X1 | X2 | X3 | X4 | X5 | X6 | X7 | X8 | X9 | XA | XB | XC | XD | XE | XF |
 |:--|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
 |0X |04|01|60|00|51|06|00|01|01|23|45|67|89|AB|CD|EF|
@@ -856,7 +906,7 @@ The ROM, which stand for Read Only Memory, it’s very similar to the RAM, excep
 
 The Hardware states is a set of registers controlling and monitoring the state of each device of the computer. It is divided into 4 sections of 8 bytes.
 
-The first (00 to 07) is the HARDWARE section. You can know what devices are connected to the computer with the register 0. You can also get a sense of time with the register 1 that counts from 0 to 255 for each second that passed. Register 3 control the buzzer.
+The first (00 to 07) is the HARDWARE section. You can know what devices are connected to the computer with the register 0. You can also get a sense of time with the register 1 that counts from 0 to 255 for each second that passed. Register 2 control the buzzer.
 
 The second section (08-0F) is the FDC section. It is used to control the Floppy Disk Controller (FDC). The third section (10-17) is dedicated to the IO Controller and the fourth section (18-1F) to the Video Processing Unit (VPU)
 
@@ -864,7 +914,7 @@ The second section (08-0F) is the FDC section. It is used to control the Floppy 
 
 ### 4- The Screen
 
-The screen is where you can display visual information using the computer. You can think of an image display by it as a grid if little colored square called “pixels”. The maximum number of pixels that the screen can display is 256(width)*256(height). It can also display a maximum number of 16 different colors.
+The screen is where you can display visual information using the computer. You can think of an image display by it as a grid if little colored square called "pixels". The maximum number of pixels that the screen can display is 256(width)*256(height). It can also display a maximum number of 16 different colors.
 
 The screen is control by the VPU (Video Processing Unit) and an 8KB RAM called the VRAM. The VRAM is where you send the data to display to the screen and the VPU is used to control how to display the data.
 
@@ -889,7 +939,7 @@ Be aware that you cannot change the value of the VRAM when the Screen is display
 
 Everything you plug into the IO connections is controlled by the IO Controller. It is the interface between IO devices and the computer.
 
-The IO Controller can be access via the hardware state. The first register tells for each bit if a device is connected to the corresponding port. The second register send for each bit to the corresponding device if the “CPU want to talk”. The third register get for each device in the corresponding bit if the “Device want to talk”.
+The IO Controller can be access via the hardware state. The first register tells for each bit if a device is connected to the corresponding port. The second register send for each bit to the corresponding device if the "CPU want to talk". The third register get for each device in the corresponding bit if the "Device want to talk".
 
 You can send and receive data from and to device with the IO memory. Each address and the corresponding action are described in the table below:
 
@@ -906,13 +956,23 @@ You can send and receive data from and to device with the IO memory. Each addres
 
 Table IV 2: Address for each devices
 
-Each device has a “Set” and “Get” buffer of 8 bytes. When you get a value from a device, it is removed from the buffer. When a value is put in the set buffer it will be send and remove afterward. The “Get Stat” and “Set Stat” are two register for each device with the number of values in corresponding buffers.
+Each device has a "Set" and "Get" buffer of 8 bytes. When you get a value from a device, it is removed from the buffer. When a value is put in the set buffer it will be send and remove afterward. The "Get Stat" and "Set Stat" are two register for each device with the number of values in corresponding buffers.
 
 &nbsp;
 
 ### 6- The floppy drive
 
-_**TODO**_
+The floppy disk let you read and write data permanently to a 5.25-inch floppy disk.
+The floppy is inserted into the floppy disk drive (FDD). Make sure the lock is up before.
+When the floppy is in, push the lock down to keep the floppy in place.
+The light next to it is on when the floppy disk is used. Don’t remove the disk when the light is on otherwise your data may be corrupted.
+
+You can see a hole in the disk. This is normal, it is called the Sector Zero Hole and it let the computer find the start of the disk.
+Another hole may be present in the top corner and indicate that the disk can be written.
+If there is no hole, then the floppy can only be read.
+You may also see that the disk is inside a plastic folder. **DON’T REMOVE IT**. It protects the data from dust and other things.
+
+You can’t access the FDD directly. It is accessed by the Floppy Disk Controller (FDC). The CMD register will tell the FDC what to do (the only commands for now are READ and WRITE). The SECTOR register tells what sector to select. The TRACK register tells what track to select. Two other register STATES and CONTROL can be used to access the FDD directly.
 
 &nbsp;
 
@@ -928,103 +988,387 @@ The EXT interface is used to plug almost anything compatible to the SAPHYR I to 
 
 ## **V- Hardware specifications**
 
-_**TODO**_
+### 1- SAPHYR I architecture
 
-### 1- S257-01
+![Saphyr_I_architecture](architecture.PNG)
 
-&nbsp;
-
-### 2- HWSTATS
-
-    #     0 : devices connected    #
-    #         (EIMVRRrr)           #
-    #     1 : timer                #
-    #     2 : buzzer               #
+Figure V 1: Saphyr I architecture
 
 &nbsp;
 
-### 3- ROM4K
+### 2- S257-01 (CPU)
+
+#### _a- Chip pins_
+
+![S257-01](S257-01.PNG)
+
+Figure V 2: S257-01 Chip
+
+- D0 to D7: Data bus.
+- A0 to A15: Address bus.
+- STP: A high signal tell the CPU to stop.
+- CLK IN: Clock signal to feed to the CPU.
+- CLK OUT: Clock signal in “cycle”.
+- RW: tell if the CPU is reading (low) or writing (high) data.
+- RST: A high signal tell the CPU to reset.
+- GND: Ground pin
+- PWR: Power pin.
+
+#### _b- Simplify view of the internal Architecture_
+
+![S257-01_architecture](cpu-archittecture.PNG)
+
+Figure V 3: S257-01 architecture
 
 &nbsp;
 
-### 4- ROM2K
+### 3- HWSTATS (Hardware States)
+
+#### _a - Registers_
+
+|Index|Name|Description
+|-----|----|-----------
+|  0  |CNT |Connected devices (see table below)
+|  1  |TIM |Timer (go through 0 to 255 in 1 second and repeat)
+|  2  |BUZ |Control the buzzer sound (base frequency 488,28125Hz)
+|     |    |Bits: ttttimmm
+|     |    |t= time to let the sound play
+|     |    |i= invert multiplier
+|     |    |m= multiplier of the pitch
+
+Table V 1: Hardware states registers
+
+|Bits   |  7  |  6  |  5  |  4  |  3  |  2  |  1  |  0  |
+|-------|-----|-----|-----|-----|-----|-----|-----|-----|
+|Device | EXT |IO CTRL|DSK MEM|VRAM 8K|RAM 16K|RAM 1K|ROM 4K|ROM 2K
+
+Table V 2: CNT register flags
 
 &nbsp;
 
-### 5- RAM1K
+### 4- S400-4K (Rom 4K)
+
+#### _a- Specification_
+
+|Name       |Value
+|-----------|-----
+|Memory     |4KB (4096 bytes)
+|Persistent |Yes
+|Readable   |Yes
+|Writable   |No
+|Access time|< 1 us
+
+Table V 3: S400-4K specification
+
+#### _b- Chip pins_
+
+![S400-4K](S400-4K.PNG)
+
+Figure V 4: S400-4K chip
 
 &nbsp;
 
-### 6- RAM16K
+### 5- S400-2K (Rom 2K)
+
+#### _a- Specification_
+
+|Name       |Value
+|-----------|-----
+|Memory     |2KB (2048 bytes)
+|Persistent |Yes
+|Readable   |Yes
+|Writable   |No
+|Access time|< 1 us
+
+Table V 4: S400-2K specification
+
+#### _b- Chip pins_
+
+![S400-2K](S400-2K.PNG)
+
+Figure V 5: S400-2K chip
 
 &nbsp;
 
-### 7- VRAM8K
+### 6- S300-1K (Ram 1K)
+
+#### _a- Specification_
+
+|Name       |Value
+|-----------|-----
+|Memory     |1KB (1024 bytes)
+|Persistent |No
+|Readable   |Yes
+|Writable   |Yes
+|Access time|< 1 us
+
+Table V 5: S300-1K specification
+
+#### _b- Chip pins_
+
+![S300-1K](S300-1K.PNG)
+
+Figure V 6: S300-1K chip
 
 &nbsp;
 
-### 8- VPU
+### 7- S300-16K (Ram 16K)
 
-    #     0 : MODE                 #
-    #     1 : STATE                #
+#### _a- Specification_
 
-&nbsp;
+|Name       |Value
+|-----------|-----
+|Memory     |16KB (16 384 bytes)
+|Persistent |No
+|Readable   |Yes
+|Writable   |Yes
+|Access time|< 1 us
 
-### 9- EXT
+Table V 6: S300-16K specification
 
-&nbsp;
+#### _b- Chip pins_
 
-### 10- FDC
+![S300-16K](S300-16K.PNG)
 
-    #     0 FDC Command            #
-    #     1 FDC Data               #
-    #     2 FDC Track              #
-    #     3 FDC Sector             #
-    #     4 FDC State (R)          #
-    #     5 FDC Control (W)        #
-
-&nbsp;
-
-### 11- FDD
+Figure V 7: S300-16K chip
 
 &nbsp;
 
-### 12- IO
+### 8- S301-8K (VRam 8K)
 
-    #     0 connected              #
-    #     1 talkCPU                #
-    #     2 talkDEV                #
+#### _a- Specification_
 
-#### _a- Keyboard_
+|Name       |Value
+|-----------|-----
+|Memory     |8KB (8 192 bytes)
+|Persistent |No
+|Readable   |Yes
+|Writable   |Yes
+|Access time|< 1 us
+
+Table V 7: S301-8K specification
+
+#### _b- Chip pins_
+
+![S301-8K](S301-8K.PNG)
+
+Figure V 8: S301-8K chip
 
 &nbsp;
 
-### 13- Screen
+### 9- VPU (Video Processing Unit)
 
-Spec name	Value	Unit
-Margins	No	
-Interlaced	Yes	
-Color Format	2:2:2	R:G:B
-Aspect Ratio	1:1	
-Pixel Clock	5.25	MHz
-H Total	320	Pixels
-H Pixels	256	Pixels
-H Blank	64	Pixels
-H Front porch	8	Pixels
-H Sync	24	Pixels
-H Back porch	32	Pixels
-H Freq	16.406	KHz
-H Period	60.952	us
-V Total	147.5	Pixels
-V Pixels	128	Pixels
-V Blank	19	Pixels
-V Front Porch	3	Pixels
-V Sync	10	Pixels
-V Back Porch	6	Pixels
-V Freq	111.229	Hz
-V Period	8.99	Ms
+#### _a- Architecture_
 
-Table V 1: Screen specifications
+![VPU_architecture](VPU-architecture.PNG)
+
+Figure V 9: VPU architecture
+
+#### b- Registers
+
+|Index  |Name   |Description
+|:-----:|-------|-----------
+|   0   |MODE   |Display mode
+|       |       |0= Black and white
+|       |       |1= Color
+|       |       |2= Large Text
+|       |       |3= Text
+|   1   |STATE  |State of the display
+|       |       |Bits: …….V
+|       |       |V= Vsync on
+
+Table V 8: VPU registers
+
+&nbsp;
+
+### 10- EXT (EXTention connector)
+
+#### _a- Connector Pins_
+
+![EXT pins](EXT-pins.PNG)
+
+Figure V 10: EXT connector
+
+    0-GND   8-D7    16-PWR  24-A7
+    1-D0    9-ENA   17-A0   25-A8
+    2-D1    10-RW   18-A1   26-A9
+    3-D2    11-CLK  19-A2   27-A10
+    4-D3    12-RST  20-A3   28-A11
+    5-D4    13-x    21-A4   29-A12
+    6-D5    14-x    22-A5   30-A13
+    7-D6    15-x    23-A6   31-A14
+
+&nbsp;
+
+### 11- FDC (Floppy Disk Controller)
+
+#### _a- Registers_
+
+|Index  |Name   |Description
+|:-----:|-------|-----------
+|   0   |CMD    |Write: action to the FDC
+|       |       |Read: command status
+|       |       |Bits: B…CCCC
+|       |       |B= Busy if 1
+|       |       |C= command
+|   1   |DATA   |Data for the command or the result
+|   2   |TRACK  |Track index of the FDD
+|   3   |SECTOR |Sector index of the FDD
+|   4   |STATE  |Read only. Read the states of the FDD
+|   5   |CTRL   |Write directly to the FDD
+
+Table V 9: FDC registers
+
+&nbsp;
+
+### 12- FDD (Floppy Disk Drive)
+
+#### _a- Diagram_
+
+![FDD](FDD.PNG)
+
+Figure V 11: FDD diagram
+
+#### _b- Control and state_
+
+|Index  |Read           |Write              |
+|:-----:|---------------|-------------------|
+|   0   |Data           |Data               |
+|   1   |Write protected|Write protected LED|
+|   2   |Track Zero     |Track Zero LED     |
+|   3   |Sector Zero    |Sector Zero LED    |
+|   4   |Lock push      |Motor              |
+|   5   |   \           |Step               |
+|   6   |   \           |Step Direction     |
+|   7   |   \           |Read Write head    |
+
+Table V 10: FDD read and write
+
+&nbsp;
+
+### 13- IOCTRL (Input Output Controller)
+
+#### _a- Architecture_
+
+![IO-controller](IO-controller.PNG)
+
+Figure V 12: IOCTRL architecture
+
+### _b- Registers_
+
+<u>Hardware State IO registers:</u>
+
+|Index  |Name       |Description
+|:-----:|-----------|-----------
+|   0   |CON        |Get the devices connected. Each bit is a flag (1=connected else 0). The bit 0 is the flag for Device 1
+|   1   |TALK-CPU   |Set a flag for each device to tell them that the CPU want to send data. The bit 0 is the flag for Device 1
+|   2   |TALK-DEV   |Get a flag for each device to tell which of them want to send data to the computer. The bit 0 is the flag for Device 1
+
+Table V 11: HWSTATS IO registers
+
+<u>IO Devices registers:</u>
+
+|Index  |Name           |Description
+|:-----:|---------------|-----------
+|   0   |GET            |Get the data of the device or 0 if not connected
+|   1   |SET            |Set the data of the device
+|   2   |GET BUF STAT   |Get how many bytes are in the GET buffer
+|   3   |SET BUF STAT   |Get how many bytes are in the SET buffer
+
+Table V 12: IO Devices registers
+
+#### _c- DIN Connector pins_
+
+![DIN-connector](DIN-connector.PNG)
+
+Figure V 13: Device DIN connector pins
+
+    1 : CPU-Talk
+    2 : CLK
+    3 : DAta
+    4 : CONnected
+    5 : DEV-Talk
+
+#### _d- Protocol_
+
+<u>Sending and receiving data on the DAT pin:</u>
+
+|CPU Talk   |DEV Talk   |Action     |Description
+|:---------:|:---------:|-----------|-----------
+|   0       |   0       |NONE       |Nothing is happening
+|   0       |   1       |DEV DATA   |The device send data to the computer
+|   1       |   0       |CPU DATA   |The computer send data to the device
+|   1       |   1       |CPU WAITING |The computer is waiting for the device to be ready to accept data
+
+Table V 13: Device data actions
+
+<u>Standard command for devices:</u>
+
+|Hex|Command|Description
+|---|-------|-----------
+|08 |ID     |Identify the device. The response must be the code representing the device type
+
+Table V 14: Device commands
+
+<u>Standard devices ID types:</u>
+
+|Hex|Device type    |
+|---|---------------|
+|00 |NULL           |
+|01 |COMPUTER       |
+|02 |KEYBOARD       |
+
+Table V 15: Device ID types
+
+&nbsp;
+
+### 14- Keyboard
+
+#### _a- Key code to ASCII_
+
+![keyboard_logic](keyboard_logic.png)
+
+Figure V 14: Keyboard keys to ASCII
+
+#### _b- Signals_
+
+|In             |Out            |
+|---------------|---------------|
+|ID command     |02 (Keyboard device type). Take priority over key pressed.
+|Key pressed (from the keyboard itself, not the data pin)   |ASCII value
+|Other          |Nothing
+
+Figure V 15: Keyboard signals
+
+&nbsp;
+
+### 15- Screen
+
+Spec name       |Value  |Unit   |
+|---------------|-------|-------|
+|Margins        |No     |       |
+|Interlaced     |Yes    |       |
+|Color Format   |2:2:2  |R:G:B  |
+|Aspect Ratio   |1:1    |       |
+|Pixel Clock    |5.25   |MHz    |
+|H Total        |320    |Pixels |
+|H Pixels       |256    |Pixels |
+|H Blank        |64     |Pixels |
+|H Front porch  |8      |Pixels |
+|H Sync         |24     |Pixels |
+|H Back porch   |32     |Pixels |
+|H Freq         |16.406 |KHz    |
+|H Period       |60.952 |us     |
+|V Total        |147.5  |Pixels |
+|V Pixels       |128    |Pixels |
+|V Blank        |19     |Pixels |
+|V Front Porch  |3      |Pixels |
+|V Sync         |10     |Pixels |
+|V Back Porch   |6      |Pixels |
+|V Freq         |111.229|Hz     |
+|V Period       |8.99   |Ms     |
+
+Table V 16: Screen specifications
 
 &nbsp;
 
@@ -1042,106 +1386,110 @@ The way we count number is call decimal, or base 10 (meaning it has 10 digit), a
 
 So, in binary, 0 and 1 are represented the same way as in decimal. But how do we write 2 with only 1 and 0? Well in the same way when we run out of digit in decimal, we add a new digit in front if the number (…, 7, 8, 9, 10). So, in binary we have 0, 1 and then 10 to represent 2.
 
-Decimal	Binary
-0	0
-1	1
-2	10
-3	11
-4	100
-5	101
-6	110
-7	111
-8	1000
-9	1001
+|Decimal|Binary |
+|:-----:|:-----:|
+|   0   |   0   |
+|   1   |   1   |
+|   2   |   10  |
+|   3   |   11  |
+|   4   |  100  |
+|   5   |  101  |
+|   6   |  110  |
+|   7   |  111  |
+|   8   |  1000 |
+|   9   |  1001 |
 
 Table VI 1: Decimal in Binary
 
 #### _b- Logical operations_
 
-Logical operations take one or multiple bits as input and will output a new bit. It works the same way as mathematical operations like + and – but with bits. Each logical operation has a “truth table” describing all the possible input and output.
+Logical operations take one or multiple bits as input and will output a new bit. It works the same way as mathematical operations like + and – but with bits. Each logical operation has a "truth table" describing all the possible input and output.
 
-NOT: The NOT operation inverses the bit it is given (meaning 0 become 1 and 1 become 0).
+**NOT**: The NOT operation inverses the bit it is given (meaning 0 become 1 and 1 become 0).
 
-IN	OUT
-0	1
-1	0
+|IN |OUT|
+|---|---|
+| 0 | 1 |
+| 1 | 0 |
 
-Table VI 2: NOT thruth table
+Table VI 2: NOT truth table
 
-    Example:		NOT	0101	(=5)
+    Example:        NOT  0101    (=5)
                     ---------
-                    =	1010	(=10)
+                    =    1010    (=10)
 
-AND: the AND operation will take two bits and will output 1 if the first bit AND the second are 1. It output 0 otherwise.
+**AND**: the AND operation will take two bits and will output 1 if the first bit AND the second are 1. It output 0 otherwise.
 
-IN-1	IN-2	OUT
-0	0	0
-0	1	0
-1	0	0
-1	1	1
+|IN-1|IN-2|OUT|
+|----|----|---|
+| 0  | 0  | 0 |
+| 0  | 1  | 0 |
+| 1  | 0  | 0 |
+| 1  | 1  | 1 |
 
-Table VI 3: AND thruth table
+Table VI 3: AND truth table
 
-    Example:			0101	(=5)
-                AND	0011	(=3)
-    ---------
-    =	0001	(=1)
+    Example:         0101    (=5)
+                AND  0011    (=3)
+                ---------
+                =    0001    (=1)
 
-OR: the OR operation will take two bits and will output 1 if the first bit OR the second bit is 1. It output 0 if none input bits are 1.
+**OR**: the OR operation will take two bits and will output 1 if the first bit OR the second bit is 1. It output 0 if none input bits are 1.
 
-IN-1	IN-2	OUT
-0	0	0
-0	1	1
-1	0	1
-1	1	1
+|IN-1|IN-2|OUT|
+|----|----|---|
+| 0  | 0  | 0 |
+| 0  | 1  | 1 |
+| 1  | 0  | 1 |
+| 1  | 1  | 1 |
 
-Table VI 4: OR thruth table
+Table VI 4: OR truth table
 
-    Example:			0101	(=5)
-                OR	0011	(=3)
-    ---------
-    =	0111	(=7)
+    Example:          0101    (=5)
+                OR    0011    (=3)
+                ---------
+                =     0111    (=7)
 
-XOR: the XOR (exclusive OR) operation will take two bits and will output 1 if the first bit OR the second bit is 1 BUT not both. It output 0 if the two input bits are the same.
+**XOR**: the XOR (exclusive OR) operation will take two bits and will output 1 if the first bit OR the second bit is 1 BUT not both. It output 0 if the two input bits are the same.
 
+|IN-1|IN-2|OUT|
+|----|----|---|
+| 0  | 0  | 0 |
+| 0  | 1  | 1 |
+| 1  | 0  | 1 |
+| 1  | 1  | 0 |
 
+Table VI 5: XOR truth table
 
-IN-1	IN-2	OUT
-0	0	0
-0	1	1
-1	0	1
-1	1	0
-
-Table VI 5: XOR thruth table
-
-    Example:			0101	(=5)
-                XOR	0011	(=3)
-    ---------
-    =	0110	(=6)
+    Example:           0101    (=5)
+                XOR    0011    (=3)
+                ---------
+                =      0110    (=6)
 
 &nbsp;
 
 ### 2- Hexadecimal
 
-Hexadecimal (base 16) is another way to represent number and is very useful to write binary number in a compact way. There are 16 digits in hexadecimal (or hex for short) and the first tens are normal digits from 0 to 9 but the next digits are in order ‘A’, ‘B’, ‘C’, ‘D’, ‘E’ and ‘F’ (their represents number and not letter).
+Hexadecimal (base 16) is another way to represent number and is very useful to write binary number in a compact way. There are 16 digits in hexadecimal (or hex for short) and the first tens are normal digits from 0 to 9, but the next digits are in order ‘A’, ‘B’, ‘C’, ‘D’, ‘E’ and ‘F’ (their represents number and not letter).
 
-Decimal	Hexadecimal	Binary
-0	0	0
-1	1	1
-2	2	10
-3	3	11
-4	4	100
-5	5	101
-6	6	110
-7	7	111
-8	8	1000
-9	9	1001
-10	A	1010
-11	B	1011
-12	C	1100
-13	D	1101
-14	E	1110
-15	F	1111
+|Decimal|Hexadecimal|Binary |
+|:-----:|:---------:|:-----:|
+|   0   |     0     |   0   |
+|   1   |     1     |   1   |
+|   2   |     2     |   10  |
+|   3   |     3     |   11  |
+|   4   |     4     |  100  |
+|   5   |     5     |  101  |
+|   6   |     6     |  110  |
+|   7   |     7     |  111  |
+|   8   |     8     |  1000 |
+|   9   |     9     |  1001 |
+|   10  |     A     |  1010 |
+|   11  |     B     |  1011 |
+|   12  |     C     |  1100 |
+|   13  |     D     |  1101 |
+|   14  |     E     |  1110 |
+|   15  |     F     |  1111 |
 
 Table VI 6: Hexadecimal representation
 
@@ -1149,7 +1497,7 @@ Table VI 6: Hexadecimal representation
 
 ### 3- Some programs
 
-#### _a- Pretty screen_
+#### _a- Random screen_
 
     # ####################
     # # For the Saphyr I #
@@ -1192,7 +1540,450 @@ Table VI 6: Hexadecimal representation
         AND $F $F FE
         JMP 08 :SCREEN_FILL
         MOV $C 00
-        JMP $F :SCREEN_FILL
+        JMP $F :SCREEN_FILL 
+
+#### _b- Keyboard reading_
+
+    # ####################
+    # # For the Saphyr I #
+    # ####################
+    #
+    # Read the keyboard input and put the typed character on the screen.
+    # 
+    # /!\
+    # The Keyboard need to be on port 1 for this program to work.
+    # /!\
+
+    # Some constant
+    @const UEQ 05
+    @const UGE 01
+    @const FLC 01
+
+    # Adress for the VPU
+    @origin 1C18
+    VPU_MODE:
+    @origin 1C19
+    VPU_STATE:
+
+    # Adresses for IOs
+    @origin 1D00
+    IO:
+    IO1G:
+    @origin 1D01
+    IO1S:
+    @origin 1D02
+    IO1GR:
+    @origin 1D03
+    IO1SR:
+
+    # VRAM adress
+    @origin 2000
+    VRAM:
+
+
+    # Start of the program
+    @origin 0000
+    START:
+    # Prepare the VPU
+    SET 03 :VPU_MODE
+    JMP $F :WAIT_VSYNC
+    SET 0F :VRAM:h A1
+
+    START_LOOP:
+    # wait for the key
+    JMP $F :WAIT_KEY
+    # wait for the vsync
+    JMP $F :WAIT_VSYNC
+    # put the key on the screen
+    SET $A :VRAM:h A0
+    # loop
+    JMP $F :START_LOOP
+
+
+    # Wait for an input on the
+    # first device (which
+    # should be the keyboard)
+    WAIT_KEY:
+    # Save the return adress
+    MOV $G0 $J1
+    MOV $G1 $J2
+
+    WAIT_KEY_LOOP:
+    # Get the keyboard input
+    GET $A :IO1G
+    # if it is not 0
+    CMP $A 01
+    AND $F $F FLC
+    # then return to the caller
+    JMP UGE $G0 $G1
+    # else loop
+    JMP $F :WAIT_KEY_LOOP
+
+
+
+    # Wait for the vertical
+    # blanking interval
+    WAIT_VSYNC:
+    # Save the return adress
+    MOV $G0 $J1
+    MOV $G1 $J2
+
+    WAIT_VSYNC_LOOP:
+    # Get the VPU state
+    GET $F :VPU_STATE
+    # if it is 0
+    AND $F $F 01
+    CMP $F 00
+    # then loop because it is
+    # not vsync
+    JMP UEQ :WAIT_VSYNC_LOOP
+    # else vsync is on and we
+    # return to the caller
+    JMP $F $G0 $G1
+
+#### _c- Sound Pattern_
+
+    # ####################
+    # # For the Saphyr I #
+    # ####################
+    #
+    # Play a pattern of sound with the buzzer.
+
+    @origin 1C01
+    HW_TIMER:
+    @origin 1C02
+    HW_BUZZER:
+
+
+    # start
+    @origin 0000
+    # init C to 0
+    MOV $C 00
+
+    MOV $G0 :pattern1:h
+    MOV $G1 :pattern1:l
+    LOOP:
+    # get the next sound
+    GET $A $G0 $G1
+    AND $B $A F0
+    CMP $B 00
+    AND $F $F 04
+    JMP 00 :PLAY
+
+    CMD:
+    AND $B $A 0F
+    CMP $B 00
+    AND $F $F 04
+    JMP 04 :END
+    MUL $B $B 10
+    GET $A :HW_TIMER
+    ADD $D $A $B
+    CMD_WAIT:
+    GET $A :HW_TIMER
+    CMP $A $D
+    AND $F $F 04
+    JMP 00 :CMD_WAIT
+    JMP $F :NEXT
+
+    # play the next sound
+    PLAY:
+    SET $A :HW_BUZZER
+    # inc C
+    ADD $C $C 01
+
+    # wait for the sound to end
+    WAIT:
+    GET $F :HW_BUZZER
+    AND $F $F F0
+    CMP $F 00
+    AND $F $F 04
+    JMP 00 :WAIT
+    
+    NEXT:
+    ADD $G1 $G1 01
+    CMP $G1 01
+    AND $F $F 01
+    JMP 01 :LOOP
+    ADD $G0 $G0 01
+    JMP $F :LOOP
+
+    # the end
+    END:
+    JMP $F :END
+
+
+    pattern1:
+    19 18 0F
+    10 11 12 21 0F
+    17 16 15 14 13 12 11 0F
+    5B 5A 5B 5A 5B 5A 5B 0 
+
+#### _d- Write to the floppy_
+
+    # ####################
+    # # For the Saphyr I #
+    # ####################
+    #
+    # Write sector 0 on track 0 with the FDC.
+
+    # declare some label
+    @origin 1C08
+    FDC_CMD:
+    @origin 1C09
+    FDC_DATA:
+    @origin 1C0A
+    FDC_TRACK:
+    @origin 1C0B
+    FDC_SECTOR:
+    @origin 1C0C
+    FDC_STATS:
+    @origin 1C0D
+    FDC_CTRL:
+    @origin 1E00
+    RAM_MEM:
+
+
+    # start
+    @origin 0000
+    # put the MEM RAM adress in $AB
+    MOV $A :RAM_MEM:h
+    MOV $B :RAM_MEM:l
+
+    # fill the first part of the MEM with data
+    LOOP1:
+        SET $B $A $B
+        ADD $B $B 01
+        CMP $B 00
+        AND $F $F 04
+        JMP 00 :LOOP1
+
+    # fill the second part of the MEM with data
+    ADD $A $A 01
+    LOOP12:
+        SET $B $A $B
+        ADD $B $B 01
+        CMP $B 00
+        AND $F $F 04
+        JMP 00 :LOOP12
+
+
+    # wait for the FDC in case it is busy
+    WAIT:
+        GET $F :FDC_CMD
+        AND $F $F 80
+        CMP $F 80
+        AND $F $F FE
+        JMP 04 :WAIT
+
+    # Write sector 0 on track 0
+    # the data in MEM
+    SET 00 :FDC_TRACK
+    SET 00 :FDC_SECTOR
+    SET 08 :FDC_CMD
+
+    # The end
+    END:
+        JMP $F :END
+
+#### _e- Read from the Floppy_
+
+    # ####################
+    # # For the Saphyr I #
+    # ####################
+    #
+    # Read sector 0 on track 0 with the FDC.
+
+    # declare some label
+    @origin 1C08
+    FDC_CMD:
+    @origin 1C09
+    FDC_DATA:
+    @origin 1C0A
+    FDC_TRACK:
+    @origin 1C0B
+    FDC_SECTOR:
+    @origin 1C0C
+    FDC_STATS:
+    @origin 1C0D
+    FDC_CTRL:
+    @origin 1E00
+    RAM_MEM:
+
+
+    # start
+    @origin 0000
+    # put the MEM RAM adress in $AB
+    MOV $A :RAM_MEM:h
+    MOV $B :RAM_MEM:l
+
+    # fill the first part of the MEM with 0
+    LOOP2:
+        SET 00 $A $B
+        ADD $B $B 01
+        CMP $B 00
+        AND $F $F 04
+        JMP 00 :LOOP2
+
+    # fill the second part of the MEM with 0
+    ADD $A $A 01
+    LOOP22:
+        SET 00 $A $B
+        ADD $B $B 01
+        CMP $B 00
+        AND $F $F 04
+        JMP 00 :LOOP22
+
+    # wait for the FDC in case it is busy
+    WAIT:
+        GET $F :FDC_CMD
+        AND $F $F 80
+        CMP $F 80
+        AND $F $F FE
+        JMP 04 :WAIT
+
+    # Read sector 0 on track 0
+    # The data will be save in MEM
+    SET 00 :FDC_TRACK
+    SET 00 :FDC_SECTOR
+    SET 04 :FDC_CMD
+
+    # The end
+    END:
+        JMP $F :END 
+
+#### _f- Moving line_
+
+    # ####################
+    # # For the Saphyr I #
+    # ####################
+    #
+    # Draw a moving line
+    # that move randomly
+    # across the screen
+
+    @origin 1C01
+    HW_TIME:
+    # VRAM adress
+    @origin 2000
+    VRAM:
+    # Adress for the VPU
+    @origin 1C18
+    VPU_MODE:
+    @origin 1C19
+    VPU_STATE:
+
+    @origin 0000
+    # VPU mode
+    SET 01 :VPU_MODE
+
+    MOV $G0 3F # X
+    MOV $G1 3F # Y
+    MOV $G2 02 # DIR
+    MOV $G3 0F # COLOR
+    # G4 & G5 use for SRT return
+
+    LOOP:
+    # random number between 1 and 4
+    AND $E $R ~00000111
+    ADD $E $E 01
+    # and multiply by 8
+    MUL $E $E 02
+
+    # random color & dir
+    AND $G3 $R 0F
+    AND $G2 $R 03
+
+    MOVE:
+    JMP $F :WAIT_VSYNC
+
+    # find pixel Y
+    DIV $A $G1 04
+    ADD $A $A 20
+    MUL $B $G1 40
+    # find pixel X
+    DIV $C $G0 02
+    ADD $B $B $C
+    # left or right pixel
+    GET $C $A $B
+    AND $F $G0 01
+    CMP $F 01
+    JMP 05 :RIGHT
+    LEFT:
+    AND $C $C 0F
+    MUL $C $G3 10
+    ADD $C $G3 $C
+    JMP $F :DRAW
+    RIGHT:
+    AND $C $C F0
+    ADD $C $G3 $C
+    DRAW:
+    # draw
+    SET $C $A $B
+
+    # find where to move
+    AND $A $G2 03
+    CMP $A 00
+    JMP 05 :ADD_Y
+    CMP $A 01
+    JMP 05 :SUB_Y
+    CMP $A 02
+    JMP 05 :ADD_X
+    JMP $A :SUB_X
+
+    # move down
+    ADD_Y:
+    ADD $G1 $G1 01
+    JMP $F :AND_POS
+    # move up
+    SUB_Y:
+    SUB $G1 $G1 01
+    JMP $F :AND_POS
+    # move right
+    ADD_X:
+    ADD $G0 $G0 01
+    JMP $F :AND_POS
+    # move left
+    SUB_X:
+    SUB $G0 $G0 01
+
+    AND_POS:
+    # keep X & Y inside the screen
+    AND $G0 $G0 7F
+    AND $G1 $G1 7F
+    # wait some time
+    JMP $F :WAIT
+    # loop
+    SUB $E $E 01
+    CMP $E 00
+    AND $F $F 04
+    JMP 00 :MOVE
+    # loop
+    JMP $F :LOOP
+
+    # wait some time
+    WAIT:
+    MOV $G4 $J1
+    MOV $G5 $J2
+    GET $A :HW_TIME
+    AND $A $A FC
+    WAIT_LOOP:
+    GET $F :HW_TIME
+    AND $F $F FC
+    CMP $A $F
+    JMP 05 :WAIT_LOOP
+    JMP $F $G4 $G5
+
+
+    # wait for the vsync
+    WAIT_VSYNC:
+    MOV $G4 $J1
+    MOV $G5 $J2
+    WAIT_VSYNC_LOOP:
+    GET $F :VPU_STATE
+    AND $F $F 01
+    CMP $F 01
+    JMP 05 $G4 $G5
+    JMP $F :WAIT_VSYNC_LOOP
 
 &nbsp;
 
@@ -1200,87 +1991,88 @@ Table VI 6: Hexadecimal representation
 
 Description of the values in the table:
 
--	R = register
--	V = value/number
--	\ = nothing/0
+- R = register
+- V = value/number
+- \ = nothing/0
 
 Instruction’s syntax is: <MEM> <DST> <SRC> <VAL>
 
--	MEM: the Mnemonic for the operation
--	DST: the “Destination” (not in all case) / the first argument
--	SRC: the “Source” (not in all case) / the second argument
--	VAL: the “Value” / the third argument
+- MEM: the Mnemonic for the operation
+- DST: the "Destination" (not in all case) / the first argument
+- SRC: the "Source" (not in all case) / the second argument
+- VAL: the "Value" / the third argument
 
-HEX	MEM	DST	SRC	VAL	DESCRIPTION
-00	NOP	\	\	\	Do nothing
-01	RST	\	\	\	Reset the computer
-02	OFF	\	\	\	Turn off the computer
-03	MOV	R	R	\	Move the value in the SRC register into the DST register
-04	MOV	R	V	\	Move the value SRC into the DST register
-05	CMP	\	R	R	Compare the register SRC with the register VAL and update flags in the $F register
-06	CMP	\	V	R	Compare SRC with the register VAL and update flags in the $F register
-07	CMP	\	R	V	Compare the register SRC with VAL and update flags in the $F register
-08	CMP	\	V	V	Compare SRC with VAL and update flags in the $F register
-10	ADD	R	R	R	Add the register SRC with the register VAL and put the result in the register DST
-11	ADC	R	R	R	Add the register SRC with the register VAL and add 1. Put the result in the register DST
-12	SUB	R	R	R	Subtract the register SRC with the register VAL and put the result in the register DST
-13	SBB	R	R	R	Subtract the register SRC with the register VAL and subtract 1. Put the result in the register DST
-14	MUL	R	R	R	Multiply the register SRC with the register VAL and put the result in the register DST
-15	DIV	R	R	R	Divide the register SRC with the register VAL and put the result in the register DST
-16	MOD	R	R	R	Modulo the register SRC with the register VAL and put the result in the register DST
-17	AND	R	R	R	Do a Boolean AND with the register SRC and the register VAL. Put the result in the register DST
-18	OR	R	R	R	Do a Boolean OR with the register SRC and the register VAL. Put the result in the register DST
-19	XOR	R	R	R	Do a Boolean XOR with the register SRC and the register VAL. Put the result in the register DST
-20	ADD	R	V	R	Add SRC with the register VAL and put the result in the register DST
-21	ADC	R	V	R	Add SRC with the register VAL and add 1. Put the result in the register DST
-22	SUB	R	V	R	Subtract SRC with the register VAL and put the result in the register DST
-23	SBB	R	V	R	Subtract SRC with the register VAL and subtract 1. Put the result in the register DST
-24	MUL	R	V	R	Multiply SRC with the register VAL and put the result in the register DST
-25	DIV	R	V	R	Divide SRC with the register VAL and put the result in the register DST
-26	MOD	R	V	R	Modulo SRC with the register VAL and put the result in the register DST
-27	AND	R	V	R	Do a Boolean AND with SRC and the register VAL. Put the result in the register DST
-28	OR	R	V	R	Do a Boolean OR with SRC and the register VAL. Put the result in the register DST
-29	XOR	R	V	R	Do a Boolean XOR with SRC and the register VAL. Put the result in the register DST
-30	ADD	R	R	V	Add the register SRC with VAL and put the result in the register DST
-31	ADC	R	R	V	Add the register SRC with VAL and add 1. Put the result in the register DST
-32	SUB	R	R	V	Subtract the register SRC with VAL and put the result in the register DST
-33	SBB	R	R	V	Subtract the register SRC with VAL and subtract 1. Put the result in the register DST
-34	MUL	R	R	V	Multiply the register SRC with VAL and put the result in the register DST
-35	DIV	R	R	V	Divide the register SRC with VAL and put the result in the register DST
-36	MOD	R	R	V	Modulo the register SRC with VAL and put the result in the register DST
-37	AND	R	R	V	Do a Boolean AND with the register SRC and VAL. Put the result in the register DST
-38	OR	R	R	V	Do a Boolean OR with the register SRC and VAL. Put the result in the register DST
-39	XOR	R	R	V	Do a Boolean XOR with the register SRC and VAL. Put the result in the register DST
-40	ADD	R	V	V	Add SRC with VAL and put the result in the register DST
-41	ADC	R	V	V	Add SRC with VAL and add 1. Put the result in the register DST
-42	SUB	R	V	V	Subtract SRC with VAL and put the result in the register DST
-43	SBB	R	V	V	Subtract SRC with VAL and subtract 1. Put the result in the register DST
-44	MUL	R	V	V	Multiply SRC with VAL and put the result in the register DST
-45	DIV	R	V	V	Divide SRC with VAL and put the result in the register DST
-46	MOD	R	V	V	Modulo SRC with VAL and put the result in the register DST
-47	AND	R	V	V	Do a Boolean AND with SRC and VAL. Put the result in the register DST
-48	OR	R	V	V	Do a Boolean OR with SRC and VAL. Put the result in the register DST
-49	XOR	R	V	V	Do a Boolean XOR with SRC and VAL. Put the result in the register DST
-50	JMP	R	R	R	Jump to the memory address (SRC:VAL) if the register DST = $F
-51	JMP	R	V	R	Jump to the memory address (SRC:VAL) if the register DST = $F
-52	JMP	R	R	V	Jump to the memory address (SRC:VAL) if the register DST = $F
-53	JMP	R	V	V	Jump to the memory address (SRC:VAL) if the register DST = $F
-54	JMP	V	R	R	Jump to the memory address (SRC:VAL) if DST = $F
-55	JMP	V	V	R	Jump to the memory address (SRC:VAL) if DST = $F
-56	JMP	V	R	V	Jump to the memory address (SRC:VAL) if DST = $F
-57	JMP	V	V	V	Jump to the memory address (SRC:VAL) if DST = $F
-60	GET	R	R	R	Get the value at memory address (SRC:VAL) and put it in the register DST
-61	GET	R	V	R	Get the value at memory address (SRC:VAL) and put it in the register DST
-62	GET	R	R	V	Get the value at memory address (SRC:VAL) and put it in the register DST
-63	GET	R	V	V	Get the value at memory address (SRC:VAL) and put it in the register DST
-64	SET	R	R	R	Set the value in the register DST at memory address (SRC:VAL)
-65	SET	R	V	R	Set the value in the register DST at memory address (SRC:VAL)
-66	SET	R	R	V	Set the value in the register DST at memory address (SRC:VAL)
-67	SET	R	V	V	Set the value in the register DST at memory address (SRC:VAL)
-68	SET	V	R	R	Set the value DST at memory address (SRC:VAL)
-69	SET	V	V	R	Set the value DST at memory address (SRC:VAL)
-6A	SET	V	R	V	Set the value DST at memory address (SRC:VAL)
-6B	SET	V	V	V	Set the value DST at memory address (SRC:VAL)
+|HEX|MEM|DST|SRC|VAL|DESCRIPTION
+|:-:|:-:|:-:|:-:|:-:|-----------
+|00 |NOP| \ | \ | \ |Do nothing
+|01 |RST| \ | \ | \ |Reset the computer
+|02 |OFF| \ | \ | \ |Turn off the computer
+|03 |MOV| R | R | \ |Move the value in the SRC register into the DST register
+|04 |MOV| R | V | \ |Move the value SRC into the DST register
+|05 |CMP| \ | R | R |Compare the register SRC with the register VAL and update flags in the $F register
+|06 |CMP| \ | V | R |Compare SRC with the register VAL and update flags in the $F register
+|07 |CMP| \ | R | V |Compare the register SRC with VAL and update flags in the $F register
+|08 |CMP| \ | V | V |Compare SRC with VAL and update flags in the $F register
+|10 |ADD| R | R | R |Add the register SRC with the register VAL and put the result in the register DST
+|11 |ADC| R | R | R |Add the register SRC with the register VAL and add 1. Put the result in the register DST
+|12 |SUB| R | R | R |Subtract the register SRC with the register VAL and put the result in the register DST
+|13 |SBB| R | R | R |Subtract the register SRC with the register VAL and subtract 1. Put the result in the register DST
+|14 |MUL| R | R | R |Multiply the register SRC with the register VAL and put the result in the register DST
+|15 |DIV| R | R | R |Divide the register SRC with the register VAL and put the result in the register DST
+|16 |MOD| R | R | R |Modulo the register SRC with the register VAL and put the result in the register DST
+|17 |AND| R | R | R |Do a Boolean AND with the register SRC and the register VAL. Put the result in the register DST
+|18 |OR | R | R | R |Do a Boolean OR with the register SRC and the register VAL. Put the result in the register DST
+|19 |XOR| R | R | R |Do a Boolean XOR with the register SRC and the register VAL. Put the result in the register DST
+|20 |ADD| R | V | R |Add SRC with the register VAL and put the result in the register DST
+|21 |ADC| R | V | R |Add SRC with the register VAL and add 1. Put the result in the register DST
+|22 |SUB| R | V | R |Subtract SRC with the register VAL and put the result in the register DST
+|23 |SBB| R | V | R |Subtract SRC with the register VAL and subtract 1. Put the result in the register DST
+|24 |MUL| R | V | R |Multiply SRC with the register VAL and put the result in the register DST
+|25 |DIV| R | V | R |Divide SRC with the register VAL and put the result in the register DST
+|26 |MOD| R | V | R |Modulo SRC with the register VAL and put the result in the register DST
+|27 |AND| R | V | R |Do a Boolean AND with SRC and the register VAL. Put the result in the register DST
+|28 |OR | R | V | R |Do a Boolean OR with SRC and the register VAL. Put the result in the register DST
+|29 |XOR| R | V | R |Do a Boolean XOR with SRC and the register VAL. Put the result in the register DST
+|30 |ADD| R | R | V |Add the register SRC with VAL and put the result in the register DST
+|31 |ADC| R | R | V |Add the register SRC with VAL and add 1. Put the result in the register DST
+|32 |SUB| R | R | V |Subtract the register SRC with VAL and put the result in the register DST
+|33 |SBB| R | R | V |Subtract the register SRC with VAL and subtract 1. Put the result in the register DST
+|34 |MUL| R | R | V |Multiply the register SRC with VAL and put the result in the register DST
+|35 |DIV| R | R | V |Divide the register SRC with VAL and put the result in the register DST
+|36 |MOD| R | R | V |Modulo the register SRC with VAL and put the result in the register DST
+|37 |AND| R | R | V |Do a Boolean AND with the register SRC and VAL. Put the result in the register DST
+|38 |OR | R | R | V |Do a Boolean OR with the register SRC and VAL. Put the result in the register DST
+|39 |XOR| R | R | V |Do a Boolean XOR with the register SRC and VAL. Put the result in the register DST
+|40 |ADD| R | V | V |Add SRC with VAL and put the result in the register DST
+|41 |ADC| R | V | V |Add SRC with VAL and add 1. Put the result in the register DST
+|42 |SUB| R | V | V |Subtract SRC with VAL and put the result in the register DST
+|43 |SBB| R | V | V |Subtract SRC with VAL and subtract 1. Put the result in the register DST
+|44 |MUL| R | V | V |Multiply SRC with VAL and put the result in the register DST
+|45 |DIV| R | V | V |Divide SRC with VAL and put the result in the register DST
+|46 |MOD| R | V | V |Modulo SRC with VAL and put the result in the register DST
+|47 |AND| R | V | V |Do a Boolean AND with SRC and VAL. Put the result in the register DST
+|48 |OR | R | V | V |Do a Boolean OR with SRC and VAL. Put the result in the register DST
+|49 |XOR| R | V | V |Do a Boolean XOR with SRC and VAL. Put the result in the register DST
+|50 |JMP| R | R | R |Jump to the memory address (SRC:VAL) if the register DST = $F
+|51 |JMP| R | V | R |Jump to the memory address (SRC:VAL) if the register DST = $F
+|52 |JMP| R | R | V |Jump to the memory address (SRC:VAL) if the register DST = $F
+|53 |JMP| R | V | V |Jump to the memory address (SRC:VAL) if the register DST = $F
+|54 |JMP| V | R | R |Jump to the memory address (SRC:VAL) if DST = $F
+|55 |JMP| V | V | R |Jump to the memory address (SRC:VAL) if DST = $F
+|56 |JMP| V | R | V |Jump to the memory address (SRC:VAL) if DST = $F
+|57 |JMP| V | V | V |Jump to the memory address (SRC:VAL) if DST = $F
+|60 |GET| R | R | R |Get the value at memory address (SRC:VAL) and put it in the register DST
+|61 |GET| R | V | R |Get the value at memory address (SRC:VAL) and put it in the register DST
+|62 |GET| R | R | V |Get the value at memory address (SRC:VAL) and put it in the register DST
+|63 |GET| R | V | V |Get the value at memory address (SRC:VAL) and put it in the register DST
+|64 |SET| R | R | R |Set the value in the register DST at memory address (SRC:VAL)
+|65 |SET| R | V | R |Set the value in the register DST at memory address (SRC:VAL)
+|66 |SET| R | R | V |Set the value in the register DST at memory address (SRC:VAL)
+|67 |SET| R | V | V |Set the value in the register DST at memory address (SRC:VAL)
+|68 |SET| V | R | R |Set the value DST at memory address (SRC:VAL)
+|69 |SET| V | V | R |Set the value DST at memory address (SRC:VAL)
+|6A |SET| V | R | V |Set the value DST at memory address (SRC:VAL)
+|6B |SET| V | V | V |Set the value DST at memory address (SRC:VAL)
 
 Table VI 7: Instruction set of the S257-01
 
@@ -1298,111 +2090,83 @@ Figure VI 1: Memory map of the SAPHYR I
 
 Normal table:
 
-00	NULL	20	SPACE	40	@	60	`
-01	UP	21	!	41	A	61	a
-02	DOWN	22	"	42	B	62	b
-03	RIGHT	23	#	43	C	63	c
-04	LEFT	24	$	44	D	64	d
-05		25	%	45	E	65	e
-06		26	&	46	F	66	f
-07		27	'	47	G	67	g
-08	BS	28	(	48	H	68	h
-09	TAB	29	)	49	I	69	i
-0A		2A	*	4A	J	6A	j
-0B		2B	+	4B	K	6B	k
-0C		2C	,	4C	L	6C	l
-0D	CR/ENTER	2D	-	4D	M	6D	m
-0E		2E	.	4E	N	6E	n
-0F		2F	/	4F	O	6F	o
-10		30	0	50	P	70	p
-11		31	1	51	Q	71	q
-12		32	2	52	R	72	r
-13		33	3	53	S	73	s
-14		34	4	54	T	74	t
-15		35	5	55	U	75	u
-16		36	6	56	V	76	v
-17		37	7	57	W	77	w
-18		38	8	58	X	78	x
-19		39	9	59	Y	79	y
-1A		3A	:	5A	Z	7A	z
-1B	ESC	3B	;	5B	[	7B	{
-1C		3C	<	5C	\	7C	|
-1D		3D	=	5D	]	7D	}
-1E		3E	>	5E	^	7E	~
-1F		3F	?	5F	_	7F	DEL
+![char_table_1](char_table_1.PNG)
 
 Table VI 8: Normal character table of the SAPHYR I ASCII
 
--	CR= carriage return
--	BS= backspace
--	ESC= Escape
+- CR= carriage return
+- BS= backspace
+- ESC= Escape
 
 Alternative table:
 
-80		A0	 	C0	À	E0	à
-81		A1	¡	C1	Á	E1	á
-82		A2	¢	C2	Â	E2	â
-83		A3	£	C3	Ã	E3	ã
-84		A4	¤	C4	Ä	E4	ä
-85		A5	¥	C5	Å	E5	å
-86		A6	¦	C6	Æ	E6	æ
-87		A7	§	C7	Ç	E7	ç
-88		A8	¨	C8	È	E8	è
-89		A9	©	C9	É	E9	é
-8A		AA	ª	CA	Ê	EA	ê
-8B		AB	«	CB	Ë	EB	ë
-8C		AC	¬	CC	Ì	EC	ì
-8D		AD	­	CD	Í	ED	í
-8E		AE	®	CE	Î	EE	î
-8F		AF	¯	CF	Ï	EF	ï
-90		B0	°	D0	Ð	F0	ð
-91		B1	±	D1	Ñ	F1	ñ
-92		B2	²	D2	Ò	F2	ò
-93		B3	³	D3	Ó	F3	ó
-94		B4	´	D4	Ô	F4	ô
-95		B5	µ	D5	Õ	F5	õ
-96		B6	¶	D6	Ö	F6	ö
-97		B7	·	D7	×	F7	÷
-98		B8	¸	D8	Ø	F8	ø
-99		B9	¹	D9	Ù	F9	ù
-9A		BA	º	DA	Ú	FA	ú
-9B		BB	»	DB	Û	FB	û
-9C		BC	¼	DC	Ü	FC	ü
-9D		BD	½	DD	Ý	FD	ý
-9E		BE	¾	DE	Þ	FE	þ
-9F		BF	¿	DF	ß	FF	ÿ
+![char_table_2](char_table_2.PNG)
 
 Table VI 9: Alternative character table of the SAPHYR I ASCII
 
 &nbsp;
 
-### 7- Palette
+### 7- Safyrus Industry Naming Convention (SINC)
+
+CTSX-NNN
+
+- C: Constructor
+- T: Type of device
+  - 0: Circuit
+  - 1: DEVICE
+  - 2: CPU
+  - 3: VOLATIL MEMORY
+  - 4: LONG TERM MEMORY
+  - 5: IO DEVICE
+- S: Sub type
+
+|Type   |   0       |   1       |   2               |   3   |   4   |   5           |
+|-------|:---------:|:---------:|:-----------------:|:-----:|:-----:|:-------------:|
+|3      |DRAM       |SRAM       |                   |       |       |               |
+|4      |ROM        |Magnetic   |                   |       |       |               |
+|5      |Slow Input |Slow Output|Slow Input & Output|Input  |Output |Input & Output |
+
+Table VI 10: SINC types and names
+
+- X: Sub type / other
+- NNN: Version/Model/other info (optional)
+
+Example:
+
+- S256: First 8bits CPU prototype, never commercialized. Architecture n*56 because of 256 values in 8bits
+- S257-01: First commercialized 8bits CPU. 57 come after 56.
+- S300-16K: 16KB DRAM chip
+- S400-4K: 4KB ROM chip
+
+&nbsp;
+
+### 8- Palette
 
 ![pix46](pal16-num.png)
 
 Figure VI 2: Saphyr I color palette
 
-0.	Black
-1.	Magenta
-2.	Pink
-3.	Red
-4.	Dark blue
-5.	Grey
-6.	Dark Red
-7.	Orange
-8.	Blue
-9.	Light Blue
-10.	Light Grey
-11.	Yellow
-12.	Azure
-13.	Dark green
-14.	Green
-15.	White
+0. Black
+1. Magenta
+2. Pink
+3. Red
+4. Dark blue
+5. Grey
+6. Dark Red
+7. Orange
+8. Blue
+9. Light Blue
+10. Light Grey
+11. Yellow
+12. Azure
+13. Dark green
+14. Green
+15. White
 
 &nbsp;
 
 ### 8- Pix46 Font
 
 ![font](font.png)
- 
+
 Figure VI 3: Pix46 font

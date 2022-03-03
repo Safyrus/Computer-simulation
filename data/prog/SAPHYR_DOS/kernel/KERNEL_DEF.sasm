@@ -1,0 +1,117 @@
+################################
+#                              #
+#    NAME: SAPHYR DOS          #
+#                              #
+#  AUTHOR: Safyrus             #
+#                              #
+# VERSION: 1                   #
+#                              #
+#    FILE: KERNEL_DEF          #
+#                              #
+#    DESC: Labels for adr,     #
+#          vars and consts     #
+################################
+
+
+# - - - - - - - - - - - - - - -
+# Flags constants
+@const LES 08
+@const EQU 04
+@const GRE 02
+@const UEQ 05
+@const UGE 01
+@const CFL 01
+@const NEQ 00
+
+# - - - - - - - - - - - - - - -
+# Hardware connection constants
+@const CON_ROM4   01
+@const CON_ROM2   02
+@const CON_RAM1   04
+@const CON_VRAM16 08
+@const CON_VRAM   10
+@const CON_DSK    20
+@const CON_IO     40
+@const CON_EXT    80
+
+# - - - - - - - - - - - - - - -
+# FDC constants
+@const FDC_BUSY  80
+@const FDC_READ  04
+@const FDC_WRITE 08
+
+
+# - - - - - - - - - - - - - - -
+# Hardware location
+@origin 1800
+LOWRAM:
+@origin 1C00
+HWSTAT:
+@origin 1C00
+HW_CON:
+@origin 1C01
+HW_TIM:
+@origin 1C02
+HW_BUZ:
+@origin 1C08
+FDC_CMD:
+@origin 1C0A
+FDC_TRACK:
+@origin 1C0B
+FDC_SECTOR:
+@origin 1C18
+VPU_MODE:
+@origin 1C19
+VPU_STATE:
+@origin 1E00
+MEM:
+@origin 2000
+VRAM:
+@origin 4000
+RAM:
+
+
+# - - - - - - - - - - - - - - -
+# "Big things" location
+@origin 1BFF
+STACK:
+@origin 4200
+KENEL:
+
+
+# - - - - - - - - - - - - - - -
+# Variables
+@origin 4000
+VAR_RTRET_H:
+@origin 4001
+VAR_RTRET_L:
+@origin 4002
+VAR_STK_H:
+@origin 4003
+VAR_STK_L:
+@origin 4004
+VAR_STK_VAL:
+@origin 4005
+VAR_FCTRET_H:
+@origin 4006
+VAR_FCTRET_L:
+@origin 4007
+VAR_FILE_T:
+@origin 4008
+VAR_FILE_S:
+@origin 4009
+VAR_RAM_BS_H:
+@origin 400A
+VAR_RAM_BS_L:
+@origin 400B
+VAR_RAM_TK_H:
+@origin 400C
+VAR_RAM_TK_L:
+@origin 400D
+VAR_SRT_H:
+@origin 400E
+VAR_SRT_L:
+@origin 400F
+VAR_TMP:
+@origin 4010
+VAR_RAM_VAL:

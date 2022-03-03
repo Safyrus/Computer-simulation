@@ -1,0 +1,185 @@
+################################
+#                              #
+#    NAME: SAPHYR DOS          #
+#                              #
+#  AUTHOR: Safyrus             #
+#                              #
+# VERSION: 1                   #
+#                              #
+#    FILE: KERNEL_PRG          #
+#                              #
+#    DESC: programs fct,rt and #
+#          srt of the kernel   #
+################################
+
+
+
+
+################################
+# Function PRG_RUN
+# - - - - - - - - - - - - - - -
+# Params:
+#  $AB= file name to run
+# - - - - - - - - - - - - - - -
+# Return: None
+# - - - - - - - - - - - - - - -
+# Errors: 
+#  $E= 1: file not found
+#      2: root folder corrupted
+#      3: can't read directory
+#      4: not enought ram
+# - - - - - - - - - - - - - - -
+PRG_RUN:
+ # prologue
+ SET $J1 :VAR_FCTRET_H
+ SET $J2 :VAR_FCTRET_L
+ JMP $F :PROLOGUE
+
+ # push C
+ SET $C :VAR_STK_VAL
+ JMP $F :SRT_PUSH
+
+ # find current file size
+ JMP $F :FCT_FS_SIZE
+ # if error
+ CMP $E 00
+ JMP UEQ :PRG_RUN_RAM
+  # pull C
+  JMP $F :SRT_PULL
+  GET $C :VAR_STK_VAL
+  JMP $F :PRG_RUN_END
+
+
+ PRG_RUN_RAM:
+ # get file size in page
+ MUL $C $C 02
+ # get free ram in page
+ GET $F :VAR_RAM_TK_H
+ SUB $F $F 4F
+ # if current file size > ram free
+ CMP $C $F
+ AND $F $F LES
+ JMP LES :PRG_RUN_NXT
+  # then error 4
+  MOV $E 04
+  # pull C
+  JMP $F :SRT_PULL
+  GET $C :VAR_STK_VAL
+  JMP $F :PRG_RUN_END
+
+
+ PRG_RUN_NXT:
+ # pull C
+ JMP $F :SRT_PULL
+ GET $C :VAR_STK_VAL
+ 
+ # push current file location
+ GET $F :VAR_FILE_T
+ SET $F :VAR_STK_VAL
+ JMP $F :SRT_PUSH
+ GET $F :VAR_FILE_S
+ SET $F :VAR_STK_VAL
+ JMP $F :SRT_PUSH
+
+ # push virtual RAM base
+ GET $F :VAR_RAM_BS_H
+ SET $F :VAR_STK_VAL
+ JMP $F :SRT_PUSH
+ GET $F :VAR_RAM_BS_L
+ SET $F :VAR_STK_VAL
+ JMP $F :SRT_PUSH
+ # push virtual RAM taken
+ # and make it the new base
+ GET $F :VAR_RAM_TK_H
+ SET $F :VAR_STK_VAL
+ SET $F :VAR_RAM_BS_H
+ JMP $F :SRT_PUSH
+ GET $F :VAR_RAM_TK_L
+ SET $F :VAR_STK_VAL
+ SET $F :VAR_RAM_BS_L
+ JMP $F :SRT_PUSH
+
+
+ # push ABCDE
+ JMP $F :RT_PUSH_ABCDE
+
+ # read new file
+ MOV $C 50
+ MOV $D 00
+ JMP $F :FCT_FS_RD
+
+ # get new file location
+ JMP $F :FCT_FS_FIND
+
+ # save new file location
+ SET $A :VAR_FILE_T
+ SET $B :VAR_FILE_S
+
+ # pull ABCDE
+ JMP $F :RT_PULL_ABCDE
+
+ # jump to new file
+ JMP $F 50 00
+
+
+ PRG_RUN_END:
+ # epilogue
+ JMP $F :EPILOGUE
+################################
+
+
+
+################################
+# Function PRG_STOP
+# - - - - - - - - - - - - - - -
+# Params: None
+# - - - - - - - - - - - - - - -
+# Return: None
+# - - - - - - - - - - - - - - -
+# Errors: None
+# - - - - - - - - - - - - - - -
+PRG_STOP:
+ # pull virtual RAM taken
+ JMP $F :SRT_PULL
+ GET $F :VAR_STK_VAL
+ SET $F :VAR_RAM_TK_L
+ JMP $F :SRT_PULL
+ GET $F :VAR_STK_VAL
+ SET $F :VAR_RAM_TK_H
+ # pull virtual RAM base
+ JMP $F :SRT_PULL
+ GET $F :VAR_STK_VAL
+ SET $F :VAR_RAM_BS_L
+ JMP $F :SRT_PULL
+ GET $F :VAR_STK_VAL
+ SET $F :VAR_RAM_BS_H
+
+ # pull old file location
+ JMP $F :SRT_PULL
+ GET $F :VAR_STK_VAL
+ SET $F :VAR_FILE_S
+ JMP $F :SRT_PULL
+ GET $F :VAR_STK_VAL
+ SET $F :VAR_FILE_T
+
+ # push all regs
+ JMP $F :RT_PUSH_ABCDE
+ JMP $F :RT_PUSH_G
+ 
+ # find old file name
+ GET $A :VAR_FILE_T
+ GET $B :VAR_FILE_S
+ JMP $F :FCT_FS_NAME
+
+ # read old file
+ MOV $C 50
+ MOV $D 00
+ JMP $F :FCT_FS_RD
+
+ # pull all regs
+ JMP $F :RT_PULL_G
+ JMP $F :RT_PULL_ABCDE
+
+ # epilogue
+ JMP $F :EPILOGUE
+################################

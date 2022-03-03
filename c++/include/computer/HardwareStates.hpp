@@ -23,6 +23,7 @@ namespace computer
 
         sf::SoundBuffer square;
         sf::Sound buzzer;
+        sf::SoundSource::Status buzzerStatus;
 
     public:
         HardwareStates();

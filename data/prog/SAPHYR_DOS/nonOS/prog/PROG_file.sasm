@@ -1,0 +1,67 @@
+@extern PRG_STOP
+@extern RT_PUSH_ABCDE
+@extern RT_PUSH_G
+@extern RT_PULL_ABCDE
+@extern RT_PULL_G
+@extern FCT_RAM_TAKE
+@extern FCT_RAM_FREE
+@extern FCT_RAM_GET
+@extern FCT_RAM_SET
+
+@origin 1C01
+HW_TIM:
+@origin 4010
+VAR_RAM_VAL:
+
+# Adress for IOs
+@origin 1D00
+IO1G:
+
+@origin 5000
+START:
+JMP $F :RT_PUSH_ABCDE
+JMP $F :RT_PUSH_G
+
+MOV $A BE
+MOV $C 12
+MOV $E 00
+
+MOV $D 34
+JMP $F :FCT_RAM_TAKE
+
+MOV $A 00
+MOV $B 04
+SET $C :VAR_RAM_VAL
+JMP $F :FCT_RAM_SET
+SET 00 :VAR_RAM_VAL
+JMP $F :FCT_RAM_GET
+GET $G0 :VAR_RAM_VAL
+
+WAIT_KEY_LOOP:
+ GET $A :IO1G
+ CMP $A 00
+ JMP 05 :WAIT_KEY_LOOP
+
+WAIT_TIME:
+ GET $A :HW_TIM
+ CMP $A 00
+ AND $F $F 04
+ JMP 00 :WAIT_TIME
+
+MOV $D 34
+JMP $F :FCT_RAM_FREE
+
+WAIT_KEY_LOOP2:
+ GET $A :IO1G
+ CMP $A 00
+ JMP 05 :WAIT_KEY_LOOP2
+
+
+STOP:
+JMP $F :RT_PULL_G
+JMP $F :RT_PULL_ABCDE
+JMP $F :PRG_STOP
+
+# you not supposed to be here
+MOV $E FF
+END: JMP $F :END
